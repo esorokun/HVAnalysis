@@ -22,3 +22,8 @@ $ pip install -r requirements.txt
 ```
 
 ### Usage
+Use the following command to make a plot of the resistance:
+```
+$ python HVAnalysis/make_resistance_plot.py --datelist 2018-09-14 --loglvl 1
+```
+If ```datelist``` is not specified, all data in the input folder will be considered.
