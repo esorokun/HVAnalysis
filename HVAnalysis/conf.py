@@ -15,11 +15,13 @@ all_date_list = ['2018-09-14', '2018-09-15', '2018-09-16', '2018-09-17', '2018-0
                  '2018-11-07', '2018-11-08', '2018-11-09', '2018-11-10', '2018-11-11', '2018-11-12']
 curr_file_names = [f'{input_data_folder}/heinzCurr_{d}.csv' for d in all_date_list]
 volt_file_names = [f'{input_data_folder}/heinzVolt_{d}.csv' for d in all_date_list]
+output_folder = 'data/output'
 
 
 def configure_from_args(args):
     logging.basicConfig(level=log_dict[args.loglvl])
     logging.info(f'Set log level to {args.loglvl}')
+    global output_folder; output_folder = args.outputfolder
     if args.datelist is not None:
         global curr_file_names
         global volt_file_names
