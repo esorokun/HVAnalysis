@@ -1,3 +1,4 @@
+import logging
 import pandas as pd
 from functools import cached_property
 
@@ -20,7 +21,9 @@ class HeinzWrapper:
     @cached_property
     def data_frame(self):
         df = pd.concat([self._get_data_frame_from_file(fn) for fn in self.file_names], axis=0)
-        return self._get_modified_data_frame(df)
+        df = self._get_modified_data_frame(df)
+        logging.info(f'HeinzWrapper.data_frame =\n{df}')
+        return df
 
     def resample_value(self, resample_rate):
         res = self.data_frame.resample(resample_rate)[self.val_name].sum()
@@ -58,4 +61,6 @@ class ResistanceWrapper:
     @cached_property
     def data_frame(self):
         df = pd.concat(self._get_data_frames(), axis=1)
-        return self._get_modified_data_frame(df)
+        df = self._get_modified_data_frame(df)
+        logging.info(f'ResistanceWrapper.data_frame =\n{df}')
+        return df
