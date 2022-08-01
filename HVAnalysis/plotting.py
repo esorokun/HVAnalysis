@@ -6,12 +6,30 @@ class Plotter:
     def __init__(self, df_wrapper):
         self.df_wrapper = df_wrapper
 
-    def plot(self):
+    def plot(self, saver):
         self.df_wrapper.data_frame.plot(y=['resistance', 'avgcurr', 'avgvolt'])
         plt.show()
-        plt.savefig(f'{conf.output_folder}/plot.png')
+        if saver == 1: plt.savefig(f'{conf.output_folder}/plot.png')
 
-    def plotcurr(self):
-        self.df_wrapper.data_frame.plot(y=['curr'])
+    def plotcurr(self, saver):
+        self.df_wrapper.data_frame.plot(y=['avgcurr'])
         plt.show()
-        plt.savefig(f'{conf.output_folder}/plotcurr.png')
+        if saver == 1: plt.savefig(f'{conf.output_folder}/plot.png')
+
+    def plotvolt(self, saver):
+        self.df_wrapper.data_frame.plot(y=['avgvolt'])
+        plt.show()
+        if saver == 1: plt.savefig(f'{conf.output_folder}/plot.png')
+
+    def plotresist(self, saver):
+        self.df_wrapper.data_frame.plot(y=['resistance'])
+        plt.show()
+        if saver == 1: plt.savefig(f'{conf.output_folder}/plot.png')
+
+    def plotall(self, saver):
+        self.df_wrapper.data_frame.plot(y=['avgcurr'])
+        self.df_wrapper.data_frame.plot(y=['resistance'])
+        self.df_wrapper.data_frame.plot(y=['avgvolt'])
+        plt.show()
+        if saver == 1:
+            plt.savefig(f'{conf.output_folder}/plot.png')

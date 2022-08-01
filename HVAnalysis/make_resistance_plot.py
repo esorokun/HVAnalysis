@@ -9,8 +9,8 @@ def main(args):
     curr_wrapper = HeinzWrapper(conf.curr_file_names, 'curr')
     volt_wrapper = HeinzWrapper(conf.volt_file_names, 'volt')
     comb_wrapper = ResistanceWrapper(curr_wrapper, volt_wrapper)
-    my_plotter = Plotter(curr_wrapper)
-    my_plotter.plotcurr()
+    my_plotter = Plotter(comb_wrapper)
+    my_plotter.plotall(0)
 
 
 if __name__ == '__main__':
