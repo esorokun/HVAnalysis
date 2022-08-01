@@ -10,13 +10,13 @@ def main(args):
     volt_wrapper = HeinzWrapper(conf.volt_file_names, 'volt')
     comb_wrapper = ResistanceWrapper(curr_wrapper, volt_wrapper)
     my_plotter = Plotter(comb_wrapper)
-    my_plotter.gistogram('avgcurr', 1)
+    my_plotter.gistogram('resistance', 1)
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("--datelist", nargs="+", default=None, help="dates to consider")
-    parser.add_argument("--alldata", default=None, help="consider all data from 2018-09-14 --> 2018-11-12")
+    parser.add_argument("--alldates", default=None, help="consider all data from 2018-09-14 --> 2018-11-12")
     parser.add_argument("--loglvl", type=int, default=0, help="0: warning, 1: info, 2: debug")
     parser.add_argument("--outputfolder", type=str, default="data/output/",
                         help="name of output file")
