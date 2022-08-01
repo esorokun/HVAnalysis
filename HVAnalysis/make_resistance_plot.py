@@ -16,6 +16,7 @@ def main(args):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("--datelist", nargs="+", default=None, help="dates to consider")
+    parser.add_argument("--alldata", default=None, help="consider all data from 2018-09-14 --> 2018-11-12")
     parser.add_argument("--loglvl", type=int, default=0, help="0: warning, 1: info, 2: debug")
     parser.add_argument("--outputfolder", type=str, default="data/output/",
                         help="name of output file")
