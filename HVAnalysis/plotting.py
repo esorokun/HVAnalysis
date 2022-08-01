@@ -1,5 +1,7 @@
 import matplotlib.pyplot as plt
 import conf
+import numpy as np
+
 
 class Plotter:
     def __init__(self, df_wrapper):
