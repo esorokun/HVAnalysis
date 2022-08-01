@@ -16,7 +16,9 @@ class Plotter:
         if saver == 1: plt.savefig(f'{conf.output_folder}/plot.png')
 
     def gistogram(self, name, saver):
-        _ = plt.hist(self.df_wrapper.data_frame[name], bins=40, range=[-50000000, 50000000])
+        range = None
+        if name == 'resistance': range = [-2000, 3000]
+        _ = plt.hist(self.df_wrapper.data_frame[name], bins=60, range = range)
         plt.xlabel(name)
         plt.ylabel("Num")
         plt.show()
