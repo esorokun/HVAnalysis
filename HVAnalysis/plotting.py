@@ -11,30 +11,14 @@ class Plotter:
         plt.show()
         if saver == 1: plt.savefig(f'{conf.output_folder}/plot.png')
 
-    def plotcurr(self, saver):
-        self.df_wrapper.data_frame.plot(y=['avgcurr'])
+    def plotseparate(self, name, saver):
+        self.df_wrapper.data_frame.plot(y=[name])
         plt.show()
         if saver == 1: plt.savefig(f'{conf.output_folder}/plot.png')
-
-    def plotvolt(self, saver):
-        self.df_wrapper.data_frame.plot(y=['avgvolt'])
-        plt.show()
-        if saver == 1: plt.savefig(f'{conf.output_folder}/plot.png')
-
-    def plotresist(self, saver):
-        self.df_wrapper.data_frame.plot(y=['resistance'])
-        plt.show()
-        if saver == 1: plt.savefig(f'{conf.output_folder}/plot.png')
-
-    def plotall(self, saver):
-        self.df_wrapper.data_frame.plot(y=['avgcurr'])
-        self.df_wrapper.data_frame.plot(y=['resistance'])
-        self.df_wrapper.data_frame.plot(y=['avgvolt'])
-        plt.show()
-        if saver == 1:
-            plt.savefig(f'{conf.output_folder}/plot.png')
 
     def gistogram(self, name, saver):
         _ = plt.hist(self.df_wrapper.data_frame[name], bins=40)
+        plt.xlabel(name)
+        plt.ylabel("Num")
         plt.show()
         if saver == 1: plt.savefig(f'{conf.output_folder}/plot.png')
