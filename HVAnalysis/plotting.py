@@ -12,6 +12,8 @@ class Plotter:
 
     def plotseparate(self, name, saver):
         self.df_wrapper.data_frame.plot(y=[name])
+        plt.xlabel("timeset")
+        plt.ylabel("Value of " + name)
         plt.show()
         if saver == 1: plt.savefig(f'{conf.output_folder}/plot.png')
 

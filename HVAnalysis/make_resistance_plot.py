@@ -10,7 +10,12 @@ def main(args):
     volt_wrapper = HeinzWrapper(conf.volt_file_names, 'volt')
     comb_wrapper = ResistanceWrapper(curr_wrapper, volt_wrapper)
     my_plotter = Plotter(comb_wrapper)
-    my_plotter.gistogram('resistance', 1)
+    my_plotter.plotseparate('resistance', 0)
+    my_plotter.plotseparate('avgvolt', 0)
+    my_plotter.plotseparate('avgcurr', 0)
+    my_plotter.gistogram('resistance', 0)
+    my_plotter.gistogram('avgvolt', 0)
+    my_plotter.gistogram('avgcurr', 0)
 
 
 if __name__ == '__main__':
