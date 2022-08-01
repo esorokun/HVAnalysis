@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 import conf
-
+import numpy as np
 
 class Plotter:
     def __init__(self, df_wrapper):
@@ -33,3 +33,8 @@ class Plotter:
         plt.show()
         if saver == 1:
             plt.savefig(f'{conf.output_folder}/plot.png')
+
+    def gistogram(self, name, saver):
+        _ = plt.hist(self.df_wrapper.data_frame[name], bins=40)
+        plt.show()
+        if saver == 1: plt.savefig(f'{conf.output_folder}/plot.png')
