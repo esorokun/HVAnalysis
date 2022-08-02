@@ -14,16 +14,16 @@ def main(args):
     my_plotter.plotseparate('resistance')
     my_plotter.plotseparate('avgvolt')
     my_plotter.plotseparate('avgcurr')
-    my_plotter.gistogram('resistance')
-    my_plotter.gistogram('avgvolt')
-    my_plotter.gistogram('avgcurr')
+    my_plotter.histogram('resistance')
+    my_plotter.histogram('avgvolt')
+    my_plotter.histogram('avgcurr')
     '''
     my_plotter.plotscatter()
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("--datelist", nargs="+", default=None, help="dates to consider")
-    parser.add_argument("--alldates", default=None, help="consider all data from 2018-09-14 --> 2018-11-12")
     parser.add_argument("--loglvl", type=int, default=0, help="0: warning, 1: info, 2: debug")
     parser.add_argument("--outputfolder", type=str, default="data/output/",
                         help="name of output file")
