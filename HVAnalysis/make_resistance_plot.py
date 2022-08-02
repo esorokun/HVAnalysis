@@ -2,6 +2,7 @@ import argparse
 import conf
 from dfwrapper import HeinzWrapper, ResistanceWrapper
 from plotting import Plotter
+from writing import Writer
 
 
 def main(args):
@@ -11,6 +12,8 @@ def main(args):
     comb_wrapper = ResistanceWrapper(curr_wrapper, volt_wrapper)
     my_plotter = Plotter(comb_wrapper)
     my_plotter.histogram('avgvolt')
+    my_writer = Writer(comb_wrapper)
+    my_writer.write_streamer_periods('data/output/unstable_periods.csv')
 
 
 if __name__ == '__main__':
