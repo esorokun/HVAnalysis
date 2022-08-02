@@ -6,8 +6,9 @@ import pandas as pd
 
 
 class Plotter:
-    def __init__(self, df_wrapper, df_wrapper_2 = None):
-        self.df_wrapper = df_wrapper._join_wrapper(df_wrapper_2)
+    def __init__(self, df_wrapper, df_wrapper_2=None):
+        if df_wrapper_2 is not None:self.df_wrapper = df_wrapper._join_wrapper(df_wrapper_2)
+        else: self.df_wrapper = df_wrapper
 
     def plot(self, saver):
         self.df_wrapper.data_frame.plot(y=['resistance', 'avgcurr', 'avgvolt'])

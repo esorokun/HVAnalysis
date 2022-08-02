@@ -26,8 +26,12 @@ class HeinzWrapper:
         return df
 
     def _join_wrapper(self, wrapper_1):
-        dfall = pd.merge(self.data_frame, wrapper_1.data_frame, on=['timestamp'], how='left')
-        dfall = self._get_modified_data_frame(dfall)
+        first = self.data_frame
+        second = wrapper_1.data_frame
+        dfall = pd.merge(first, second, on='timestamp')
+        #dfall = pd.merge(self.data_frame, wrapper_1.data_frame, on=['timestamp'], how='left')
+        #dfall = self._get_modified_data_frame(dfall)
+        logging.info(f'HeinzWrapper.data_frame =\n{dfall}')
         return dfall
 
     def resample_value(self, resample_rate):
