@@ -32,22 +32,24 @@ class Writer:
                         cutONperiod.append([startStream - timedelta(0, 2), b + timedelta(0, 2)])
                         writer.writerow([int(pytime.mktime((startStream - timedelta(0, 2)).timetuple())),
                                      int(pytime.mktime((b + timedelta(0, 2)).timetuple()))])
-                        
-                if b > b1 and b < b2 and (r < 1465 or vps < 120000.) and not streamerON:
-                    streamerON = True
-                    startStream = b
-                if b > b1 and b < b2 and (r > 1465 and vps > 120000.) and streamerON:
-                    streamerON = False
-                    cutONperiod.append([startStream - timedelta(0, 2), b + timedelta(0, 2)])
-                    writer.writerow([int(pytime.mktime((startStream - timedelta(0, 2)).timetuple())),
-                                     int(pytime.mktime((b + timedelta(0, 2)).timetuple()))])
 
-                if b >= b2 and (r < 1465 or vps < 180000.) and not streamerON:
-                    streamerON = True
-                    startStream = b
-                if b >= b2 and (r > 1465 and vps > 180000.) and streamerON:
-                    streamerON = False
-                    cutONperiod.append([startStream - timedelta(0, 2), b + timedelta(0, 2)])
-                    writer.writerow([int(pytime.mktime((startStream - timedelta(0, 2)).timetuple())),
-                                     int(pytime.mktime((b + timedelta(0, 2)).timetuple()))])
+                if b > b1 and b < b2:
+                    if not streamerON and (r < 1465 or vps < 120000.):
+                        streamerON = True
+                        startStream = b
+                    elif streamerON and (r > 1465 and vps > 120000.) and streamerON:
+                        streamerON = False
+                        cutONperiod.append([startStream - timedelta(0, 2), b + timedelta(0, 2)])
+                        writer.writerow([int(pytime.mktime((startStream - timedelta(0, 2)).timetuple())),
+                                        int(pytime.mktime((b + timedelta(0, 2)).timetuple()))])
+
+                if b >= b2:
+                    if not streamerON and (r < 1465 or vps < 180000.):
+                        streamerON = True
+                        startStream = b
+                    if streamerON and (r > 1465 and vps > 180000.):
+                        streamerON = False
+                        cutONperiod.append([startStream - timedelta(0, 2), b + timedelta(0, 2)])
+                        writer.writerow([int(pytime.mktime((startStream - timedelta(0, 2)).timetuple())),
+                                        int(pytime.mktime((b + timedelta(0, 2)).timetuple()))])
 
