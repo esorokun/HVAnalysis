@@ -6,9 +6,10 @@ import pandas as pd
 
 
 class Plotter:
-    def __init__(self, df_wrapper, df_wrapper_2=None):
-        if df_wrapper_2 is not None:self.df_wrapper = df_wrapper._join_wrapper(df_wrapper_2)
-        else: self.df_wrapper = df_wrapper.data_frame
+    def __init__(self, df_wrapper_1, df_wrapper_2=None):
+        #if df_wrapper_2 is not None:self.df_wrapper = pd.merge(df_wrapper_1, df_wrapper_2, on='timestamp')
+        #else: self.df_wrapper = df_wrapper_1
+        self.df_wrapper = df_wrapper_1
 
     def plot(self, saver):
         self.df_wrapper.plot(y=['resistance', 'avgcurr', 'avgvolt'])
@@ -32,7 +33,7 @@ class Plotter:
         if savename is not None: plt.savefig(f'{conf.output_folder}/{savename}.png')
 
     def plot_scatter(self, name_x='avgcurr', name_y='avgvolt', savename=None):
-        self.df_wrapper.plot.scatter(y=[name_y], x=[name_x], alpha=0.05, s=0.1)
+        _ = plt.scatter(y=self.df_wrapper([name_y]), x=self.df_wrapper([name_x]), alpha=0.05, s=0.1)
         plt.xlabel(name_x)
         plt.ylabel(name_y)
         plt.show()

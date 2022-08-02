@@ -10,10 +10,9 @@ def main(args):
     curr_wrapper = HeinzWrapper(conf.curr_file_names, 'curr')
     volt_wrapper = HeinzWrapper(conf.volt_file_names, 'volt')
     comb_wrapper = ResistanceWrapper(curr_wrapper, volt_wrapper)
-    #my_plotter = Plotter(comb_wrapper)
-    #my_plotter.plot_scatter()
-    my_writer = Writer(comb_wrapper)
-    my_writer.write_streamer_periods('data/output/unstable_periods.csv')
+    comb_wrapper._stable_data()
+    #my_plotter = Plotter(curr_wrapper._stable_data())
+    #my_plotter.plot_scatter('curr', 'curr')
 
 
 if __name__ == '__main__':
