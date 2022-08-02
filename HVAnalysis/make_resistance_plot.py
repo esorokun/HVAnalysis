@@ -11,9 +11,10 @@ def main(args):
     volt_wrapper = HeinzWrapper(conf.volt_file_names, 'volt')
     comb_wrapper = ResistanceWrapper(curr_wrapper, volt_wrapper)
     my_plotter = Plotter(comb_wrapper)
-    my_plotter.histogram('avgvolt')
-    my_writer = Writer(comb_wrapper)
-    my_writer.write_streamer_periods('data/output/unstable_periods.csv')
+    #my_plotter.histogram('avgvolt')
+    #my_writer = Writer(comb_wrapper)
+    #my_writer.write_streamer_periods('data/output/unstable_periods.csv')
+    my_plotter.plot_scatter()
 
 
 if __name__ == '__main__':

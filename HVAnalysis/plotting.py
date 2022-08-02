@@ -1,6 +1,9 @@
 import matplotlib.pyplot as plt
 import conf
-import seaborn as sns
+import seaborn as sb
+import numpy as np
+import pandas as pd
+
 
 class Plotter:
     def __init__(self, df_wrapper):
@@ -11,7 +14,7 @@ class Plotter:
         plt.show()
         if saver == 1: plt.savefig(f'{conf.output_folder}/plot.png')
 
-    def plotseparate(self, name, savename=None):
+    def plot_separate(self, name, savename=None):
         self.df_wrapper.data_frame.plot(y=[name])
         plt.xlabel("timeset")
         plt.ylabel("Value of " + name)
@@ -27,8 +30,8 @@ class Plotter:
         plt.show()
         if savename is not None: plt.savefig(f'{conf.output_folder}/{savename}.png')
 
-    def plotscatter(self, name_x='avgcurr', name_y='avgvolt', savename=None):
-        self.df_wrapper.data_frame.plot.scatter(y=[name_y], x=[name_x])
+    def plot_scatter(self, name_x='avgcurr', name_y='avgvolt', savename=None):
+        self.df_wrapper.data_frame.plot.scatter(y=[name_y], x=[name_x], alpha=0.4, marker='.', s=0.1)
         plt.xlabel(name_x)
         plt.ylabel(name_y)
         plt.show()
