@@ -26,11 +26,7 @@ class HeinzWrapper:
         return df
 
     def _join_wrapper(self, wrapper_1):
-        first = self.data_frame
-        second = wrapper_1.data_frame
-        dfall = pd.merge(first, second, on='timestamp')
-        #dfall = pd.merge(self.data_frame, wrapper_1.data_frame, on=['timestamp'], how='left')
-        #dfall = self._get_modified_data_frame(dfall)
+        dfall = pd.merge(self.data_frame, wrapper_1.data_frame, on='timestamp')
         logging.info(f'HeinzWrapper.data_frame =\n{dfall}')
         return dfall
 
@@ -73,18 +69,3 @@ class ResistanceWrapper:
         df = self._get_modified_data_frame(df)
         logging.info(f'ResistanceWrapper.data_frame =\n{df}')
         return df
-
-
-'''class Voltage_CurrentWrapper:
-    """Wrapper class for voltage and current in one data frame. made from volt and curr wrappers"""
-    def __init__(self, volt_wrapper, curr_wrapper):
-        self.volt_wrapper = volt_wrapper
-        self.curr_wrapper = curr_wrapper
-
-    def _connect_data_frames(self):
-        dfs = []
-        for wrapper in [self.volt_wrapper, self.curr_wrapper]:
-            dfs.append(wrapper.self.volt_wrapper)
-            dfs.append(wrapper.self.curr_wrapper)
-        return dfs
-        '''
