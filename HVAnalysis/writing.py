@@ -17,12 +17,22 @@ class Writer:
         with open(file_name, mode='w') as f:
             writer = csv.writer(f, delimiter=',')
             for row in df.itertuples():
-                if row.ncurr == 0 or row.nvolt == 0:
+                if row.ncurr == 0 or row.nvolt == 0: # piecewise cut on resistance
                     continue
-                # piecewise cut on resistance
                 b = row.Index
                 r = row.resistance
                 vps = row.avgvolt
+                '''
+                if b <= b1:
+                    if streamerON and 1472 < r or r < 1452 or vps < 120000.:
+                        streamerON = True
+                        startStream = b
+                    elif 1452 < r < 1472 and vps > 120000. and streamerON:
+                        streamerON = False
+                        cutONperiod.append([startStream - timedelta(0, 2), b + timedelta(0, 2)])
+                        writer.writerow([int(pytime.mktime((startStream - timedelta(0, 2)).timetuple())),
+                                     int(pytime.mktime((b + timedelta(0, 2)).timetuple()))])
+                '''
                 if b <= b1 and (r > 1472 or r < 1452 or vps < 120000.) and not streamerON:
                     streamerON = True
                     startStream = b
