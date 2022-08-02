@@ -25,6 +25,11 @@ class HeinzWrapper:
         logging.info(f'HeinzWrapper.data_frame =\n{df}')
         return df
 
+    def _join_wrapper(self, wrapper_1):
+        dfall = pd.merge(self.data_frame, wrapper_1.data_frame, on=['timestamp'], how='left')
+        dfall = self._get_modified_data_frame(dfall)
+        return dfall
+
     def resample_value(self, resample_rate):
         res = self.data_frame.resample(resample_rate)[self.val_name].sum()
         return pd.Series.to_frame(res).rename(columns={self.val_name: 'sum'+self.val_name})
@@ -64,3 +69,18 @@ class ResistanceWrapper:
         df = self._get_modified_data_frame(df)
         logging.info(f'ResistanceWrapper.data_frame =\n{df}')
         return df
+
+
+'''class Voltage_CurrentWrapper:
+    """Wrapper class for voltage and current in one data frame. made from volt and curr wrappers"""
+    def __init__(self, volt_wrapper, curr_wrapper):
+        self.volt_wrapper = volt_wrapper
+        self.curr_wrapper = curr_wrapper
+
+    def _connect_data_frames(self):
+        dfs = []
+        for wrapper in [self.volt_wrapper, self.curr_wrapper]:
+            dfs.append(wrapper.self.volt_wrapper)
+            dfs.append(wrapper.self.curr_wrapper)
+        return dfs
+        '''
