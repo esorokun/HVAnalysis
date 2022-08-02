@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 import conf
-
+import seaborn as sns
 
 class Plotter:
     def __init__(self, df_wrapper):
