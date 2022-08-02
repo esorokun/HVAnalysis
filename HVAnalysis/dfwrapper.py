@@ -1,6 +1,7 @@
 import logging
 import pandas as pd
 from functools import cached_property
+from writing import Writer
 
 
 class HeinzWrapper:
@@ -61,6 +62,13 @@ class ResistanceWrapper:
         df['avgcurr'] = df['sumcurr'] / df['ncurr']
         df['avgvolt'] = df['sumvolt'] / df['nvolt']
         df['resistance'] = df['avgvolt'] / df['avgcurr']
+        return df
+
+    def _unstable_data(self):
+        my_writer = Writer(self)
+        my_writer.write_streamer_periods('data/output/unstable_periods.csv')
+        df = pd.read_csv('data/output/unstable_periods.csv', sep=' ', index_col=0, usecols=[0, 1], names=['timestamp'])
+        df['timestamp'] = pd.to_datetime(df.index)
         return df
 
     @cached_property
