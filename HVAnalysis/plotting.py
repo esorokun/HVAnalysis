@@ -33,8 +33,8 @@ class Plotter:
         plt.show()
         if savename is not None: plt.savefig(f'{conf.output_folder}/{savename}.png')
 
-    def plot_scatter(self, name_x='avgcurr', name_y='avgvolt', savename=None):
-        self.df_wrapper.plot.scatter(y=[name_y], x=[name_x], alpha=0.05, s=0.1)
+    def plot_scatter(self, name_x, name_y, colourmap='blue', savename=None):
+        self.df_wrapper.plot.scatter(y=[name_y], x=[name_x], alpha=0.05, s=0.1, c=[colourmap])
         plt.xlabel(name_x)
         plt.ylabel(name_y)
         plt.show()
