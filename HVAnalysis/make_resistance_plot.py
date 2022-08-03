@@ -13,6 +13,8 @@ def main(args):
     comb_wrapper._stable_data()
     #my_plotter = Plotter(curr_wrapper._stable_data())
     #my_plotter.plot_scatter('curr', 'curr')
+    my_writer = Writer(comb_wrapper)
+    my_writer.create_unstable_date_df('data/output/unstable_periods.csv')
 
 
 if __name__ == '__main__':
