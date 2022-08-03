@@ -4,8 +4,13 @@ import pandas as pd
 import logging
 
 class Filter:
-    def __init__(self, df_wrapper):
-        self.df_wrapper = df_wrapper
+    def __init__(self, df_writer):
+        self.df_writer = df_writer
+        self.file_name = df_writer.file_name
+
+    def _get_data_frame_from_file(self):
+        return pd.read_csv(self.file_name, sep=',', index_col=0, usecols=[0, 1],
+                           names=['timestamp', self.val_name])
 '''
 class Stable:
     def __init__(self, df_wrapper):

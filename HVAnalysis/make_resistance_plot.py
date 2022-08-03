@@ -14,8 +14,8 @@ def main(args):
     #comb_wrapper._stable_data()
     #my_plotter = Plotter(curr_wrapper._stable_data())
     #my_plotter.plot_scatter('curr', 'curr')
-    my_writer = Writer(comb_wrapper)
-    my_writer.write_streamer_periods('data/output/unstable_periods.csv')
+    my_writer = Writer(comb_wrapper, 'data/output/unstable_periods.csv')
+    my_writer.write_streamer_periods()
     #filtered_data = Filter(my_writer)
 
 
