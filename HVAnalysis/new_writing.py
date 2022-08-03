@@ -16,6 +16,7 @@ class NewWriter:
         df = pd.read_csv('data/output/__test_out.csv', sep=',', skipinitialspace=False)
         df = df.T
         df['timeset'] = df.index
+        df.reset_index(drop=True, inplace=True)
         logging.info(f'HeinzWrapper.data_frame_from_file =\n{df}')
 
 
