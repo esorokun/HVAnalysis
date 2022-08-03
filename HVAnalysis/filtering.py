@@ -32,10 +32,17 @@ class Filter:
                 full_date_time.append([datetime.fromtimestamp(time)])
                 time += 1
             i += 1
-        full_df = pd.DataFrame(full_date_time).set_axis(['unstable_dates'], axis=1)
+        full_df = pd.DataFrame(full_date_time).set_axis(['ncurr'], axis=1)
         logging.info(f'HeinzWrapper.unstable_data_frame_ =\n{full_df}')
         return full_df
 
+    def colored_type_of_data(self, color):
+        df = self.df_wrapper.data_frame
+        df['color'] = color
+        unstable_df = self.date_type_of_data()
+        #df.loc[(unstable_df['ncurr'] == df['ncurr']), 'color'] = 'red'
+        logging.info(f'HeinzWrapper.unstable_data_frame_ =\n{df}')
+        return df
 
 
 
