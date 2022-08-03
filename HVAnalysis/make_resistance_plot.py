@@ -16,7 +16,7 @@ def main(args):
     #my_writer.write_streamer_periods()
     my_writer = Writer(comb_wrapper, 'data/output/unstable_periods.csv')
     filtered_data = Filter(my_writer)
-    filtered_data._get_data_frame_from_file()
+    filtered_data.data_frame
 
 
 if __name__ == '__main__':

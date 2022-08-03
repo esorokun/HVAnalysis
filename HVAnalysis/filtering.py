@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 import pandas as pd
 from original_writing import Writer
 import logging
+from functools import cached_property
 
 class Filter:
     def __init__(self, df_writer):
@@ -15,12 +16,23 @@ class Filter:
                            names=['start_time', 'end_time'])
         logging.info(f'HeinzWrapper.data_frame =\n{df}')
         return df
-'''
-class Stable:
-    def __init__(self, df_wrapper):
-        self.df_wrapper = df_wrapper
 
-    def write_streamer_periods(self, file_name):
+    def date_type_of_data(self):
+        self.df_writer.write_streamer_periods()
+        df = pd.read_csv(self.file_name, sep=',', usecols=[0, 1],
+                           names=['start_time', 'end_time'])
+        return df
+
+    @cached_property
+    def data_frame(self):
+        df = pd.concat([self._get_data_frame_from_file()], axis=0)
+        logging.info(f'HeinzWrapper.data_frame =\n{df}')
+        return df
+
+
+
+'''
+    def write_streamer_periods(self):
         b1 = datetime(2018, 10, 5, 0, 0, 0)
         b2 = datetime(2018, 10, 17, 12, 0, 0)
         df = self.df_wrapper.data_frame
