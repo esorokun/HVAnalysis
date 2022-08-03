@@ -11,12 +11,12 @@ def main(args):
     curr_wrapper = HeinzWrapper(conf.curr_file_names, 'curr')
     volt_wrapper = HeinzWrapper(conf.volt_file_names, 'volt')
     comb_wrapper = ResistanceWrapper(curr_wrapper, volt_wrapper)
-    #comb_wrapper._stable_data()
-    my_plotter = Plotter(curr_wrapper)
-    my_plotter.plot_scatter('curr', 'curr')
+    #my_plotter = Plotter(curr_wrapper)
+    #my_plotter.plot_separate('curr')
+    #my_writer.write_streamer_periods()
     my_writer = Writer(comb_wrapper, 'data/output/unstable_periods.csv')
-    my_writer.write_streamer_periods()
-    #filtered_data = Filter(my_writer)
+    filtered_data = Filter(my_writer)
+    filtered_data._get_data_frame_from_file()
 
 
 if __name__ == '__main__':

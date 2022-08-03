@@ -1,6 +1,7 @@
 import csv
 from datetime import datetime, timedelta
 import pandas as pd
+from original_writing import Writer
 import logging
 
 class Filter:
@@ -9,8 +10,11 @@ class Filter:
         self.file_name = df_writer.file_name
 
     def _get_data_frame_from_file(self):
-        return pd.read_csv(self.file_name, sep=',', index_col=0, usecols=[0, 1],
-                           names=['timestamp', self.val_name])
+        self.df_writer.write_streamer_periods()
+        df = pd.read_csv(self.file_name, sep=',', usecols=[0, 1],
+                           names=['start_time', 'end_time'])
+        logging.info(f'HeinzWrapper.data_frame =\n{df}')
+        return df
 '''
 class Stable:
     def __init__(self, df_wrapper):
