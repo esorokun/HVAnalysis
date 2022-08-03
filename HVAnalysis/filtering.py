@@ -9,6 +9,7 @@ class Filter:
     def __init__(self, df_writer):
         self.df_writer = df_writer
         self.file_name = df_writer.file_name
+        self.df_wrapper = df_writer.df_wrapper
 
     def _get_data_frame_from_file(self):
         self.df_writer.write_streamer_periods()
@@ -19,9 +20,7 @@ class Filter:
 
     @cached_property
     def data_frame(self):
-        df = pd.concat([self._get_data_frame_from_file()], axis=0)
-        logging.info(f'HeinzWrapper.data_frame =\n{df}')
-        return df
+        return pd.concat([self._get_data_frame_from_file()], axis=0)
 
     def date_type_of_data(self):
         full_date_time = []
