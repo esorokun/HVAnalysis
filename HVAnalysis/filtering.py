@@ -30,7 +30,7 @@ class Filter:
         while i < df.index.size:
             time = df.at[i, 'start_time']
             while df.at[i, 'start_time'] <= time <= df.at[i, 'end_time']:
-                full_date_time.append([time])
+                full_date_time.append([datetime.fromtimestamp(time)])
                 time += 1
             i += 1
         full_df = pd.DataFrame(full_date_time).set_axis(['unstable_dates'], axis=1)
