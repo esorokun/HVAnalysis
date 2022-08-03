@@ -73,8 +73,9 @@ class ResistanceWrapper:
         my_writer.write_streamer_periods('data/output/unstable_periods.csv')
         df = pd.read_csv('data/output/unstable_periods.csv',
                             index_col=0, usecols=[0], names=['timestamp'])
+        df.index = 1000000000 * df.index
         df['timestamp'] = pd.to_datetime(df.index)
-        logging.info(f'HeinzWrapper.stable_data_frame =\n{self._subtract_wrapper(df)}')
+        logging.info(f'HeinzWrapper.stable_data_frame =\n{df}')
         return self._subtract_wrapper(df)
 
     @cached_property

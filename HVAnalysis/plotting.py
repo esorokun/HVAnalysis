@@ -1,15 +1,15 @@
 import matplotlib.pyplot as plt
 import conf
-import seaborn as sb
 import numpy as np
 import pandas as pd
 
 
 class Plotter:
     def __init__(self, df_wrapper_1, df_wrapper_2=None):
-        #if df_wrapper_2 is not None:self.df_wrapper = pd.merge(df_wrapper_1, df_wrapper_2, on='timestamp')
-        #else: self.df_wrapper = df_wrapper_1
-        self.df_wrapper = df_wrapper_1
+        if df_wrapper_2 is not None:
+            self.df_wrapper = pd.merge(df_wrapper_1, df_wrapper_2, on='timestamp')
+        else:
+            self.df_wrapper = df_wrapper_1
 
     def plot(self, saver):
         self.df_wrapper.plot(y=['resistance', 'avgcurr', 'avgvolt'])
