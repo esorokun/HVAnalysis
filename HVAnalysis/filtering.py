@@ -14,13 +14,7 @@ class Filter:
         self.df_writer.write_streamer_periods()
         df = pd.read_csv(self.file_name, sep=',', usecols=[0, 1],
                            names=['start_time', 'end_time'])
-        logging.info(f'HeinzWrapper.data_frame =\n{df}')
-        return df
-
-    def date_type_of_data(self):
-        self.df_writer.write_streamer_periods()
-        df = pd.read_csv(self.file_name, sep=',', usecols=[0, 1],
-                           names=['start_time', 'end_time'])
+        logging.info(f'HeinzWrapper.data_frame_from_file =\n{df}')
         return df
 
     @cached_property
@@ -28,6 +22,22 @@ class Filter:
         df = pd.concat([self._get_data_frame_from_file()], axis=0)
         logging.info(f'HeinzWrapper.data_frame =\n{df}')
         return df
+
+    def date_type_of_data(self):
+        full_date_time = []
+        df = self.data_frame
+        i = 0
+        while i < df.index.size:
+            time = df.at[i, 'start_time']
+            while df.at[i, 'start_time'] <= time <= df.at[i, 'end_time']:
+                full_date_time.append([time])
+                time += 1
+            i += 1
+        full_df = pd.DataFrame(full_date_time).set_axis(['unstable_dates'], axis=1)
+        logging.info(f'HeinzWrapper.unstable_data_frame_ =\n{full_df}')
+        return full_df
+
+
 
 
 

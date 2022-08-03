@@ -4,7 +4,7 @@ from dfwrapper import HeinzWrapper, ResistanceWrapper
 from plotting import Plotter
 from original_writing import Writer
 from filtering import Filter
-
+import pandas as pd
 
 def main(args):
     conf.configure_from_args(args)
@@ -16,7 +16,8 @@ def main(args):
     #my_writer.write_streamer_periods()
     my_writer = Writer(comb_wrapper, 'data/output/unstable_periods.csv')
     filtered_data = Filter(my_writer)
-    filtered_data.data_frame
+    df = filtered_data.date_type_of_data()
+
 
 
 if __name__ == '__main__':
