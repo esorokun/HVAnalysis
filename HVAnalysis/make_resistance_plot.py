@@ -15,12 +15,11 @@ def main(args):
     #my_plotter = Plotter(comb_wrapper)
     #my_plotter.plot_scatter('avgcurr', 'avgvolt')
     #my_writer.write_streamer_periods()
-    my_writer = Writer(comb_wrapper, 'data/output/unstable_periods.csv')
+    #my_writer = Writer(comb_wrapper, 'data/output/unstable_periods.csv')
     my_new_writer = NewWriter(comb_wrapper, 'data/output/new_unstable_periods.csv')
-    my_new_writer.write_streamer_periods()
+    my_new_writer.unstable_hv_filter_reader()
     #filtered_data = Filter(my_writer)
     #filtered_data.build_color_data_blot()
-
 
 
 if __name__ == '__main__':

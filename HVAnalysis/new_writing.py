@@ -2,12 +2,22 @@ import csv
 import pandas as pd
 from datetime import datetime, timedelta
 import time as pytime
-
+import logging
 
 class NewWriter:
     def __init__(self, df_wrapper, file_name):
         self.df_wrapper = df_wrapper
         self.file_name = file_name
+
+    def unstable_hv_filter_reader(self):
+        file_name = 'data/output/ProtoDUNEUnstableHVFilter_copy.csv'
+        with open(file_name) as f1, open('data/output/__test_out.csv', 'w') as f2:
+            f2.write(''.join(i for i in f1.read() if i not in '[]'))
+        df = pd.read_csv('data/output/__test_out.csv', sep=',', skipinitialspace=False)
+        df = df.T
+        df['timeset'] = df.index
+        logging.info(f'HeinzWrapper.data_frame_from_file =\n{df}')
+
 
     def write_streamer_periods(self):
         b1 = datetime(2018, 10, 5, 0, 0, 0)
@@ -18,7 +28,7 @@ class NewWriter:
 
         def period_cut_writer(unstable_list, file, start, end):
             unstable_list.append([start - timedelta(0, 2), end + timedelta(0, 2)])
-            writer.writerow([int(pytime.mktime((start - timedelta(0, 2)).timetuple())),
+            file.writerow([int(pytime.mktime((start - timedelta(0, 2)).timetuple())),
                              int(pytime.mktime((end + timedelta(0, 2)).timetuple()))])
 
         with open(self.file_name, mode='w') as f:
