@@ -16,10 +16,10 @@ class Writer:
         cutONperiod = []
 
         def period_cut_writer(unstablelist, file, start, end):
-            unstablelist.append([start - timedelta(0, 2), end + timedelta(0, 2)])
             i = start - timedelta(0, 2)
             while i < end + timedelta(0, 2):
-                file.writerow([int(pytime.mktime((i).timetuple()))])
+                unstablelist.append([i])
+                file.writerow([i])
                 i += timedelta(0, 1)
 
         with open(file_name, mode='w') as f:
@@ -51,7 +51,7 @@ class Writer:
                     elif stream and (r > 1465 and vps > 180000.) and stream:
                         stream = False
                         period_cut_writer(cutONperiod, writer, startStream, b)
-
+'''
     def create_unstable_date_df(self, file_name):
         self.write_streamer_periods(file_name)
         df = pd.read_csv(file_name,
@@ -60,3 +60,4 @@ class Writer:
         df['timestamp'] = pd.to_datetime(df.index)
         logging.info(f'HeinzWrapper.stable_data_frame =\n{df}')
         return df
+'''
