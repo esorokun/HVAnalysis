@@ -3,6 +3,9 @@ from datetime import datetime, timedelta
 import pandas as pd
 import logging
 
+class Filter:
+    def __init__(self, df_wrapper):
+        self.df_wrapper = df_wrapper
 '''
 class Stable:
     def __init__(self, df_wrapper):

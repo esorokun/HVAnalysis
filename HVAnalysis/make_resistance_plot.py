@@ -3,6 +3,7 @@ import conf
 from dfwrapper import HeinzWrapper, ResistanceWrapper
 from plotting import Plotter
 from original_writing import Writer
+from filtering import Filter
 
 
 def main(args):
@@ -15,6 +16,7 @@ def main(args):
     #my_plotter.plot_scatter('curr', 'curr')
     my_writer = Writer(comb_wrapper)
     my_writer.write_streamer_periods('data/output/unstable_periods.csv')
+    #filtered_data = Filter(my_writer)
 
 
 if __name__ == '__main__':
