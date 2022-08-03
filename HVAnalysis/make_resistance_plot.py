@@ -3,6 +3,7 @@ import conf
 from dfwrapper import HeinzWrapper, ResistanceWrapper
 from plotting import Plotter
 from original_writing import Writer
+from new_writing import NewWriter
 from filtering import Filter
 import pandas as pd
 
@@ -15,8 +16,10 @@ def main(args):
     #my_plotter.plot_scatter('avgcurr', 'avgvolt')
     #my_writer.write_streamer_periods()
     my_writer = Writer(comb_wrapper, 'data/output/unstable_periods.csv')
-    filtered_data = Filter(my_writer)
-    filtered_data.build_color_data_blot()
+    my_new_writer = NewWriter(comb_wrapper, 'data/output/new_unstable_periods.csv')
+    my_new_writer.write_streamer_periods()
+    #filtered_data = Filter(my_writer)
+    #filtered_data.build_color_data_blot()
 
 
 
