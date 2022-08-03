@@ -2,7 +2,7 @@ import argparse
 import conf
 from dfwrapper import HeinzWrapper, ResistanceWrapper
 from plotting import Plotter
-from writing import Writer
+from original_writing import Writer
 
 
 def main(args):

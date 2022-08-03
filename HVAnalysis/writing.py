@@ -1,8 +1,10 @@
 import csv
 from datetime import datetime, timedelta
+import pandas as pd
+import logging
 
-
-class Writer:
+'''
+class Stable:
     def __init__(self, df_wrapper):
         self.df_wrapper = df_wrapper
 
@@ -13,11 +15,13 @@ class Writer:
         stream = False
         cut_time = []
 
-        def period_cut_writer(unstable_list, file, start, end):
+        def period_cut_writer(unstablelist, file, start, end):
+            unstablelist.append([start - timedelta(0, 2), end + timedelta(0, 2)])
             i = start - timedelta(0, 2)
             while i < end + timedelta(0, 2):
-                unstable_list.append([i])
-                file.writerow([i])
+                file.writerow([i, ])
+                unstablelist.append([i])
+
                 i += timedelta(0, 1)
 
         with open(file_name, mode='w') as f:
@@ -52,13 +56,10 @@ class Writer:
                         stream = False
                         period_cut_writer(cut_time, writer, start_stream, b)
 
-
-'''
     def create_unstable_date_df(self, file_name):
         self.write_streamer_periods(file_name)
         df = pd.read_csv(file_name,
-                         index_col=0, use_cols=[0], names=['timestamp'])
-        df.index = 1000000000 * df.index
+                        index_col=0, use_cols=[0], names=['timestamp'])
         df['timestamp'] = pd.to_datetime(df.index)
         logging.info(f'HeinzWrapper.stable_data_frame =\n{df}')
         return df
