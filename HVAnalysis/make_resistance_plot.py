@@ -16,7 +16,7 @@ def main(args):
     #my_writer.write_streamer_periods()
     my_writer = Writer(comb_wrapper, 'data/output/unstable_periods.csv')
     filtered_data = Filter(my_writer)
-    filtered_data.colored_type_of_data()
+    filtered_data.build_color_data_blot()
 
 
 

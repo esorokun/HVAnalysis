@@ -4,6 +4,7 @@ import pandas as pd
 from original_writing import Writer
 import logging
 from functools import cached_property
+import matplotlib.pyplot as plt
 
 class Filter:
     def __init__(self, df_writer):
@@ -45,7 +46,16 @@ class Filter:
         empty = df_filter['color'] != 'red'
         df_filter.loc[empty, ['color']] = 'blue'
         logging.info(f'HeinzWrapper.unstable_data_frame_ =\n{df_filter}')
-        return df
+        return df_filter
+
+    def build_color_data_blot(self):
+        df = self.colored_type_of_data()
+        color_list = df['color'].values
+        plt.scatter(y=df['avgvolt'], x=df['avgcurr'], alpha=0.05, s=0.1, c=color_list)
+        plt.xlabel('avgvolt')
+        plt.ylabel('avgcurr')
+        plt.show()
+
 
 
 
