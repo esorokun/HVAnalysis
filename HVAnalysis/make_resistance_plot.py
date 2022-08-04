@@ -17,7 +17,7 @@ def main(args):
     my_writer = Writer(comb_wrapper, 'data/output/unstable_periods.csv')
     my_writer.write_streamer_periods()
     my_new_writer = NewWriter(comb_wrapper, 'data/output/new_unstable_periods.csv')
-    my_new_writer.new_df_unstable_periods()
+    my_new_writer.new_df_unstable_writer()
 
     # my_plotter = Plotter(comb_wrapper)
     # my_plotter.plot_scatter('avgcurr', 'avgvolt')

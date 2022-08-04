@@ -146,24 +146,26 @@ class NewWriter:
             print(3)
             df_unstable = self.create_unstable_df_for_b1(df)
 
-        logging.info(f'HeinzWrapper.data_frame =\n{df_unstable}')
+        logging.info(f'Unstable.data_frame =\n{df_unstable}')
         return df_unstable
 
     def new_df_unstable_writer(self):
         df = self.new_df_unstable_periods()
         with open(self.file_name, mode='w') as f:
             writer = csv.writer(f)
-            start = list[0]
-            c = start - timedelta(0, 1)
+            stream = True
+            c = df.index[0]-timedelta(0, 1)
+            start = df.index[0]
             for row in df.itertuples():
                 if row.ncurr == 0 or row.nvolt == 0:
                     continue
                 b = row.Index
-                if int(b-1) == c:
+
+                if b - timedelta(0, 1) != c:
                     writer.writerow([int(pytime.mktime((start - timedelta(0, 2)).timetuple())),
-                                     int(pytime.mktime((b + timedelta(0, 2)).timetuple()))])
-                    start = int(b)
-                c = int(b)
+                                     int(pytime.mktime((c + timedelta(0, 3)).timetuple()))])
+                    start = b
+                c = b
 
 
 
