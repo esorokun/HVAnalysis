@@ -24,7 +24,6 @@ class Filter:
     def date_type_of_data(self):
         full_date_time = []
         df = self.data_frame
-        df.drop_duplicates(keep='first', inplace=False)
         i = 0
         while i < df.index.size:
             time = df.at[i, 'start_time']
@@ -33,6 +32,8 @@ class Filter:
                 time += 1
             i += 1
         full_df = pd.DataFrame(full_date_time).set_axis(['timestamp'], axis=1)
+        full_df.drop_duplicates(keep='first', inplace=False)
+        logging.info(f'HeinzWrapper.unstable_data_frame_ =\n{full_df}')
         return full_df
 
     def colored_type_of_data(self):
@@ -43,25 +44,23 @@ class Filter:
         df_filter = pd.merge(df, unstable_df, on='timestamp', how='left')
         empty = df_filter['color'] != 'red'
         df_filter.loc[empty, ['color']] = 'blue'
-        logging.info(f'HeinzWrapper.unstable_data_frame_ =\n{unstable_df}')
-        df_filter.to_csv('data/output/pandastext.txt', header=True,
-                   sep="\t", mode='w', float_format='%.0f')
+        #logging.info(f'HeinzWrapper.unstable_data_frame_ =\n{unstable_df}')
+        #df_filter.to_csv('data/output/pandastext.txt', header=True,
+        #          sep="\t", mode='w', float_format='%.0f')
         return df_filter
 
     def unstable_real_type_of_data(self):
-        '''
         df = self.df_wrapper.data_frame
         unstable_df = self.date_type_of_data()
         unstable_df['color'] = 'red'
         unstable_df.set_index('timestamp', inplace=True)
-        df_filter = pd.merge(df, unstable_df, on='timestamp', how='left')
-        empty = df_filter['color'] != 'red'
-        df_filter.loc[empty, ['color']] = 'blue'
+        df_filter = pd.merge(df, unstable_df, on='timestamp', how='right')
+        #empty = df_filter['color'] != 'red'
+        #df_filter.loc[empty, ['color']] = 'blue'
         logging.info(f'HeinzWrapper.unstable_data_frame_ =\n{unstable_df}')
         df_filter.to_csv('data/output/pandastext.txt', header=True,
                    sep="\t", mode='w', float_format='%.0f')
         return df_filter
-        '''
 
     def build_color_data_plot(self):
         df = self.colored_type_of_data()

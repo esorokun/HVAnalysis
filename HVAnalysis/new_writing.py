@@ -56,6 +56,11 @@ class NewWriter:
         file.writerow([int(pytime.mktime((start - timedelta(0, 2)).timetuple())),
                     int(pytime.mktime((end + timedelta(0, 2)).timetuple()))])
 
+    def last_period_cut_writer(self, unstable_list, file, start, end):
+        unstable_list.append([start - timedelta(0, 2), end])
+        file.writerow([int(pytime.mktime((start - timedelta(0, 2)).timetuple())),
+                    int(pytime.mktime(end.timetuple()))])
+
     def write_streamer_periods(self):
         b1 = datetime(2018, 10, 5, 0, 0, 0)
         b2 = datetime(2018, 10, 17, 12, 0, 0)
@@ -75,7 +80,7 @@ class NewWriter:
                 avgvolt = row.avgvolt
 
                 if b == last:
-                    self.period_cut_writer(cut_time, writer, start_stream, b)
+                    self.last_period_cut_writer(cut_time, writer, start_stream, b)
 
                 if b <= b1:
                     if not stream and (1472 < r or r < 1452 or avgvolt < 120000.):
