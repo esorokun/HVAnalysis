@@ -21,12 +21,15 @@ class NewWriter:
 
     def unstable_hv_filter_separate_start_end(self):
         df = self.unstable_hv_filter_reader()
+
         df_start = df.loc[df.index % 2 == 0]
         df_start.reset_index(drop=True, inplace=True)
         df_start.rename(columns={'timeset': 'start_time'}, inplace=True)
+
         df_ends = df.loc[df.index % 2 != 0]
         df_ends.reset_index(drop=True, inplace=True)
         df_ends.rename(columns={'timeset': 'end_time'}, inplace=True)
+
         new_df = df_start.join(df_ends)
         logging.info(f'HeinzWrapper.data_frame_from_file =\n{new_df}')
         return new_df
