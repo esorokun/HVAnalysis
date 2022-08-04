@@ -10,18 +10,21 @@ class Filter:
         self.df_writer = df_writer
         self.file_name = df_writer.file_name
         self.df_wrapper = df_writer.df_wrapper
+
     def _get_data_frame_from_file(self):
         self.df_writer.write_streamer_periods()
         df = pd.read_csv(self.file_name, sep=',', usecols=[0, 1],
                            names=['start_time', 'end_time'])
-        logging.info(f'HeinzWrapper.data_frame_from_file =\n{df}')
         return df
+
     @cached_property
     def data_frame(self):
         return pd.concat([self._get_data_frame_from_file()], axis=0)
+
     def date_type_of_data(self):
         full_date_time = []
         df = self.data_frame
+        df.drop_duplicates(keep='first', inplace=False)
         i = 0
         while i < df.index.size:
             time = df.at[i, 'start_time']
@@ -30,8 +33,8 @@ class Filter:
                 time += 1
             i += 1
         full_df = pd.DataFrame(full_date_time).set_axis(['timestamp'], axis=1)
-        logging.info(f'HeinzWrapper.unstable_data_frame_ =\n{full_df}')
         return full_df
+
     def colored_type_of_data(self):
         df = self.df_wrapper.data_frame
         unstable_df = self.date_type_of_data()
@@ -41,7 +44,6 @@ class Filter:
         empty = df_filter['color'] != 'red'
         df_filter.loc[empty, ['color']] = 'blue'
         logging.info(f'HeinzWrapper.unstable_data_frame_ =\n{unstable_df}')
-        logging.info(f'HeinzWrapper.unstable_data_frame_ =\n{df_filter.head()}')
         df_filter.to_csv('data/output/pandastext.txt', header=True,
                    sep="\t", mode='w', float_format='%.0f')
         return df_filter

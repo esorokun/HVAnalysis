@@ -16,6 +16,7 @@ class Writer:
         cutONperiod = []
         with open(self.file_name, mode='w') as f:
             writer = csv.writer(f, delimiter=',')
+            last = df.last_valid_index()
             for row in df.itertuples():
                 if row.ncurr == 0 or row.nvolt == 0:
                     continue
@@ -26,6 +27,13 @@ class Writer:
                 if b <= b1 and (r > 1472 or r < 1452 or vps < 120000.) and not streamerON:
                     streamerON = True
                     startStream = b
+
+                elif b == last:
+                    cutONperiod.append([startStream - timedelta(0, 2), b])
+                    streamerON = False
+                    writer.writerow([int(pytime.mktime((startStream - timedelta(0, 2)).timetuple())),
+                                    int(pytime.mktime(b.timetuple()))])
+
                 if b <= b1 and (r > 1452 and r < 1472 and vps > 120000.) and streamerON:
                     streamerON = False
                     cutONperiod.append([startStream - timedelta(0, 2), b + timedelta(0, 2)])
