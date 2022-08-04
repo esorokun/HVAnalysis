@@ -18,9 +18,9 @@ def main(args):
     #my_plotter.plot_scatter('avgcurr', 'avgvolt')
     #my_writer.write_streamer_periods()
     my_new_writer = NewWriter(comb_wrapper, 'data/output/new_unstable_periods.csv')
-    #my_new_writer.hv_filter_data_in_csv()
+    my_new_writer.hv_filter_data_in_csv()
     filtered_data = Filter(my_new_writer)
-    filtered_data.date_type_of_data()
+    filtered_data.unstable_real_type_of_data()
     #grid_end = '2018-11-12 13:50:03'
     #grid_start = '2018-09-19 03:00:16'
 

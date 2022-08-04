@@ -20,36 +20,11 @@ class NewWriter:
                 unstable_periods[0] = unstable_periods[0].replace('  TimeRanges: [[', '')
                 unstable_periods[-1] = unstable_periods[-1].replace(']', '')
 
-
         with open('data/output/transformed_periods.csv', 'w') as output_file:
+            self.file_name = 'data/output/transformed_periods.csv'
             for line in unstable_periods:
                 line = line.replace(', ', ',')
                 output_file.write(f'{line}\n')
-
-    def unstable_hv_filter_reader(self):
-        file_name = 'data/output/ProtoDUNEUnstableHVFilter_copy.csv'
-        with open(file_name) as f1, open('data/output/__test_out.csv', 'w') as f2:
-            f2.write(''.join(i for i in f1.read() if i not in '[]'))
-        df = pd.read_csv('data/output/__test_out.csv', sep=',', skipinitialspace=False)
-        df = df.T
-        df['timeset'] = df.index
-        df.reset_index(drop=True, inplace=True)
-        return df
-
-    def unstable_hv_filter_separate_start_end(self):
-        df = self.unstable_hv_filter_reader()
-
-        df_start = df.loc[df.index % 2 == 0]
-        df_start.reset_index(drop=True, inplace=True)
-        df_start.rename(columns={'timeset': 'start_time'}, inplace=True)
-
-        df_ends = df.loc[df.index % 2 != 0]
-        df_ends.reset_index(drop=True, inplace=True)
-        df_ends.rename(columns={'timeset': 'end_time'}, inplace=True)
-
-        new_df = df_start.join(df_ends)
-        logging.info(f'HeinzWrapper.data_frame_from_file =\n{new_df}')
-        return new_df
 
     def period_cut_writer(self, unstable_list, file, start, end):
         unstable_list.append([start - timedelta(0, 2), end + timedelta(0, 2)])
