@@ -12,8 +12,8 @@ class Filter:
         self.df_wrapper = df_writer.df_wrapper
 
     def _get_data_frame_from_file(self):
-        #self.df_writer.write_streamer_periods()
-        df = pd.read_csv('data/output/transformed_periods.csv', sep=',', usecols=[0, 1],
+        self.df_writer.write_streamer_periods()
+        df = pd.read_csv(self.df_writer.file_name, sep=',', usecols=[0, 1],
                            names=['start_time', 'end_time'])
         return df
 
@@ -69,8 +69,9 @@ class Filter:
     def build_color_data_plot(self):
         df = self.colored_type_of_data()
         color_list = df['color'].values
-        plt.scatter(y=df['avgcurr'], x=df['resistance'], alpha=0.05, s=0.1, c=color_list,)
-        plt.xlim(-2000, 3000)
+        plt.scatter(y=df['avgvolt'], x=df['avgcurr'], alpha=0.05, s=0.1, c=color_list,)
+        #plt.xlim(500, 3000)
+        #plt.ylim(0, 200)
         plt.xlabel('resistance')
         plt.ylabel('avgcurr')
         plt.show()

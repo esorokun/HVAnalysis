@@ -13,16 +13,40 @@ def main(args):
     curr_wrapper = HeinzWrapper(conf.curr_file_names, 'curr')
     volt_wrapper = HeinzWrapper(conf.volt_file_names, 'volt')
     comb_wrapper = ResistanceWrapper(curr_wrapper, volt_wrapper)
+
     my_writer = Writer(comb_wrapper, 'data/output/unstable_periods.csv')
-    #my_plotter = Plotter(comb_wrapper)
-    #my_plotter.plot_scatter('avgcurr', 'avgvolt')
-    #my_writer.write_streamer_periods()
+    my_writer.write_streamer_periods()
     my_new_writer = NewWriter(comb_wrapper, 'data/output/new_unstable_periods.csv')
-    my_new_writer.hv_filter_data_in_csv()
-    filtered_data = Filter(my_new_writer)
-    filtered_data.build_color_data_plot()
-    #grid_end = '2018-11-12 13:50:03'
+    my_new_writer.write_streamer_periods()
+
+    # my_plotter = Plotter(comb_wrapper)
+    # my_plotter.plot_scatter('avgcurr', 'avgvolt')
+
+    #my_new_writer.hv_filter_data_in_csv()
+    #filtered_data = Filter(my_new_writer)
+    #filtered_data.build_color_data_plot()
+
     #grid_start = '2018-09-19 03:00:16'
+    #grid_end = '2018-11-12 13:50:03'
+
+
+    def numbers_to_strings(argument):
+        switcher = {
+            0: "zero",
+            1: "one",
+            2: "two",
+        }
+
+        # get() method of dictionary data type returns
+        # value of passed argument if it is present
+        # in dictionary otherwise second argument will
+        # be assigned as default value of passed argument
+        return switcher.get(argument, "nothing")
+
+    # Driver program
+    if __name__ == "__main__":
+        argument = 0
+        print(numbers_to_strings(argument))
 
 
 if __name__ == '__main__':

@@ -11,6 +11,10 @@ class NewWriter:
         self.file_name = file_name
 
     def hv_filter_data_in_csv(self):
+
+        # grid_start = '2018-09-19 03:00:16'
+        # grid_end = '2018-11-12 13:50:03'
+
         file_name = 'data/output/ProtoDUNEUnstableHVFilter.fcl'
         with open(file_name, 'r') as input_file:
             for line in input_file:
