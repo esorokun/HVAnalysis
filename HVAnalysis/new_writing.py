@@ -101,24 +101,32 @@ class NewWriter:
         b1 = datetime(2018, 10, 5, 0, 0, 0)
         map = df.index <= b1
         df_b1, df_b1_b2 = df[map], df[~map]
+
         model = df_b1_b2['resistance'] < 1465
         df_b1_b2_ver1 = df_b1_b2[model]
+
         model_2 = df_b1_b2_ver1['avgvolt'] < 120000.
-        df_res_2 = df_b1_b2_ver1[model_2]
+        df_b1_b2_ver2 = df_b1_b2[model_2]
+
         df_res_1 = self.create_unstable_df_for_b1(df_b1)
-        result = pd.concat([df_res_1, df_res_2])
+        result = pd.concat([df_res_1, df_b1_b2_ver2, df_b1_b2_ver1]).drop_duplicates()
+        result = result.sort_index()
         return result
 
     def create_unstable_df_for_b2(self, df):
         b2 = datetime(2018, 10, 17, 12, 0, 0)
         map = df.index < b2
         df_b1_b2, df_b2 = df[map], df[~map]
+
         model = df_b2['resistance'] < 1465
         df_b2_ver1 = df_b2[model]
+
         model_2 = df_b2_ver1['avgvolt'] < 180000.
-        df_res_2 = df_b2_ver1[model_2]
+        df_b2_ver2 = df_b2[model_2]
+
         df_res_1 = self.create_unstable_df_for_b1_b2(df_b1_b2)
-        result = pd.concat([df_res_1, df_res_2])
+        result = pd.concat([df_res_1, df_b2_ver1, df_b2_ver2]).drop_duplicates()
+        result = result.sort_index()
         return result
 
     def new_df_unstable_periods(self):
@@ -138,7 +146,7 @@ class NewWriter:
             print(3)
             df_unstable = self.create_unstable_df_for_b1(df)
 
-        #logging.info(f'HeinzWrapper.data_frame =\n{df_unstable}')
+        logging.info(f'HeinzWrapper.data_frame =\n{df_unstable}')
         return df_unstable
 
     def new_df_unstable_writer(self):
