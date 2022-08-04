@@ -3,6 +3,7 @@ import pandas as pd
 from datetime import datetime, timedelta
 import time as pytime
 import logging
+from filtering import Filter
 
 class NewWriter:
     def __init__(self, df_wrapper, file_name):

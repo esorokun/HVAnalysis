@@ -22,9 +22,8 @@ class Filter:
     def data_frame(self):
         return pd.concat([self._get_data_frame_from_file()], axis=0)
 
-    def date_type_of_data(self):
+    def date_type_of_data(self, df):
         full_date_time = []
-        df = self.data_frame
         i = 0
         while i < df.index.size:
             time = df.at[i, 'start_time']
@@ -36,9 +35,9 @@ class Filter:
         logging.info(f'HeinzWrapper.unstable_data_frame_ =\n{full_df}')
         return full_df
 
-    def colored_type_of_data(self):
+    def colored_type_of_data(self, data_f):
         df = self.df_wrapper.data_frame
-        unstable_df = self.date_type_of_data()
+        unstable_df = self.date_type_of_data(data_f)
         unstable_df['color'] = 'red'
         unstable_df.set_index('timestamp', inplace=True)
         df_filter = pd.merge(df, unstable_df, on='timestamp', how='left')
@@ -47,10 +46,10 @@ class Filter:
         logging.info(f'HeinzWrapper.unstable_data_frame_ =\n{df_filter}')
         return df_filter
 
-    def build_color_data_blot(self):
-        df = self.colored_type_of_data()
+    def build_color_data_plot(self, data_f):
+        df = self.colored_type_of_data(data_f)
         color_list = df['color'].values
-        plt.scatter(y=df['avgvolt'], x=df['avgcurr'], alpha=0.2, s=0.1, c=color_list)
-        plt.xlabel('avgvolt')
-        plt.ylabel('avgcurr')
+        plt.scatter(y=df['avgvolt'], x=df['avgcurr'], alpha=0.1, s=0.1, c=color_list)
+        plt.xlabel('avgcurr')
+        plt.ylabel('avgvolt')
         plt.show()
