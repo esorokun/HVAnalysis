@@ -12,8 +12,8 @@ class Filter:
         self.df_wrapper = df_writer.df_wrapper
 
     def _get_data_frame_from_file(self):
-        self.df_writer.write_streamer_periods()
-        df = pd.read_csv(self.file_name, sep=',', usecols=[0, 1],
+        #self.df_writer.write_streamer_periods()
+        df = pd.read_csv('data/output/transformed_periods.csv', sep=',', usecols=[0, 1],
                            names=['start_time', 'end_time'])
         return df
 
@@ -44,8 +44,8 @@ class Filter:
         empty = df_filter['color'] != 'red'
         df_filter.loc[empty, ['color']] = 'blue'
         #logging.info(f'HeinzWrapper.unstable_data_frame_ =\n{unstable_df}')
-        #df_filter.to_csv('data/output/pandastext.txt', header=True,
-        #          sep="\t", mode='w', float_format='%.0f')
+        #df_filter.to_csv('data/output/pandastext.xlsx', header=True,
+        #         sep="\t", mode='w', float_format='%.0f')
         return df_filter
 
     def unstable_real_type_of_data(self):
@@ -53,18 +53,24 @@ class Filter:
         unstable_df = self.date_type_of_data()
         unstable_df['color'] = 'red'
         unstable_df.set_index('timestamp', inplace=True)
-        df_filter = pd.merge(df, unstable_df, on='timestamp', how='right')
-        #empty = df_filter['color'] != 'red'
-        #df_filter.loc[empty, ['color']] = 'blue'
-        logging.info(f'HeinzWrapper.unstable_data_frame_ =\n{df_filter}')
-        #df_filter.to_csv('data/output/pandastext.txt', header=True,
+        df_filter = pd.merge(df, unstable_df, on='timestamp', how='left')
+        empty = df_filter['color'] != 'red'
+        df_filter.loc[empty, ['color']] = 'blue'
+        df1 = df_filter[empty]
+        #logging.info(f'HeinzWrapper.unstable_data_frame_ =\n{df_filter}')
+        #df1.to_csv('data/output/pandastext.txt', header=True,
+        #           sep="\t", mode='w', float_format='%.0f')
+        #mask = 127800 < df_filter['avgvolt'] #1460 < df_filter['resistance'] < 1480 and
+        #df_mask = df_filter[mask]
+        #df_mask.to_csv('data/output/pandastext_test.txt', header=True,
         #           sep="\t", mode='w', float_format='%.0f')
         return df_filter
 
     def build_color_data_plot(self):
         df = self.colored_type_of_data()
         color_list = df['color'].values
-        plt.scatter(y=df['avgvolt'], x=df['avgcurr'], alpha=0.05, s=0.1, c=color_list)
-        plt.xlabel('avgvolt')
+        plt.scatter(y=df['avgcurr'], x=df['resistance'], alpha=0.05, s=0.1, c=color_list,)
+        plt.xlim(-2000, 3000)
+        plt.xlabel('resistance')
         plt.ylabel('avgcurr')
         plt.show()

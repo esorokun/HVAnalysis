@@ -20,7 +20,7 @@ def main(args):
     my_new_writer = NewWriter(comb_wrapper, 'data/output/new_unstable_periods.csv')
     my_new_writer.hv_filter_data_in_csv()
     filtered_data = Filter(my_new_writer)
-    filtered_data.unstable_real_type_of_data()
+    filtered_data.build_color_data_plot()
     #grid_end = '2018-11-12 13:50:03'
     #grid_start = '2018-09-19 03:00:16'
 
