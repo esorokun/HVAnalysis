@@ -72,5 +72,5 @@ class Filter:
         #plt.ylim(0, 200)
         plt.xlabel('resistance')
         plt.ylabel('avgcurr')
-        
+
         plt.show()

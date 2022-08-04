@@ -81,3 +81,43 @@ class NewWriter:
 
                 #if b == last:
                  #   self.last_period_cut_writer(cut_time, writer, start_stream, b)
+
+    def create_unstable_df_for_b1(self, df):
+        model_1 = (1452 > df['resistance'] or df['resistance'] > 1472 and df['avgvolt'] < 12000.)
+        df_res = df[model_1]
+        return df_res
+
+    def create_unstable_df_for_b1_b2(self, df, df_add):
+        model_1 = (df['resistance'] < 1465 and df['avgvolt'] < 12000.)
+        df_res = df[model_1]
+        result = pd.concat([df_add, df_res])
+        return result
+
+    def create_unstable_df_for_b2(self, df, df_add):
+        model_1 = (df['resistance'] < 1465 and df['avgvolt'] < 18000.)
+        df_res = df[model_1]
+        result = pd.concat([df_add, df_res])
+        return result
+
+    def new_write_stremer_periods(self):
+        b1 = datetime(2018, 10, 5, 0, 0, 0)  # 2018-10-05 00:00:00
+        b2 = datetime(2018, 10, 17, 12, 0, 0)  # 2018-10-17 12:00:00
+        df = self.df_wrapper.data_frame
+        last_index = df.last_valid_index()
+        if last_index > b2:
+
+            map_1 = df.index <= b1
+            df_b1, df_2 = df[map_1], df[~map_1]  #df for  --> b1 and b1-->
+            map_2 = df_2.index < b2
+            df_b1_b2, df_b2 = df_2[map_1], df_2[~map_1]  #separate  b1--> on b1-->b2 and b2-->
+
+        elif last_index < b2:
+            map_1 = df.index <= b1
+            df_b1, df_b1_b2 = df[map_1], df[~map_1]
+
+
+        elif last_index <= b1:
+
+
+
+
