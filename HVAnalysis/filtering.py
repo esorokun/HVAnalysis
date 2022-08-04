@@ -13,8 +13,7 @@ class Filter:
 
     def _get_data_frame_from_file(self):
         self.df_writer.write_streamer_periods()
-        df = pd.read_csv(self.df_writer.file_name, sep=',', usecols=[0, 1],
-                           names=['start_time', 'end_time'])
+        df = pd.read_csv(self.df_writer.file_name, sep=',', usecols=[0, 1], names=['start_time', 'end_time'])
         return df
 
     @cached_property
@@ -43,9 +42,6 @@ class Filter:
         df_filter = pd.merge(df, unstable_df, on='timestamp', how='left')
         empty = df_filter['color'] != 'red'
         df_filter.loc[empty, ['color']] = 'blue'
-        #logging.info(f'HeinzWrapper.unstable_data_frame_ =\n{unstable_df}')
-        #df_filter.to_csv('data/output/pandastext.xlsx', header=True,
-        #         sep="\t", mode='w', float_format='%.0f')
         return df_filter
 
     def unstable_real_type_of_data(self):
@@ -56,14 +52,7 @@ class Filter:
         df_filter = pd.merge(df, unstable_df, on='timestamp', how='left')
         empty = df_filter['color'] != 'red'
         df_filter.loc[empty, ['color']] = 'blue'
-        df1 = df_filter[empty]
-        #logging.info(f'HeinzWrapper.unstable_data_frame_ =\n{df_filter}')
-        #df1.to_csv('data/output/pandastext.txt', header=True,
-        #           sep="\t", mode='w', float_format='%.0f')
-        #mask = 127800 < df_filter['avgvolt'] #1460 < df_filter['resistance'] < 1480 and
-        #df_mask = df_filter[mask]
-        #df_mask.to_csv('data/output/pandastext_test.txt', header=True,
-        #           sep="\t", mode='w', float_format='%.0f')
+        logging.info(f'Colored.data_frame =\n{df_filter}')
         return df_filter
 
     def build_color_data_plot(self):

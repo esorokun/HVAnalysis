@@ -32,6 +32,7 @@ class NewWriter:
                 output_file.write(f'{line}\n')
 
     def period_cut_writer(self, unstable_list, file, start, end):
+        unstable_list.append([start - timedelta(0, 2), end + timedelta(0, 2)])
         file.writerow([int(pytime.mktime((start - timedelta(0, 2)).timetuple())),
                     int(pytime.mktime((end + timedelta(0, 2)).timetuple()))])
 
