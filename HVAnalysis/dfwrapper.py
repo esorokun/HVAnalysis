@@ -2,7 +2,6 @@ import logging
 import pandas as pd
 from functools import cached_property
 
-
 class HeinzWrapper:
     """Wrapper class for pandas data frame"""
     def __init__(self, file_names=None, val_name=None):
@@ -62,22 +61,6 @@ class ResistanceWrapper:
         df['avgvolt'] = df['sumvolt'] / df['nvolt']
         df['resistance'] = df['avgvolt'] / df['avgcurr']
         return df
-
-    '''
-    def _subtract_wrapper(self, df):
-        data = pd.concat([self.data_frame, df]).drop_duplicates(keep=False)
-        return data
-
-    def _stable_data(self):
-        my_writer = Writer(self)
-        my_writer.write_streamer_periods('data/output/unstable_periods.csv')
-        df = pd.read_csv('data/output/unstable_periods.csv',
-                            index_col=0, usecols=[0], names=['timestamp'])
-        df.index = 1000000000 * df.index
-        df['timestamp'] = pd.to_datetime(df.index)
-        logging.info(f'HeinzWrapper.stable_data_frame =\n{df}')
-        return self._subtract_wrapper(df)
-    '''
 
     @cached_property
     def data_frame(self):

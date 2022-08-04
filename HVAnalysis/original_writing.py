@@ -43,6 +43,7 @@ class Writer:
                 if b > b1 and b < b2 and (r < 1465 or vps < 120000.) and not streamerON:
                     streamerON = True
                     startStream = b
+
                 if b > b1 and b < b2 and (r > 1465 and vps > 120000.) and streamerON:
                     streamerON = False
                     cutONperiod.append([startStream - timedelta(0, 2), b + timedelta(0, 2)])
@@ -52,6 +53,7 @@ class Writer:
                 if b >= b2 and (r < 1465 or vps < 180000.) and not streamerON:
                     streamerON = True
                     startStream = b
+
                 if b >= b2 and (r > 1465 and vps > 180000.) and streamerON:
                     streamerON = False
                     cutONperiod.append([startStream - timedelta(0, 2), b + timedelta(0, 2)])

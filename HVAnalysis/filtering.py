@@ -48,6 +48,21 @@ class Filter:
                    sep="\t", mode='w', float_format='%.0f')
         return df_filter
 
+    def unstable_real_type_of_data(self):
+        '''
+        df = self.df_wrapper.data_frame
+        unstable_df = self.date_type_of_data()
+        unstable_df['color'] = 'red'
+        unstable_df.set_index('timestamp', inplace=True)
+        df_filter = pd.merge(df, unstable_df, on='timestamp', how='left')
+        empty = df_filter['color'] != 'red'
+        df_filter.loc[empty, ['color']] = 'blue'
+        logging.info(f'HeinzWrapper.unstable_data_frame_ =\n{unstable_df}')
+        df_filter.to_csv('data/output/pandastext.txt', header=True,
+                   sep="\t", mode='w', float_format='%.0f')
+        return df_filter
+        '''
+
     def build_color_data_plot(self):
         df = self.colored_type_of_data()
         color_list = df['color'].values

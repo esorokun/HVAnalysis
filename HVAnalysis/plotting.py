@@ -3,7 +3,6 @@ import conf
 import pandas as pd
 import logging
 
-
 class Plotter:
     def __init__(self, df_wrapper_1, df_wrapper_2=None):
         if df_wrapper_2 is not None:

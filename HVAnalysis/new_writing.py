@@ -65,6 +65,7 @@ class NewWriter:
 
         with open(self.file_name, mode='w') as f:
             writer = csv.writer(f)
+            last = df.last_valid_index()
             for row in df.itertuples():
                 if row.ncurr == 0 or row.nvolt == 0:
                     continue
@@ -73,6 +74,9 @@ class NewWriter:
                 r = row.resistance
                 avgvolt = row.avgvolt
 
+                if b == last:
+                    self.period_cut_writer(cut_time, writer, start_stream, b)
+
                 if b <= b1:
                     if not stream and (1472 < r or r < 1452 or avgvolt < 120000.):
                         stream = True
@@ -80,6 +84,7 @@ class NewWriter:
                     elif stream and (1452 < r < 1472 and avgvolt > 120000.):
                         stream = False
                         self.period_cut_writer(cut_time, writer, start_stream, b)
+
                 if b1 < b < b2:
                     if not stream and (r < 1465 or avgvolt < 120000.):
                         stream = True
@@ -87,6 +92,7 @@ class NewWriter:
                     elif stream and (r > 1465 and avgvolt > 120000.) and stream:
                         stream = False
                         self.period_cut_writer(cut_time, writer, start_stream, b)
+
                 if b >= b2:
                     if not stream and (r < 1465 or avgvolt < 180000.):
                         stream = True
