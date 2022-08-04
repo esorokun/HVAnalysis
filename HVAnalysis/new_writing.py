@@ -17,6 +17,10 @@ class NewWriter:
         df = df.T
         df['timeset'] = df.index
         df.reset_index(drop=True, inplace=True)
+        return df
+
+    def unstable_hv_filter_separate_start_end(self):
+        df = self.unstable_hv_filter_reader()
         df_start = df.loc[df.index % 2 == 0]
         df_start.reset_index(drop=True, inplace=True)
         df_start.rename(columns={'timeset': 'start_time'}, inplace=True)
@@ -26,7 +30,6 @@ class NewWriter:
         new_df = df_start.join(df_ends)
         logging.info(f'HeinzWrapper.data_frame_from_file =\n{new_df}')
         return new_df
-
 
     def write_streamer_periods(self):
         b1 = datetime(2018, 10, 5, 0, 0, 0)

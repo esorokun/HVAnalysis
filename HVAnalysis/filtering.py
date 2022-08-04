@@ -50,7 +50,7 @@ class Filter:
     def build_color_data_blot(self):
         df = self.colored_type_of_data()
         color_list = df['color'].values
-        plt.scatter(y=df['avgvolt'], x=df['avgcurr'], alpha=0.05, s=0.1, c=color_list)
+        plt.scatter(y=df['avgvolt'], x=df['avgcurr'], alpha=0.2, s=0.1, c=color_list)
         plt.xlabel('avgvolt')
         plt.ylabel('avgcurr')
         plt.show()

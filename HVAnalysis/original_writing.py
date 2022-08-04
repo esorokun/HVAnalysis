@@ -9,8 +9,8 @@ class Writer:
         self.file_name = file_name
 
     def write_streamer_periods(self):
-        b1 = datetime(2018, 10, 5, 0, 0, 0)
-        b2 = datetime(2018, 10, 17, 12, 0, 0)
+        b1 = datetime(2018, 10, 5, 0, 0, 0)    #2018-10-05 00:00:00
+        b2 = datetime(2018, 10, 17, 12, 0, 0)  #2018-10-17 12:00:00
         df = self.df_wrapper.data_frame
         streamerON = False
         cutONperiod = []
