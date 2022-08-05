@@ -35,11 +35,11 @@ class Writer:
                     startStream = b
 
 
-                elif b == last:
+                '''elif b == last:
                     cutONperiod.append([startStream - timedelta(0, 2), b])
                     streamerON = False
                     writer.writerow([int(pytime.mktime((startStream - timedelta(0, 2)).timetuple())),
-                                    int(pytime.mktime(b.timetuple()))])
+                                    int(pytime.mktime(b.timetuple()))])'''
 
                 if b <= b1 and (r > 1452 and r < 1472 and vps > 120000.) and streamerON:
                     streamerON = False

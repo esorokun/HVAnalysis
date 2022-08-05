@@ -31,10 +31,10 @@ class Filter:
                 full_date_time.append([datetime.fromtimestamp(time)])
                 time += 1
             i += 1
-
         full_df = pd.DataFrame(full_date_time).set_axis(['timestamp'], axis=1)
-        full_df.drop_duplicates(keep='first', inplace=False)
-
+        full_df = full_df.drop_duplicates()
+        full_df.to_csv('data/output/pandas_old.csv', header=True,
+                           sep="\t", mode='w', float_format='%.0f')
         return full_df
 
     def colored_type_of_data(self):

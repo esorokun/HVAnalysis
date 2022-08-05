@@ -23,7 +23,7 @@ def main(args):
     # my_plotter.plot_scatter('avgcurr', 'avgvolt')
 
     #my_new_writer.hv_filter_data_in_csv()
-    #filtered_data = Filter(my_new_writer)
+    #filtered_data = Filter(my_writer)
     #filtered_data.build_color_data_plot()
 
     #grid_start = '2018-09-19 03:00:16'
