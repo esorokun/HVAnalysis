@@ -15,7 +15,7 @@ def main(args):
     comb_wrapper = ResistanceWrapper(curr_wrapper, volt_wrapper)
 
     my_writer = Writer(comb_wrapper, 'data/output/unstable_periods.csv')
-    #my_writer.write_streamer_periods()
+    my_writer.write_streamer_periods()
     my_new_writer = NewWriter(comb_wrapper, 'data/output/new_unstable_periods.csv')
     my_new_writer.new_df_unstable_writer()
 
@@ -30,10 +30,6 @@ def main(args):
     #new_filtered_data = Filter(my_new_writer)
     #df_2 = new_filtered_data.colored_type_of_data()
     #new_filtered_data.write_in_csv(df_2,'data/output/pandas_hv.csv')
-
-    #grid_start = '2018-09-19 03:00:16'
-    #grid_end = '2018-11-12 13:50:03'
-    print(datetime.fromtimestamp(1538100565))
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
