@@ -130,6 +130,12 @@ class NewWriter:
         b1 = datetime(2018, 10, 5, 0, 0, 0)  # 2018-10-05 00:00:00
         b2 = datetime(2018, 10, 17, 12, 0, 0)  # 2018-10-17 12:00:00
         df = self.df_wrapper.data_frame
+
+        df_clear_1 = df['ncurr'] != 0
+        df = df[df_clear_1]
+        df_clear_2 = df['nvolt'] != 0
+        df = df[df_clear_2]
+        logging.info(f'HeinzWrapper.data_frame =\n{df}')
         last_index = df.last_valid_index()
         df_unstable = []
         if last_index >= b2:
@@ -141,21 +147,18 @@ class NewWriter:
         elif last_index <= b1:
             print(3)
             df_unstable = self.create_unstable_df_for_b1(df)
-
+        logging.info(f'HeinzWrapper.data_frame =\n{df_unstable}')
         return df_unstable
 
     def new_df_unstable_writer(self):
         df = self.new_df_unstable_periods()
         start_time = pytime.time()
+
         mask_1 = df['bool'].eq(True)
         mask_2 = df['bool'].shift(1).eq(True)
         mask_3 = df['bool'].shift(-1).eq(True)
-        mask_4 = df['bool'].shift(2).eq(True)
-        mask_5 = df['bool'].shift(-2).eq(True)
         submask = mask_1.mask(mask_2, True)
         submask = submask.mask(mask_3, True)
-        submask = submask.mask(mask_4, True)
-        submask = submask.mask(mask_5, True)
         df = df[submask]
         mask_1 = df['bool'].eq(False)
         mask_2 = df['bool'].shift(1).eq(False)
@@ -171,8 +174,6 @@ class NewWriter:
             writer = csv.writer(f)
             stream = False
             for row in df.itertuples():
-                if row.ncurr == 0 or row.nvolt == 0:
-                    continue
                 b = row.Index
                 bool = row.bool
                 if bool and not stream:

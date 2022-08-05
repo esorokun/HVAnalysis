@@ -23,8 +23,13 @@ def main(args):
     # my_plotter.plot_scatter('avgcurr', 'avgvolt')
 
     #my_new_writer.hv_filter_data_in_csv()
-    #filtered_data = Filter(my_writer)
-    #filtered_data.build_color_data_plot()
+    #filtered_data = Filter(my_new_writer)
+    #df_1 = filtered_data.colored_type_of_data()
+    #filtered_data.write_in_csv(df_1, 'data/output/pandas_og.csv')
+
+    #new_filtered_data = Filter(my_new_writer)
+    #df_2 = new_filtered_data.colored_type_of_data()
+    #new_filtered_data.write_in_csv(df_2,'data/output/pandas_hv.csv')
 
     #grid_start = '2018-09-19 03:00:16'
     #grid_end = '2018-11-12 13:50:03'

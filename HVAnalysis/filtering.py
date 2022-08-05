@@ -49,6 +49,11 @@ class Filter:
         df_filter.loc[empty, ['color']] = 'blue'
 
         return df_filter
+
+    def write_in_csv(self, df, file_name):
+        df.to_csv(file_name, header=True,
+                  sep="\t", mode='w', float_format='%.1f')
+
     '''
     
     def unstable_real_type_of_data(self):
