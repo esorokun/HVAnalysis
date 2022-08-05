@@ -142,13 +142,26 @@ class NewWriter:
             print(3)
             df_unstable = self.create_unstable_df_for_b1(df)
 
-        #logging.info(f'Unstable.data_frame =\n{df_unstable}')
-        df_unstable.to_csv('data/output/pandas.csv', header=True,
-                   sep="\t", mode='w', float_format='%.0f')
         return df_unstable
 
     def new_df_unstable_writer(self):
         df = self.new_df_unstable_periods()
+        mask_1 = df['bool'].eq(True)
+        mask_2 = df['bool'].shift(1).eq(True)
+        mask_3 = df['bool'].shift(-1).eq(True)
+        mask_1 = mask_1.mask(mask_2, True)
+        mask_1 = mask_1.mask(mask_3, True)
+        df = df[mask_1]
+        mask_1 = df['bool'].eq(False)
+        mask_2 = df['bool'].shift(1).eq(False)
+        mask_3 = df['bool'].shift(-1).eq(False)
+        mask_1 = mask_1.mask(mask_2, True)
+        mask_1 = mask_1.mask(mask_3, True)
+        df = df[mask_1]
+
+        df.to_csv('data/output/pandas.csv', header=True,
+                           sep="\t", mode='w', float_format='%.1f')
+        logging.info(f'HeinzWrapper.data_frame =\n{df}')
         with open(self.file_name, mode='w') as f:
             writer = csv.writer(f)
             stream = False
