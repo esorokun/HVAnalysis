@@ -11,6 +11,7 @@ class Writer:
     def write_streamer_periods(self):
         df = self.df_wrapper.data_frame
 
+        start_time = pytime.time()
         b1 = datetime(2018, 10, 5, 0, 0, 0)    #2018-10-05 00:00:00
         b2 = datetime(2018, 10, 17, 12, 0, 0)  #2018-10-17 12:00:00
         streamerON = False
@@ -66,3 +67,5 @@ class Writer:
                     cutONperiod.append([startStream - timedelta(0, 2), b + timedelta(0, 2)])
                     writer.writerow([int(pytime.mktime((startStream - timedelta(0, 2)).timetuple())),
                                      int(pytime.mktime((b + timedelta(0, 2)).timetuple()))])
+
+        print("--- %s seconds ---" % (pytime.time() - start_time))

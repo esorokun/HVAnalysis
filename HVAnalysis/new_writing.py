@@ -146,18 +146,23 @@ class NewWriter:
 
     def new_df_unstable_writer(self):
         df = self.new_df_unstable_periods()
+        start_time = pytime.time()
         mask_1 = df['bool'].eq(True)
         mask_2 = df['bool'].shift(1).eq(True)
         mask_3 = df['bool'].shift(-1).eq(True)
-        mask_1 = mask_1.mask(mask_2, True)
-        mask_1 = mask_1.mask(mask_3, True)
-        df = df[mask_1]
+        mask_4 = df['bool'].shift(2).eq(True)
+        mask_5 = df['bool'].shift(-2).eq(True)
+        submask = mask_1.mask(mask_2, True)
+        submask = submask.mask(mask_3, True)
+        submask = submask.mask(mask_4, True)
+        submask = submask.mask(mask_5, True)
+        df = df[submask]
         mask_1 = df['bool'].eq(False)
         mask_2 = df['bool'].shift(1).eq(False)
         mask_3 = df['bool'].shift(-1).eq(False)
-        mask_1 = mask_1.mask(mask_2, True)
-        mask_1 = mask_1.mask(mask_3, True)
-        df = df[mask_1]
+        submask = mask_1.mask(mask_2, True)
+        submask = submask.mask(mask_3, True)
+        df = df[submask]
 
         df.to_csv('data/output/pandas.csv', header=True,
                            sep="\t", mode='w', float_format='%.1f')
@@ -177,6 +182,8 @@ class NewWriter:
                     stream = False
                     writer.writerow([int(pytime.mktime((start - timedelta(0, 2)).timetuple())),
                                      int(pytime.mktime((b + timedelta(0, 2)).timetuple()))])
+
+        print("--- %s seconds ---" % (pytime.time() - start_time))
 
 
 
