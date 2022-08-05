@@ -26,7 +26,7 @@ class NewWriter:
                 unstable_periods[-1] = unstable_periods[-1].replace(']', '')
 
         with open('data/output/transformed_periods.csv', 'w') as output_file:
-            self.file_name = 'data/output/transformed_periods.csv'
+            #self.file_name = 'data/output/transformed_periods.csv'
             for line in unstable_periods:
                 line = line.replace(', ', ',')
                 output_file.write(f'{line}\n')
@@ -85,16 +85,13 @@ class NewWriter:
     def create_unstable_df_for_b1(self, df):
 
         model_1 = df['avgvolt'] < 120000.
-        df['bool'] = model_1
-
         model_2 = 1452 > df['resistance']
         model_1 = model_1.mask(model_2, True)
 
         model_3 = df['resistance'] > 1472
         model_1 = model_1.mask(model_3, True)
 
-        df['bool'] = model_1
-        return df
+        return model_1
 
     def create_unstable_df_for_b1_b2(self, df):
         b1 = datetime(2018, 10, 5, 0, 0, 0)
@@ -104,11 +101,10 @@ class NewWriter:
         model_1 = df_b1_b2['resistance'] < 1465
         model_2 = df_b1_b2['avgvolt'] < 120000.
         model_1 = model_1.mask(model_2, True)
-        df_b1_b2['bool'] = model_1
 
         df_res_1 = self.create_unstable_df_for_b1(df_b1)
 
-        result = pd.concat([df_res_1, df_b1_b2]).sort_index()
+        result = pd.concat([df_res_1, model_1])
         return result
 
     def create_unstable_df_for_b2(self, df):
@@ -121,8 +117,8 @@ class NewWriter:
         model_1 = model_1.mask(model_2, True)
 
         df_res_1 = self.create_unstable_df_for_b1_b2(df_b1_b2)
-        df_b2['bool'] = model_1
-        result = pd.concat([df_res_1, df_b2]).sort_index()
+
+        result = pd.concat([df_res_1, model_1])
         return result
 
     def new_df_unstable_periods(self):
@@ -137,18 +133,17 @@ class NewWriter:
         df = df[df_clear_2]
         logging.info(f'HeinzWrapper.data_frame =\n{df}')
         last_index = df.last_valid_index()
-        df_unstable = []
         if last_index >= b2:
             print(1)
-            df_unstable = self.create_unstable_df_for_b2(df)
+            df['bool'] = self.create_unstable_df_for_b2(df)
         elif last_index > b1:
             print(2)
-            df_unstable = self.create_unstable_df_for_b1_b2(df)
+            df['bool'] = self.create_unstable_df_for_b1_b2(df)
         elif last_index <= b1:
             print(3)
-            df_unstable = self.create_unstable_df_for_b1(df)
-        logging.info(f'HeinzWrapper.data_frame =\n{df_unstable}')
-        return df_unstable
+            df['bool'] = self.create_unstable_df_for_b1(df)
+
+        return df
 
     def new_df_unstable_writer(self):
         df = self.new_df_unstable_periods()
@@ -160,6 +155,7 @@ class NewWriter:
         submask = mask_1.mask(mask_2, True)
         submask = submask.mask(mask_3, True)
         df = df[submask]
+
         mask_1 = df['bool'].eq(False)
         mask_2 = df['bool'].shift(1).eq(False)
         mask_3 = df['bool'].shift(-1).eq(False)
@@ -167,6 +163,8 @@ class NewWriter:
         submask = submask.mask(mask_3, True)
         df = df[submask]
 
+        lastvi = df.last_valid_index()
+        df.at[lastvi, 'bool'] = True
         df.to_csv('data/output/pandas.csv', header=True,
                            sep="\t", mode='w', float_format='%.1f')
         logging.info(f'HeinzWrapper.data_frame =\n{df}')

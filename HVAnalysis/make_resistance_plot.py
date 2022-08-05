@@ -15,7 +15,7 @@ def main(args):
     comb_wrapper = ResistanceWrapper(curr_wrapper, volt_wrapper)
 
     my_writer = Writer(comb_wrapper, 'data/output/unstable_periods.csv')
-    my_writer.write_streamer_periods()
+    #my_writer.write_streamer_periods()
     my_new_writer = NewWriter(comb_wrapper, 'data/output/new_unstable_periods.csv')
     my_new_writer.new_df_unstable_writer()
 
