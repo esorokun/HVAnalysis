@@ -50,26 +50,13 @@ class Filter:
 
         return df_filter
 
-    def write_in_csv(self, df, file_name):
-        df.to_csv(file_name, header=True,
-                  sep="\t", mode='w', float_format='%.1f')
+    def bool_in_color_df(self, df):
+        mask = df['bool']
+        df['color'] = 'blue'
+        df.loc[mask, ['color']] = 'red'
+        return df
 
-    '''
-    
-    def unstable_real_type_of_data(self):
-        df = self.df_wrapper.data_frame
-        unstable_df = self.date_type_of_data()
-        unstable_df['color'] = 'red'
-        unstable_df.set_index('timestamp', inplace=True)
-        df_filter = pd.merge(df, unstable_df, on='timestamp', how='left')
-        empty = df_filter['color'] != 'red'
-        df_filter.loc[empty, ['color']] = 'blue'
-        logging.info(f'Colored.data_frame =\n{df_filter}')
-        return df_filter
-
-    '''
-    def build_color_data_plot(self):
-        df = self.colored_type_of_data()
+    def build_color_data_plot(self, df):
         color_list = df['color'].values
 
         plt.scatter(y=df['avgvolt'], x=df['avgcurr'], alpha=0.05, s=0.1, c=color_list,)

@@ -14,23 +14,11 @@ def main(args):
     volt_wrapper = HeinzWrapper(conf.volt_file_names, 'volt')
     comb_wrapper = ResistanceWrapper(curr_wrapper, volt_wrapper)
 
-    #my_writer = Writer(comb_wrapper, 'data/output/unstable_periods.csv')
-    #my_writer.write_streamer_periods()
     my_new_writer = NewWriter(comb_wrapper, 'data/output/new_unstable_periods.csv')
-    my_new_writer.new_df_unstable_writer()
-    #hv_filter_data_in_csv()
-
-    # my_plotter = Plotter(comb_wrapper)
-    # my_plotter.plot_scatter('avgcurr', 'avgvolt')
-
-    #my_new_writer.hv_filter_data_in_csv()
-    #filtered_data = Filter(my_new_writer)
-    #df_1 = filtered_data.colored_type_of_data()
-    #filtered_data.write_in_csv(df_1, 'data/output/pandas_og.csv')
-
-    #new_filtered_data = Filter(my_new_writer)
-    #df_2 = new_filtered_data.colored_type_of_data()
-    #new_filtered_data.write_in_csv(df_2,'data/output/pandas_hv.csv')
+    filtered_data = Filter(my_new_writer)
+    df_bool = my_new_writer.new_df_unstable_periods()
+    df_color = filtered_data.bool_in_color_df(df_bool)
+    filtered_data.build_color_data_plot(df_color)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
