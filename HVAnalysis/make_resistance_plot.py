@@ -3,7 +3,7 @@ import conf
 from dfwrapper import HeinzWrapper, ResistanceWrapper
 from plotting import Plotter
 from original_writing import Writer
-from new_writing import NewWriter
+from new_writing import NewWriter , hv_filter_data_in_csv
 from filtering import Filter
 import pandas as pd
 from datetime import datetime
@@ -14,10 +14,11 @@ def main(args):
     volt_wrapper = HeinzWrapper(conf.volt_file_names, 'volt')
     comb_wrapper = ResistanceWrapper(curr_wrapper, volt_wrapper)
 
-    my_writer = Writer(comb_wrapper, 'data/output/unstable_periods.csv')
-    my_writer.write_streamer_periods()
+    #my_writer = Writer(comb_wrapper, 'data/output/unstable_periods.csv')
+    #my_writer.write_streamer_periods()
     my_new_writer = NewWriter(comb_wrapper, 'data/output/new_unstable_periods.csv')
     my_new_writer.new_df_unstable_writer()
+    #hv_filter_data_in_csv()
 
     # my_plotter = Plotter(comb_wrapper)
     # my_plotter.plot_scatter('avgcurr', 'avgvolt')

@@ -134,8 +134,7 @@ class LinosWriter:
                 row = [to_time_stamp(dt) for dt in u_p]
                 writer.writerow(row)
 
-
 def to_time_stamp(dt):
     if dt < datetime(2018, 10, 28):
-        return int(datetime.timestamp(dt + timedelta(hours=2)))
-    return int(datetime.timestamp(dt + timedelta(hours=1)))
+        return int(datetime.timestamp(dt + timedelta(hours=3)))
+    return int(datetime.timestamp(dt + timedelta(hours=2)))
