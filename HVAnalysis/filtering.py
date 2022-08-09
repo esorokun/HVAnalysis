@@ -56,13 +56,24 @@ class Filter:
         df.loc[mask, ['color']] = 'red'
         return df
 
-    def build_color_data_plot(self, df):
+    def build_color_scatter_plot(self, df):
         color_list = df['color'].values
 
         plt.scatter(y=df['avgvolt'], x=df['avgcurr'], alpha=0.05, s=0.1, c=color_list,)
         #plt.xlim(500, 3000)
         #plt.ylim(0, 200)
-        plt.xlabel('resistance')
-        plt.ylabel('avgcurr')
+        plt.xlabel('avgcurr')
+        plt.ylabel('avgvolt')
 
+        plt.show()
+
+    def build_color_histogram_plot(self, df):
+        df_red = df[df['bool']]
+        df_blue_mask = df['bool'] == False
+        df_blue = df[df_blue_mask]
+        range = [-2000, 3000]
+        plt.hist(df_blue['resistance'], bins=60, range=range, density=True, histtype='bar', stacked=True, color='b')
+        plt.hist(df_red['resistance'], bins=60, range=range, density=True, histtype='bar', stacked=True, color='r')
+        plt.xlabel("resistance")
+        plt.ylabel("Num")
         plt.show()

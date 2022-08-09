@@ -18,7 +18,7 @@ def main(args):
     filtered_data = Filter(my_new_writer)
     df_bool = my_new_writer.new_df_unstable_periods()
     df_color = filtered_data.bool_in_color_df(df_bool)
-    filtered_data.build_color_data_plot(df_color)
+    filtered_data.build_color_histogram_plot(df_color)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
