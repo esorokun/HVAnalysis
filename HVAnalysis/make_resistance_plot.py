@@ -10,13 +10,13 @@ def main(args):
     volt_wrapper = HeinzWrapper(conf.volt_file_names, 'volt')
     comb_wrapper = ResistanceWrapper(curr_wrapper, volt_wrapper)
 
-    '''writer = ErnestsWriter(comb_wrapper, f'{args.outputfolder}/ernests_unstable_periods.csv')
+    writer = ErnestsWriter(comb_wrapper, f'{args.outputfolder}/ernests_unstable_periods.csv')
     periods_df = writer.new_df_unstable_periods()
     plot_data = ColorPlots(periods_df)
     colored_data = plot_data.bool_in_color_df()
-    plot_data.build_color_scatter_plot(colored_data)'''
+    beam_on_colored_data = plot_data.beam_on_filter(colored_data)
+    plot_data.build_color_scatter_plot(beam_on_colored_data)
 
-    beam_on_df()
 
 
 if __name__ == '__main__':

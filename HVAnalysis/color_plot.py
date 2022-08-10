@@ -57,7 +57,8 @@ def beam_on_df():
             beam_on_time.append(j)
             j += timedelta(seconds=1)
         i += 1
-    return beam_on_time
+    df = pd.DataFrame({'timestamp': beam_on_time})
+    return df
 
 class ColorPlots:
     def __init__(self, df_match):
@@ -88,6 +89,11 @@ class ColorPlots:
         df_filter.loc[empty, ['color']] = 'blue'
 
         return df_filter
+
+    def beam_on_filter(self, df):
+        df_filter = beam_on_df()
+        result = df.merge(df_filter, on=['timestamp'])
+        return result
 
     def bool_in_color_df(self):
         df = self.df_match
