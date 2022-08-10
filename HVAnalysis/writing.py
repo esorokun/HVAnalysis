@@ -13,11 +13,14 @@ class Writer:
     def get_unstable_periods(self):
         raise NotImplemented
 
-    def write_unstable_periods(self, unstable_periods):
+    def write_unstable_periods(self, unstable_periods, safety_seconds=0):
+        safety_interval = timedelta(seconds=safety_seconds)
         with open(self.file_name, mode='w') as f:
             writer = csv.writer(f, delimiter=',')
             for u_p in unstable_periods:
-                row = [to_time_stamp(dt) for dt in u_p]
+                begin = u_p[0] - safety_interval
+                end = u_p[1] + safety_interval
+                row = [begin, end]
                 writer.writerow(row)
 
 
@@ -52,7 +55,6 @@ class LinosWriter(Writer):
             if b <= b1 and (r > 1452 and r < 1472 and vps > 120000.) and streamer_on:
                 streamer_on = False
                 unstable_periods.append([start_stream, b])
-                #unstable_periods.append([start_stream - timedelta(0, 2), b + timedelta(0, 2)])
 
             if b1 < b < b2 and (r < 1465 or vps < 120000.) and not streamer_on:
                 streamer_on = True
@@ -61,7 +63,6 @@ class LinosWriter(Writer):
             if b1 < b < b2 and (r > 1465 and vps > 120000.) and streamer_on:
                 streamer_on = False
                 unstable_periods.append([start_stream, b])
-                #unstable_periods.append([start_stream - timedelta(0, 2), b + timedelta(0, 2)])
 
             if b >= b2 and (r < 1465 or vps < 180000.) and not streamer_on:
                 streamer_on = True
@@ -70,12 +71,10 @@ class LinosWriter(Writer):
             if b >= b2 and (r > 1465 and vps > 180000.) and streamer_on:
                 streamer_on = False
                 unstable_periods.append([start_stream, b])
-                #unstable_periods.append([start_stream - timedelta(0, 2), b + timedelta(0, 2)])
 
         # write the last unstable period
         if streamer_on:
             end_time = datetime(b.year, b.month, b.day+1, 1, 0, 59)
-            #unstable_periods.append([start_stream - timedelta(0, 2), end_time + timedelta(0, 2)])
             unstable_periods.append([start_stream, end_time])
 
         return unstable_periods
