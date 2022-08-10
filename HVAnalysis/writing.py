@@ -82,6 +82,9 @@ class LinosWriter(Writer):
 
 class ErnestsWriter(Writer):
 
+    #Need to create new class for bool operations
+    #Separate Create DF and Cut_avgvolt DF for different
+
     def create_unstable_df_for_b1(self, df):
         model_1 = df['avgvolt'] < 120000.
         model_2 = 1452 > df['resistance']
@@ -115,10 +118,10 @@ class ErnestsWriter(Writer):
     def cut_avgvolt_unstable_df_for_b1(self, df):
         model_1 = df['avgvolt'] > 120000.
         df = df[model_1]
-        model_2 = 1452 > df['resistance']
-        model_3 = df['resistance'] > 1472
-        model_3 = model_2.mask(model_3, True)
-        df['bool'] = model_3
+        df.loc[1452 > df['resistance'], 'bool'] = True
+        df.loc[1452 <= df['resistance'], 'bool'] = False
+        df.loc[1472 < df['resistance'], 'bool'] = True
+        print(df)
         return df
 
     def cut_avgvolt_unstable_df_for_b1_b2(self, df):
@@ -127,8 +130,8 @@ class ErnestsWriter(Writer):
         df_b1, df_b1_b2 = df[map], df[~map]
         model_1 = df_b1_b2['avgvolt'] > 120000.
         df_b1_b2 = df_b1_b2[model_1]
-        model_2 = df_b1_b2['resistance'] < 1465
-        df_b1_b2['bool'] = model_2
+        df_b1_b2.loc[df_b1_b2['resistance'] < 1465, 'bool'] = True
+        df_b1_b2.loc[df_b1_b2['resistance'] >= 1465, 'bool'] = False
         df_res_1 = self.cut_avgvolt_unstable_df_for_b1(df_b1)
         result = pd.concat([df_res_1, df_b1_b2])
         return result
@@ -139,8 +142,8 @@ class ErnestsWriter(Writer):
         df_b1_b2, df_b2 = df[map], df[~map]
         model_1 = df_b2['avgvolt'] > 180000.
         df_b2 = df_b2[model_1]
-        model_2 = df_b2['resistance'] < 1465
-        df_b2['bool'] = model_2
+        df_b2.loc[df_b2['resistance'] < 1465, 'bool'] = True
+        df_b2.loc[df_b2['resistance'] >= 1465, 'bool'] = False
         df_res_1 = self.cut_avgvolt_unstable_df_for_b1_b2(df_b1_b2)
         result = pd.concat([df_res_1, df_b2])
         return result
