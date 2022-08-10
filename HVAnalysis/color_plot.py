@@ -1,27 +1,63 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 import pandas as pd
 import logging
 from functools import cached_property
 import matplotlib.pyplot as plt
 
 
-def beamMom_period_writer():
+def beamMom_period_df():
     file_name = 'data/output/beamMom.txt'
     unstable_periods = []
     with open(file_name, 'r') as input_file:
         for line in input_file:
             line = line.replace('\t', '')
             line = line.replace('\n', '')
-            while line.find(' ') != -1:
-                line = line.replace(' ', '')
+            while line.find('  ') != -1:
+                line = line.replace('  ', ' ')
             unstable_periods.append(line)
     unstable_periods.pop(0)
-    print(unstable_periods)
     with open('data/output/beamMom_df.txt', 'w') as output_file:
         for line in unstable_periods:
-            #line = line.replace(', ', ',')
             output_file.write(f'{line}\n')
+    unstable_periods_time = []
+    unstable_periods_value = []
+    for line in unstable_periods:
+        unstable_periods_time.append(datetime.strptime(line.split(',')[0], "%Y-%m-%d %H:%M:%S"))
+        if float(line.split(',')[1]) != 0:
+            bool = True
+        else:
+            bool = False
+        unstable_periods_value.append(bool)
+    model = {'timestamp': unstable_periods_time, 'stable': unstable_periods_value}
+    df = pd.DataFrame(model)
+    return df
 
+def beam_on_df():
+    df = beamMom_period_df()
+    stream = False
+    stable_period_start = []
+    stable_period_end = []
+    for row in df.itertuples():
+        b = row.Index
+        time = row.timestamp
+        bool = row.stable
+        if bool and not stream:
+            stream = True
+            start = time
+        if not bool and stream:
+            stream = False
+            stable_period_start.append(start)
+            stable_period_end.append(time)
+    beam_on_time =[]
+    length = len(stable_period_start)
+    i = 0
+    while i < length:
+        j = stable_period_start[i]
+        while j < stable_period_end[i]:
+            beam_on_time.append(j)
+            j += timedelta(seconds=1)
+        i += 1
+    return beam_on_time
 
 class ColorPlots:
     def __init__(self, df_match):

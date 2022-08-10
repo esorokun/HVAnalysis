@@ -2,7 +2,7 @@ import argparse
 import conf
 from dfwrapper import HeinzWrapper, ResistanceWrapper
 from writing import LinosWriter, ErnestsWriter
-from color_plot import ColorPlots, hv_filter_data_in_csv
+from color_plot import ColorPlots, beam_on_df
 
 def main(args):
     conf.configure_from_args(args)
@@ -16,7 +16,8 @@ def main(args):
     colored_data = plot_data.bool_in_color_df()
     plot_data.build_color_scatter_plot(colored_data)'''
 
-    hv_filter_data_in_csv()
+    beam_on_df()
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
