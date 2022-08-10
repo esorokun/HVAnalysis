@@ -72,8 +72,8 @@ class Filter:
         df_blue_mask = df['bool'] == False
         df_blue = df[df_blue_mask]
         range = [-2000, 3000]
-        plt.hist(df_blue['resistance'], bins=60, range=range, density=True, histtype='bar', stacked=True, color='b')
-        plt.hist(df_red['resistance'], bins=60, range=range, density=True, histtype='bar', stacked=True, color='r')
+        plt.hist(df_blue['resistance'], bins=200, range=range, histtype='barstacked', stacked=True, color='b')
+        plt.hist(df_red['resistance'], bins=200, range=range, histtype='barstacked', stacked=True, color='r')
         plt.xlabel("resistance")
         plt.ylabel("Num")
         plt.show()
