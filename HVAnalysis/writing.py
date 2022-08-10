@@ -20,7 +20,7 @@ class Writer:
             for u_p in unstable_periods:
                 begin = u_p[0] - safety_interval
                 end = u_p[1] + safety_interval
-                row = [begin, end]
+                row = [to_time_stamp(begin), to_time_stamp(end)]
                 writer.writerow(row)
 
 
@@ -124,33 +124,18 @@ class ErnestsWriter(Writer):
             df['bool'] = self.create_unstable_df_for_b1_b2(df)
         elif last_index <= b1:
             df['bool'] = self.create_unstable_df_for_b1(df)
-        return df
-
-    def short_unstable_df(self):
-        df = self.new_df_unstable_periods()
-        first_date = datetime(2018, 9, 19, 0, 0, 0)
-        start_date = df.index > first_date
-        df = df[start_date]
-        mask_1 = df['bool'].eq(True)
-        mask_2 = df['bool'].shift(1).eq(True)
-        mask_3 = df['bool'].shift(-1).eq(True)
-        submask = mask_1.mask(mask_2, True)
-        submask = submask.mask(mask_3, True)
-        df = df[submask]
-        mask_1 = df['bool'].eq(False)
-        mask_2 = df['bool'].shift(1).eq(False)
-        mask_3 = df['bool'].shift(-1).eq(False)
-        submask = mask_1.mask(mask_2, True)
-        submask = submask.mask(mask_3, True)
-        df = df[submask]
+        df_clear_1 = df['ncurr'] != 0
+        df_clear_1[0] = True
+        df_clear_1[df_clear_1.last_valid_index()] = True
+        df = df[df_clear_1]
+        df_clear_2 = df['nvolt'] != 0
+        df_clear_2[0] = True
+        df_clear_2[df_clear_2.last_valid_index()] = True
+        df = df[df_clear_2]
         return df
 
     def get_unstable_periods(self):
         df = self.new_df_unstable_periods()
-        df_clear_1 = df['ncurr'] != 0
-        df = df[df_clear_1]
-        df_clear_2 = df['nvolt'] != 0
-        df = df[df_clear_2]
         logging.info(f'get_unstable_periods =\n{df}')
         stream = True
         start = datetime(2018, 9, 19, 0, 0, 18)
