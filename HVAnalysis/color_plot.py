@@ -116,8 +116,9 @@ class ColorPlots:
         df_blue_mask = df['bool'] == False
         df_blue = df[df_blue_mask]
         range = [-2000, 3000]
-        plt.hist(df_blue['resistance'], bins=200, range=range, histtype='barstacked', stacked=True, color='b')
-        plt.hist(df_red['resistance'], bins=200, range=range, histtype='barstacked', stacked=True, color='r')
-        plt.xlabel("resistance")
+        name = 'resistance'
+        plt.hist(df_blue[name], bins=200, range=range, histtype='barstacked', stacked=True, color='b')
+        plt.hist(df_red[name], bins=200, range=range, histtype='barstacked', stacked=True, color='r')
+        plt.xlabel(name)
         plt.ylabel("Num")
         plt.show()
