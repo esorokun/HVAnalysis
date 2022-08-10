@@ -11,9 +11,9 @@ def main(args):
     volt_wrapper = HeinzWrapper(conf.volt_file_names, 'volt')
     comb_wrapper = ResistanceWrapper(curr_wrapper, volt_wrapper)
 
-    linos_writer = LinosWriter(comb_wrapper, f'{args.outputfolder}/linos_unstable_periods.csv')
+    '''linos_writer = LinosWriter(comb_wrapper, f'{args.outputfolder}/linos_unstable_periods.csv')
     linos_periods = linos_writer.get_unstable_periods()
-    linos_writer.write_unstable_periods(linos_periods)
+    linos_writer.write_unstable_periods(linos_periods)'''
 
     ernests_writer = ErnestsWriter(comb_wrapper, f'{args.outputfolder}/ernests_unstable_periods.csv')
     ernests_periods = ernests_writer.get_unstable_periods()

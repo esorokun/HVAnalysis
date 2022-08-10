@@ -131,10 +131,6 @@ class ErnestsWriter(Writer):
         first_date = datetime(2018, 9, 19, 0, 0, 0)
         start_date = df.index > first_date
         df = df[start_date]
-        df_clear_1 = df['ncurr'] != 0
-        df = df[df_clear_1]
-        df_clear_2 = df['nvolt'] != 0
-        df = df[df_clear_2]
         mask_1 = df['bool'].eq(True)
         mask_2 = df['bool'].shift(1).eq(True)
         mask_3 = df['bool'].shift(-1).eq(True)
@@ -150,26 +146,24 @@ class ErnestsWriter(Writer):
         return df
 
     def get_unstable_periods(self):
-        df = self.short_unstable_df()
-        start_time = pytime.time()
-        first_date = datetime(2018, 9, 19, 0, 0, 0)
+        df = self.new_df_unstable_periods()
+        df_clear_1 = df['ncurr'] != 0
+        df = df[df_clear_1]
+        df_clear_2 = df['nvolt'] != 0
+        df = df[df_clear_2]
+        logging.info(f'get_unstable_periods =\n{df}')
         stream = True
         start = datetime(2018, 9, 19, 0, 0, 18)
         unstable_periods = []
-        logging.info(f'HeinzWrapper.data_frame =\n{df}')
-
         for row in df.itertuples():
             b = row.Index
             bool = row.bool
             if bool and not stream:
                 stream = True
                 start = b
-            elif not bool and stream:
+            if not bool and stream:
                 stream = False
-                unstable_periods.append([start - timedelta(0, 2), b + timedelta(0, 2)])
-
-        unstable_periods.pop()
-        unstable_periods.append([start - timedelta(0, 2), b + timedelta(0, 4, hours=1, minutes=1)])
+                unstable_periods.append([start, b])
         return unstable_periods
 
 
