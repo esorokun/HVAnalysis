@@ -5,41 +5,44 @@ from functools import cached_property
 import matplotlib.pyplot as plt
 
 
-class Filter:
-    def __init__(self, df_writer):
-        self.df_writer = df_writer
-        self.file_name = df_writer.file_name
-        self.df_wrapper = df_writer.df_wrapper
+def beamMom_period_writer():
+    file_name = 'data/output/beamMom.txt'
+    unstable_periods = []
+    with open(file_name, 'r') as input_file:
+        for line in input_file:
+            line = line.replace('\t', '')
+            line = line.replace('\n', '')
+            while line.find(' ') != -1:
+                line = line.replace(' ', '')
+            unstable_periods.append(line)
+    unstable_periods.pop(0)
+    print(unstable_periods)
+    with open('data/output/beamMom_df.txt', 'w') as output_file:
+        for line in unstable_periods:
+            #line = line.replace(', ', ',')
+            output_file.write(f'{line}\n')
 
-    def _get_data_frame_from_file(self):
-        self.df_writer.write_streamer_periods()
-        df = pd.read_csv(self.df_writer.file_name, sep=',', usecols=[0, 1], names=['start_time', 'end_time'])
-        return df
 
-    @cached_property
-    def data_frame(self):
-        return pd.concat([self._get_data_frame_from_file()], axis=0)
+class ColorPlots:
+    def __init__(self, df_match):
+        self.df_match = df_match
 
-    def date_type_of_data(self):
+    def date_type_of_data(self, unstable_period):
         full_date_time = []
-        df = self.data_frame
         i = 0
-
-        while i < df.index.size:
-            time = df.at[i, 'start_time']
-            while df.at[i, 'start_time'] <= time <= df.at[i, 'end_time']:
+        while i < unstable_period.index.size:
+            time = unstable_period.at[i, 'start_time']
+            while unstable_period.at[i, 'start_time'] <= time <= unstable_period.at[i, 'end_time']:
                 full_date_time.append([datetime.fromtimestamp(time)])
                 time += 1
             i += 1
         full_df = pd.DataFrame(full_date_time).set_axis(['timestamp'], axis=1)
         full_df = full_df.drop_duplicates()
-        full_df.to_csv('data/output/pandas_old.csv', header=True,
-                           sep="\t", mode='w', float_format='%.0f')
         return full_df
 
-    def colored_type_of_data(self):
-        df = self.df_wrapper.data_frame
-        unstable_df = self.date_type_of_data()
+    def colored_type_of_data(self, unstable_periods):
+        df = self.df_match
+        unstable_df = self.date_type_of_data(unstable_periods)
 
         unstable_df['color'] = 'red'
         unstable_df.set_index('timestamp', inplace=True)
@@ -50,7 +53,8 @@ class Filter:
 
         return df_filter
 
-    def bool_in_color_df(self, df):
+    def bool_in_color_df(self):
+        df = self.df_match
         mask = df['bool']
         df['color'] = 'blue'
         df.loc[mask, ['color']] = 'red'
@@ -58,13 +62,11 @@ class Filter:
 
     def build_color_scatter_plot(self, df):
         color_list = df['color'].values
-
         plt.scatter(y=df['avgvolt'], x=df['avgcurr'], alpha=0.05, s=0.1, c=color_list,)
         #plt.xlim(500, 3000)
         #plt.ylim(0, 200)
         plt.xlabel('avgcurr')
         plt.ylabel('avgvolt')
-
         plt.show()
 
     def build_color_histogram_plot(self, df):
