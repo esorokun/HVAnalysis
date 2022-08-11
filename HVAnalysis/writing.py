@@ -174,11 +174,14 @@ class ErnestsWriter(Writer):
         logging.info(f'HeinzWrapper.data_frame =\n{df}')
         last_index = df.last_valid_index()
         if last_index >= b2:
-            df['bool'] = self.create_unstable_df_for_b2(df)
+            df['bool'] = self.cut_avgvolt_unstable_df_for_b2(df)
         elif last_index > b1:
-            df['bool'] = self.create_unstable_df_for_b1_b2(df)
+            df['bool'] = self.cut_avgvolt_unstable_df_for_b1_b2(df)
+            print(df)
         elif last_index <= b1:
-            df['bool'] = self.create_unstable_df_for_b1(df)
+            df['bool'] = self.cut_avgvolt_unstable_df_for_b1(df)
+        df = df.dropna(subset=['bool'])
+        print(df)
         df_clear_1 = df['ncurr'] != 0
         df_clear_1[0] = True
         df_clear_1[df_clear_1.last_valid_index()] = True
