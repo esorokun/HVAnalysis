@@ -14,6 +14,7 @@ def main(args):
     periods_df = writer.cut_avgvolt_df_unstable_periods()
     plot_data = ColorPlots(periods_df)
     colored_data = plot_data.bool_in_color_df()
+    #beam_on_colored_data = plot_data.beam_on_filter(colored_data)
     plot_data.build_color_histogram_plot(colored_data)
 
 

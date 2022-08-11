@@ -118,11 +118,10 @@ class ErnestsWriter(Writer):
     def cut_avgvolt_unstable_df_for_b1(self, df):
         model_1 = df['avgvolt'] > 120000.
         df = df[model_1]
-        df.loc[1452 > df['resistance'], 'bool'] = True
-        df.loc[1452 <= df['resistance'], 'bool'] = False
-        df.loc[1472 < df['resistance'], 'bool'] = True
-        print(df)
-        return df
+        mask_1 = 1452 > df['resistance']
+        mask_2 = 1472 < df['resistance']
+        model_1 = mask_1.mask(mask_2, True)
+        return model_1
 
     def cut_avgvolt_unstable_df_for_b1_b2(self, df):
         b1 = datetime(2018, 10, 5, 0, 0, 0)
@@ -130,10 +129,9 @@ class ErnestsWriter(Writer):
         df_b1, df_b1_b2 = df[map], df[~map]
         model_1 = df_b1_b2['avgvolt'] > 120000.
         df_b1_b2 = df_b1_b2[model_1]
-        df_b1_b2.loc[df_b1_b2['resistance'] < 1465, 'bool'] = True
-        df_b1_b2.loc[df_b1_b2['resistance'] >= 1465, 'bool'] = False
+        mask = df_b1_b2['resistance'] < 1465
         df_res_1 = self.cut_avgvolt_unstable_df_for_b1(df_b1)
-        result = pd.concat([df_res_1, df_b1_b2])
+        result = pd.concat([df_res_1, mask])
         return result
 
     def cut_avgvolt_unstable_df_for_b2(self, df):
@@ -142,10 +140,9 @@ class ErnestsWriter(Writer):
         df_b1_b2, df_b2 = df[map], df[~map]
         model_1 = df_b2['avgvolt'] > 180000.
         df_b2 = df_b2[model_1]
-        df_b2.loc[df_b2['resistance'] < 1465, 'bool'] = True
-        df_b2.loc[df_b2['resistance'] >= 1465, 'bool'] = False
+        mask = df_b2['resistance'] < 1465
         df_res_1 = self.cut_avgvolt_unstable_df_for_b1_b2(df_b1_b2)
-        result = pd.concat([df_res_1, df_b2])
+        result = pd.concat([df_res_1, mask])
         return result
 
     def new_df_unstable_periods(self):
@@ -177,11 +174,11 @@ class ErnestsWriter(Writer):
         logging.info(f'HeinzWrapper.data_frame =\n{df}')
         last_index = df.last_valid_index()
         if last_index >= b2:
-            df = self.cut_avgvolt_unstable_df_for_b2(df)
+            df['bool'] = self.create_unstable_df_for_b2(df)
         elif last_index > b1:
-            df = self.cut_avgvolt_unstable_df_for_b1_b2(df)
+            df['bool'] = self.create_unstable_df_for_b1_b2(df)
         elif last_index <= b1:
-            df = self.cut_avgvolt_unstable_df_for_b1(df)
+            df['bool'] = self.create_unstable_df_for_b1(df)
         df_clear_1 = df['ncurr'] != 0
         df_clear_1[0] = True
         df_clear_1[df_clear_1.last_valid_index()] = True
