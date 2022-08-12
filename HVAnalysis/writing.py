@@ -196,7 +196,7 @@ class ErnestsWriter(Writer):
         df = self.new_df_unstable_periods()
         logging.info(f'get_unstable_periods =\n{df}')
         stream = True
-        start = datetime(2018, 9, 19, 0, 0, 18)
+        start = df.index[0]
         unstable_periods = []
         for row in df.itertuples():
             b = row.Index

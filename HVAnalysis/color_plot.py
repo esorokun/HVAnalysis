@@ -102,6 +102,22 @@ class ColorPlots:
         df.loc[mask, ['color']] = 'red'
         return df
 
+    def percentage_of_unstable_data(self, unstable_periods):
+        first_time = int(round(self.df_match.index[0].timestamp()))
+        last_time = int(round(self.df_match.last_valid_index().timestamp()))
+        all_time = last_time - first_time
+        counter = 0
+        length = int(len(unstable_periods))
+        i = 0
+        for u_p in unstable_periods:
+            begin = u_p[0]
+            end = u_p[1]
+            begin = int(datetime.timestamp(begin))
+            end = int(datetime.timestamp(end))
+            counter += end - begin
+        unstable = round(100*counter/all_time, 2)
+        return unstable
+
     def build_color_scatter_plot(self, df):
         color_list = df['color'].values
         plt.scatter(y=df['avgvolt'], x=df['avgcurr'], alpha=0.05, s=0.1, c=color_list,)
