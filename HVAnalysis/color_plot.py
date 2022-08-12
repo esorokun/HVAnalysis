@@ -118,23 +118,36 @@ class ColorPlots:
         unstable = round(100*counter/all_time, 2)
         return unstable
 
-    def build_color_scatter_plot(self, df):
+    def build_color_scatter_plot(self, df, unstable_periods=None):
         color_list = df['color'].values
-        plt.scatter(y=df['avgvolt'], x=df['avgcurr'], alpha=0.05, s=0.1, c=color_list,)
+        scatter = plt.scatter(y=df['avgvolt'], x=df['avgcurr'], alpha=0.05, s=0.1, c=color_list,)
         #plt.xlim(500, 3000)
         #plt.ylim(0, 200)
         plt.xlabel('avgcurr')
         plt.ylabel('avgvolt')
+        if unstable_periods is not None:
+            unstable = self.percentage_of_unstable_data(unstable_periods)
+            stable = round(100 - unstable, 2)
+            plt.title('Stable periods    : ' + str(stable) + '%\nUnstable periods : ' + str(unstable) + '%')
         plt.show()
 
-    def build_color_histogram_plot(self, df):
+    def build_color_histogram_plot(self, df, unstable_periods=None):
         df_red = df[df['bool']]
         df_blue_mask = df['bool'] == False
         df_blue = df[df_blue_mask]
         range = [-2000, 3000]
         name = 'resistance'
-        plt.hist(df_blue[name], bins=200, range=range, histtype='barstacked', stacked=True, color='b')
-        plt.hist(df_red[name], bins=200, range=range, histtype='barstacked', stacked=True, color='r')
+        blue = plt.hist(df_blue[name], bins=200, range=range, histtype='barstacked', stacked=True, color='b')
+        red = plt.hist(df_red[name], bins=200, range=range, histtype='barstacked', stacked=True, color='r')
+        if unstable_periods is not None:
+            unstable = self.percentage_of_unstable_data(unstable_periods)
+            stable = 100 - unstable
+            plt.legend((blue, red),
+                       (stable, unstable),
+                       scatterpoints=1,
+                       loc='lower left',
+                       ncol=1,
+                       fontsize=12)
         plt.xlabel(name)
         plt.ylabel("Num")
         plt.show()

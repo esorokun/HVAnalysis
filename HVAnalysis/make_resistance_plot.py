@@ -14,11 +14,9 @@ def main(args):
     periods_df = writer.new_df_unstable_periods()
     unstable_period_list = writer.get_unstable_periods()
     plot_data = ColorPlots(periods_df)
-    unstable_perc = plot_data.percentage_of_unstable_data(unstable_period_list)
-    print(unstable_perc)
-    #colored_data = plot_data.bool_in_color_df()
+    colored_data = plot_data.bool_in_color_df()
     #beam_on_colored_data = plot_data.beam_on_filter(colored_data)
-    #plot_data.build_color_histogram_plot(colored_data)
+    plot_data.build_color_scatter_plot(colored_data, unstable_period_list)
 
 
 
