@@ -115,6 +115,28 @@ class ErnestsWriter(Writer):
         result = pd.concat([df_res_1, model_1])
         return result
 
+    def new_df_unstable_periods(self):
+        b1 = datetime(2018, 10, 5, 0, 0, 0)  # 2018-10-05 00:00:00
+        b2 = datetime(2018, 10, 17, 12, 0, 0)  # 2018-10-17 12:00:00
+        df = self.df_wrapper.data_frame
+        logging.info(f'HeinzWrapper.data_frame =\n{df}')
+        last_index = df.last_valid_index()
+        if last_index >= b2:
+            df['bool'] = self.create_unstable_df_for_b2(df)
+        elif last_index > b1:
+            df['bool'] = self.create_unstable_df_for_b1_b2(df)
+        elif last_index <= b1:
+            df['bool'] = self.create_unstable_df_for_b1(df)
+        df_clear_1 = df['ncurr'] != 0
+        df_clear_1[0] = True
+        df_clear_1[df_clear_1.last_valid_index()] = True
+        df = df[df_clear_1]
+        df_clear_2 = df['nvolt'] != 0
+        df_clear_2[0] = True
+        df_clear_2[df_clear_2.last_valid_index()] = True
+        df = df[df_clear_2]
+        return df
+
     def cut_avgvolt_unstable_df_for_b1(self, df):
         model_1 = df['avgvolt'] > 120000.
         df = df[model_1]
@@ -144,28 +166,6 @@ class ErnestsWriter(Writer):
         df_res_1 = self.cut_avgvolt_unstable_df_for_b1_b2(df_b1_b2)
         result = pd.concat([df_res_1, mask])
         return result
-
-    def new_df_unstable_periods(self):
-        b1 = datetime(2018, 10, 5, 0, 0, 0)  # 2018-10-05 00:00:00
-        b2 = datetime(2018, 10, 17, 12, 0, 0)  # 2018-10-17 12:00:00
-        df = self.df_wrapper.data_frame
-        logging.info(f'HeinzWrapper.data_frame =\n{df}')
-        last_index = df.last_valid_index()
-        if last_index >= b2:
-            df['bool'] = self.create_unstable_df_for_b2(df)
-        elif last_index > b1:
-            df['bool'] = self.create_unstable_df_for_b1_b2(df)
-        elif last_index <= b1:
-            df['bool'] = self.create_unstable_df_for_b1(df)
-        df_clear_1 = df['ncurr'] != 0
-        df_clear_1[0] = True
-        df_clear_1[df_clear_1.last_valid_index()] = True
-        df = df[df_clear_1]
-        df_clear_2 = df['nvolt'] != 0
-        df_clear_2[0] = True
-        df_clear_2[df_clear_2.last_valid_index()] = True
-        df = df[df_clear_2]
-        return df
 
     def cut_avgvolt_df_unstable_periods(self):
         b1 = datetime(2018, 10, 5, 0, 0, 0)  # 2018-10-05 00:00:00

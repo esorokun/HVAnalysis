@@ -102,52 +102,59 @@ class ColorPlots:
         df.loc[mask, ['color']] = 'red'
         return df
 
-    def percentage_of_unstable_data(self, unstable_periods):
-        first_time = int(round(self.df_match.index[0].timestamp()))
-        last_time = int(round(self.df_match.last_valid_index().timestamp()))
+    def percentage_of_unstable_data(self, df):
+        first_time = int(round(df.index[0].timestamp()))
+        last_time = int(round(df.last_valid_index().timestamp()))
         all_time = last_time - first_time
-        counter = 0
-        length = int(len(unstable_periods))
-        i = 0
-        for u_p in unstable_periods:
-            begin = u_p[0]
-            end = u_p[1]
-            begin = int(datetime.timestamp(begin))
-            end = int(datetime.timestamp(end))
-            counter += end - begin
-        unstable = round(100*counter/all_time, 2)
-        return unstable
+        mask_1 = df['bool'].eq(True)
+        mask_2 = df['bool'].shift(1).eq(True)
+        mask_3 = df['bool'].shift(-1).eq(True)
+        submask = mask_1.mask(mask_2, True)
+        submask = submask.mask(mask_3, True)
+        submask[0] = True
+        submask[submask.last_valid_index()] = True
+        df = df[submask]
+        mask_1 = df['bool'].eq(False)
+        mask_2 = df['bool'].shift(1).eq(False)
+        mask_3 = df['bool'].shift(-1).eq(False)
+        submask = mask_1.mask(mask_2, True)
+        submask = submask.mask(mask_3, True)
+        submask[0] = True
+        submask[submask.last_valid_index()] = True
+        df = df[submask]
+        print(df)
+        length = int(len(df))
+        i, red_count = 0, 0
+        while i < length - 1:
+            if df.loc[df.index[i], 'bool']:
+                if df.loc[df.index[i], 'bool'] == df.loc[df.index[i+1], 'bool']:
+                    red_count += int(datetime.timestamp(df.index[i+1])) - int(datetime.timestamp(df.index[i]))
+                else:
+                    red_count += 1
+            i += 1
+        red = round(red_count*100/all_time, 2)
+        return red
 
-    def build_color_scatter_plot(self, df, unstable_periods=None):
+    def build_color_scatter_plot(self, df):
         color_list = df['color'].values
         scatter = plt.scatter(y=df['avgvolt'], x=df['avgcurr'], alpha=0.05, s=0.1, c=color_list,)
         #plt.xlim(500, 3000)
         #plt.ylim(0, 200)
         plt.xlabel('avgcurr')
         plt.ylabel('avgvolt')
-        if unstable_periods is not None:
-            unstable = self.percentage_of_unstable_data(unstable_periods)
-            stable = round(100 - unstable, 2)
-            plt.title('Stable periods    : ' + str(stable) + '%\nUnstable periods : ' + str(unstable) + '%')
+        unstable = self. percentage_of_unstable_data(df)
+        stable = round(100 - unstable, 2)
+        plt.title('Stable periods    : ' + str(stable) + '%\nUnstable periods : ' + str(unstable) + '%')
         plt.show()
 
-    def build_color_histogram_plot(self, df, unstable_periods=None):
+    def build_color_histogram_plot(self, df):
         df_red = df[df['bool']]
         df_blue_mask = df['bool'] == False
         df_blue = df[df_blue_mask]
         range = [-2000, 3000]
         name = 'resistance'
-        blue = plt.hist(df_blue[name], bins=200, range=range, histtype='barstacked', stacked=True, color='b')
-        red = plt.hist(df_red[name], bins=200, range=range, histtype='barstacked', stacked=True, color='r')
-        if unstable_periods is not None:
-            unstable = self.percentage_of_unstable_data(unstable_periods)
-            stable = 100 - unstable
-            plt.legend((blue, red),
-                       (stable, unstable),
-                       scatterpoints=1,
-                       loc='lower left',
-                       ncol=1,
-                       fontsize=12)
+        plt.hist(df_blue[name], bins=200, range=range, histtype='barstacked', stacked=True, color='b')
+        plt.hist(df_red[name], bins=200, range=range, histtype='barstacked', stacked=True, color='r')
         plt.xlabel(name)
         plt.ylabel("Num")
         plt.show()
