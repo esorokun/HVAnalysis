@@ -24,11 +24,6 @@ class HeinzWrapper:
         logging.info(f'HeinzWrapper.data_frame =\n{df}')
         return df
 
-    def _join_wrapper(self, wrapper_1):
-        dfall = pd.merge(self.data_frame, wrapper_1.data_frame, on='timestamp')
-        logging.info(f'HeinzWrapper.data_frame =\n{dfall}')
-        return dfall
-
     def resample_value(self, resample_rate):
         res = self.data_frame.resample(resample_rate)[self.val_name].sum()
         return pd.Series.to_frame(res).rename(columns={self.val_name: 'sum'+self.val_name})

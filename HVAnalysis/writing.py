@@ -2,6 +2,8 @@ import csv
 from datetime import datetime, timedelta
 import time as pytime
 import logging
+
+import numpy as np
 import pandas as pd
 
 
@@ -127,14 +129,9 @@ class ErnestsWriter(Writer):
             df['bool'] = self.create_unstable_df_for_b1_b2(df)
         elif last_index <= b1:
             df['bool'] = self.create_unstable_df_for_b1(df)
-        df_clear_1 = df['ncurr'] != 0
-        df_clear_1[0] = True
-        df_clear_1[df_clear_1.last_valid_index()] = True
-        df = df[df_clear_1]
-        df_clear_2 = df['nvolt'] != 0
-        df_clear_2[0] = True
-        df_clear_2[df_clear_2.last_valid_index()] = True
-        df = df[df_clear_2]
+        df = self.remove_nan(df)
+        #df = self.add_size(df)
+
         return df
 
     def cut_avgvolt_unstable_df_for_b1(self, df):
@@ -192,6 +189,22 @@ class ErnestsWriter(Writer):
         df = df[df_clear_2]
         return df
 
+    def add_size(self, df):
+        df['timestart'] = df.index
+        print(df['timestart'])
+        return 0
+
+    def remove_nan(self, df):
+        df_clear_1 = df['ncurr'] != 0
+        df_clear_1[0] = True
+        df_clear_1[df_clear_1.last_valid_index()] = True
+        df = df[df_clear_1]
+        df_clear_2 = df['nvolt'] != 0
+        df_clear_2[0] = True
+        df_clear_2[df_clear_2.last_valid_index()] = True
+        df = df[df_clear_2]
+        return df
+
     def get_unstable_periods(self):
         df = self.new_df_unstable_periods()
         logging.info(f'get_unstable_periods =\n{df}')
@@ -208,7 +221,6 @@ class ErnestsWriter(Writer):
                 stream = False
                 unstable_periods.append([start, b])
         return unstable_periods
-
 
 def to_time_stamp(dt):
     if dt < datetime(2018, 10, 28):

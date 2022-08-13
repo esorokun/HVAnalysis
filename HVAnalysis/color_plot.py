@@ -3,7 +3,7 @@ import pandas as pd
 import logging
 from functools import cached_property
 import matplotlib.pyplot as plt
-
+import seaborn as sns
 
 def beamMom_period_df():
     file_name = 'data/output/beamMom.txt'
@@ -157,4 +157,9 @@ class ColorPlots:
         plt.hist(df_red[name], bins=200, range=range, histtype='barstacked', stacked=True, color='r')
         plt.xlabel(name)
         plt.ylabel("Num")
+        plt.show()
+
+    def build_color_sns_scatter_plot(self, df):
+        sns.jointplot(x='avgcurr', y='avgvolt', data=df, hue='bool', s=3, alpha=0.1)
+        #sns.scatterplot(x='avgcurr', y='avgvolt', data=df, hue='bool', s=3, alpha=0.1)
         plt.show()

@@ -16,7 +16,7 @@ def main(args):
     plot_data = ColorPlots(periods_df)
     colored_data = plot_data.bool_in_color_df()
     #beam_on_colored_data = plot_data.beam_on_filter(colored_data)
-    plot_data.build_color_scatter_plot(colored_data)
+    #plot_data.build_color_sns_scatter_plot(colored_data)
 
 
 

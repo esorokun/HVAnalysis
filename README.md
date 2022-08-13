@@ -22,7 +22,7 @@ $ pip install -r requirements.txt
 ```
 
 ### Usage
-Use the following command to make a plot of the resistance:
+Use the following commands to make a plot of the resistance:
 ```
 (one day)
 $ python HVAnalysis/make_resistance_plot.py --datelist 2018-09-14 --loglvl 1
