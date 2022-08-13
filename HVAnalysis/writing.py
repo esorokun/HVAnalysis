@@ -130,8 +130,7 @@ class ErnestsWriter(Writer):
         elif last_index <= b1:
             df['bool'] = self.create_unstable_df_for_b1(df)
         df = self.remove_nan(df)
-        #df = self.add_size(df)
-
+        df = self.add_size(df)
         return df
 
     def cut_avgvolt_unstable_df_for_b1(self, df):
@@ -190,9 +189,20 @@ class ErnestsWriter(Writer):
         return df
 
     def add_size(self, df):
-        df['timestart'] = df.index
-        print(df['timestart'])
-        return 0
+        df_t = df.copy()
+        df = df.reset_index()
+        df = (df['timestamp'] - pd.Timestamp("1970-01-01")) // pd.Timedelta("1s")
+        df_copy = df.copy()
+        df_copy.pop(0)
+        df_copy = df_copy.reset_index(drop=True)
+        s3 = df_copy.loc[df_copy.last_valid_index()]
+        df_copy[df.last_valid_index()] = s3+1
+        df_size = pd.DataFrame({'end': df_copy, 'start': df})
+        df_size['size'] = df_size['end'] - df_size['start']
+        df_t = df_t.assign(size=df_size['size'])
+        logging.info(f'HeinzWrapper.data_frame =\n{df_size}')
+        logging.info(f'HeinzWrapper.data_frame =\n{df_t}')
+        return df_t
 
     def remove_nan(self, df):
         df_clear_1 = df['ncurr'] != 0
