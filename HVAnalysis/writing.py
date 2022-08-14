@@ -85,7 +85,6 @@ class LinosWriter(Writer):
 class ErnestsWriter(Writer):
 
     #Need to create new class for bool operations
-    #Separate Create DF and Cut_avgvolt DF for different
 
     def create_unstable_df_for_b1(self, df):
         model_1 = df['avgvolt'] < 120000.
@@ -189,22 +188,6 @@ class ErnestsWriter(Writer):
         df = df[df_clear_2]
         return df
 
-    def add_size(self, df):
-        df_t = df.copy()
-        df = df.reset_index()
-        df = (df['timestamp'] - pd.Timestamp("1970-01-01")) // pd.Timedelta("1s")
-        df_copy = df.copy()
-        df_copy.pop(0)
-        df_copy = df_copy.reset_index(drop=True)
-        s3 = df_copy.loc[df_copy.last_valid_index()]
-        df_copy[df.last_valid_index()] = s3+1
-        df_size = pd.DataFrame({'end': df_copy, 'start': df})
-        df_size['size'] = df_size['end'] - df_size['start']
-        df_size['timestamp'] = df_t.index
-        df_size = df_size.set_index('timestamp')
-        df_t = df_t.assign(size=df_size['size'])
-        return df_t
-
     def fill_na(self, df):
         df = df.ffill(axis=0)
         return df
@@ -241,3 +224,19 @@ def to_time_stamp(dt):
     if dt < datetime(2018, 10, 28):
         return int(datetime.timestamp(dt + timedelta(hours=3)))
     return int(datetime.timestamp(dt + timedelta(hours=2)))
+
+'''def add_size(self, df):
+        df_t = df.copy()
+        df = df.reset_index()
+        df = (df['timestamp'] - pd.Timestamp("1970-01-01")) // pd.Timedelta("1s")
+        df_copy = df.copy()
+        df_copy.pop(0)
+        df_copy = df_copy.reset_index(drop=True)
+        s3 = df_copy.loc[df_copy.last_valid_index()]
+        df_copy[df.last_valid_index()] = s3+1
+        df_size = pd.DataFrame({'end': df_copy, 'start': df})
+        df_size['size'] = df_size['end'] - df_size['start']
+        df_size['timestamp'] = df_t.index
+        df_size = df_size.set_index('timestamp')
+        df_t = df_t.assign(size=df_size['size'])
+        return df_t'''
