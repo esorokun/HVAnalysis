@@ -137,8 +137,58 @@ class CutAvgVolt:
         return df
 
 
-class CutOriginal:
+class BoolCurr:
+    def curr_unstable_df_for_b1(self, df):
+        model_1 = 1452 > df['resistance']
+        model_2 = df['resistance'] > 1472
+        model_3 = df['avgvolt'] < 120000.
+        model_4 = df['avgcurr'] < 20.
+        model_1 = model_1.mask(model_2, True)
+        model_1 = model_1.mask(model_3, True)
+        model_1 = model_1.mask(model_4, True)
+        return model_1
 
+    def curr_unstable_df_for_b1_b2(self, df):
+        b1 = datetime(2018, 10, 5, 0, 0, 0)
+        map = df.index <= b1
+        df_b1, df_b1_b2 = df[map], df[~map]
+        model_1 = df_b1_b2['resistance'] < 1465
+        model_2 = df_b1_b2['avgvolt'] < 120000.
+        model_3 = df_b1_b2['avgcurr'] < 20.
+        model_1 = model_1.mask(model_3, True)
+        model_1 = model_1.mask(model_2, True)
+        df_res_1 = self.curr_unstable_df_for_b1(df_b1)
+        result = pd.concat([df_res_1, model_1])
+        return result
+
+    def curr_unstable_df_for_b2(self, df):
+        b2 = datetime(2018, 10, 17, 12, 0, 0)
+        map = df.index < b2
+        df_b1_b2, df_b2 = df[map], df[~map]
+        model_1 = df_b2['resistance'] < 1465
+        model_2 = df_b2['avgvolt'] < 180000.
+        model_3 = df_b2['avgcurr'] < 20.
+        model_1 = model_1.mask(model_3, True)
+        model_1 = model_1.mask(model_2, True)
+        df_res_1 = self.curr_unstable_df_for_b1_b2(df_b1_b2)
+        result = pd.concat([df_res_1, model_1])
+        return result
+
+    def bool_curr_df_unstable_periods(self, df):
+        b1 = datetime(2018, 10, 5, 0, 0, 0)  # 2018-10-05 00:00:00
+        b2 = datetime(2018, 10, 17, 12, 0, 0)  # 2018-10-17 12:00:00
+        logging.info(f'HeinzWrapper.data_frame =\n{df}')
+        last_index = df.last_valid_index()
+        if last_index >= b2:
+            df['bool'] = self.curr_unstable_df_for_b2(df)
+        elif last_index > b1:
+            df['bool'] = self.curr_unstable_df_for_b1_b2(df)
+        elif last_index <= b1:
+            df['bool'] = self.curr_unstable_df_for_b1(df)
+        return df
+
+
+class CutOriginal:
     def create_unstable_df_for_b1(self, df):
         model_1 = df['avgvolt'] < 120000.
         model_2 = 1452 > df['resistance']
@@ -183,7 +233,7 @@ class CutOriginal:
         return df
 
 
-class ErnestsWriter(Writer, CutOriginal, CutAvgVolt):
+class ErnestsWriter(Writer, CutOriginal, CutAvgVolt,BoolCurr):
     def __init__(self, df_wrapper, file_name):
         super().__init__(df_wrapper, file_name)
         self.unstable_periods = None
@@ -196,7 +246,11 @@ class ErnestsWriter(Writer, CutOriginal, CutAvgVolt):
         self.unstable_periods = self.cut_avgvolt_df_unstable_periods(self.df_wrapper.data_frame)
         return self.unstable_periods
 
-    def fill_na(self):
+    def df_avgcurr_bool_add_unstable_periods(self):
+        self.unstable_periods = self.bool_curr_df_unstable_periods(self.df_wrapper.data_frame)
+        return self.unstable_periods
+
+    def fill_nan(self):
         self.df_wrapper.data_frame = self.df_wrapper.data_frame.ffill(axis=0)
         return 0
 
@@ -214,6 +268,9 @@ class ErnestsWriter(Writer, CutOriginal, CutAvgVolt):
         return 0
 
     def get_unstable_periods(self):
+        if self.unstable_periods == None:
+            self.remove_nan()
+            self.df_original_unstable_periods()
         df = self.unstable_periods
         logging.info(f'get_unstable_periods =\n{df}')
         stream = True
