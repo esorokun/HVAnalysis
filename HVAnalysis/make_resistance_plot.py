@@ -13,10 +13,10 @@ def main(args):
 
     writer = ErnestsWriter(comb_wrapper, f'{args.outputfolder}/ernests_unstable_periods.csv')
     writer.fill_nan()
-    periods_df = writer.df_avgcurr_bool_add_unstable_periods()
+    periods_df = writer.df_avgvolt_cut_unstable_periods()
     plot_data = BuildColorPlots(periods_df)
     #plot_data.filter_df_by_beam_mom()
-    plot_data.build_color_scatter_plot()
+    plot_data.build_color_histogram_plot()
 
 
 if __name__ == '__main__':

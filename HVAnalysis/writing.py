@@ -121,19 +121,9 @@ class CutAvgVolt:
             df['bool'] = self.cut_avgvolt_unstable_df_for_b2(df)
         elif last_index > b1:
             df['bool'] = self.cut_avgvolt_unstable_df_for_b1_b2(df)
-            print(df)
         elif last_index <= b1:
             df['bool'] = self.cut_avgvolt_unstable_df_for_b1(df)
         df = df.dropna(subset=['bool'])
-        print(df)
-        df_clear_1 = df['ncurr'] != 0
-        df_clear_1[0] = True
-        df_clear_1[df_clear_1.last_valid_index()] = True
-        df = df[df_clear_1]
-        df_clear_2 = df['nvolt'] != 0
-        df_clear_2[0] = True
-        df_clear_2[df_clear_2.last_valid_index()] = True
-        df = df[df_clear_2]
         return df
 
 
@@ -233,7 +223,7 @@ class CutOriginal:
         return df
 
 
-class ErnestsWriter(Writer, CutOriginal, CutAvgVolt,BoolCurr):
+class ErnestsWriter(Writer, CutOriginal, CutAvgVolt, BoolCurr):
     def __init__(self, df_wrapper, file_name):
         super().__init__(df_wrapper, file_name)
         self.unstable_periods = None
