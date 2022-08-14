@@ -95,6 +95,8 @@ class ColorPlots:
     def beam_on_filter(self, df):
         df_filter = beam_on_df()
         result = df.merge(df_filter, on=['timestamp'])
+        result = result.set_index('timestamp')
+        logging.info(f'beam_on_filter_df =\n{result}')
         return result
 
     def bool_in_color_df(self):
@@ -162,13 +164,19 @@ class ColorPlots:
         plt.show()
 
     def build_color_sns_scatter_plot(self, df):
-        g = sns.jointplot(x='avgcurr', y='avgvolt', data=df, hue='bool',
-                          s=3, alpha=0.1, marginal_ticks=True, height=10, ratio=3)
-        plt.legend(labels=["unstable", "stable"])
+        mask = df['bool']
+        df['color'] = 'Stable'
+        df.loc[mask, ['color']] = 'Unstable'
+        g = sns.jointplot(x='avgcurr', y='avgvolt', data=df, hue='color', palette=['b', 'r'],
+                          s=3, alpha=0.1, marginal_ticks=True, height=8, ratio=4)
+        un = self.percentage_of_unstable_data(df)
+        stbl = round(100 - un, 2)
+        plt.legend(labels=[str(un) + "%", str(stbl) + "%"])
         df_r = df[df['bool']]
-        _ = g.ax_marg_x.hist(df_r['avgcurr'], color='r', alpha=.6, bins=20)
-        _ = g.ax_marg_y.hist(df_r['avgvolt'], color='r', alpha=.6, bins=20, orientation="horizontal")
+        mybins = 30
+        _ = g.ax_marg_x.hist(df_r['avgcurr'], color='r', alpha=.6, bins=mybins)
+        _ = g.ax_marg_y.hist(df_r['avgvolt'], color='r', alpha=.6, bins=mybins, orientation="horizontal")
         df_b = df[~df['bool']]
-        _ = g.ax_marg_x.hist(df_b['avgcurr'], color='b', alpha=.6, bins=20)
-        _ = g.ax_marg_y.hist(df_b['avgvolt'], color='b', alpha=.6, bins=20, orientation="horizontal")
+        _ = g.ax_marg_x.hist(df_b['avgcurr'], color='b', alpha=.6, bins=mybins)
+        _ = g.ax_marg_y.hist(df_b['avgvolt'], color='b', alpha=.6, bins=mybins, orientation="horizontal")
         plt.show()

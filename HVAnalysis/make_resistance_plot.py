@@ -15,8 +15,8 @@ def main(args):
     unstable_period_list = writer.get_unstable_periods()
     plot_data = ColorPlots(periods_df)
     colored_data = plot_data.bool_in_color_df()
-    #beam_on_colored_data = plot_data.beam_on_filter(colored_data)
-    plot_data.build_color_sns_scatter_plot(colored_data)
+    beam_on_colored_data = plot_data.beam_on_filter(colored_data)
+    plot_data.build_color_sns_scatter_plot(beam_on_colored_data)
 
 
 
