@@ -80,6 +80,9 @@ class ColorDF(BeamFilter):
         self.df_bool = self.beam_on_filter(self.df_bool)
         return 0
 
+    def show_data_frame(self):
+        return print(self.df_bool)
+
     ''' def date_type_of_data(self, unstable_period):
         full_date_time = []
         i = 0

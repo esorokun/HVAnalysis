@@ -82,9 +82,62 @@ class LinosWriter(Writer):
         return unstable_periods
 
 
-class ErnestsWriter(Writer):
+class CutAvgVolt:
+    def cut_avgvolt_unstable_df_for_b1(self, df):
+        model_1 = df['avgvolt'] > 120000.
+        df = df[model_1]
+        mask_1 = 1452 > df['resistance']
+        mask_2 = 1472 < df['resistance']
+        model_1 = mask_1.mask(mask_2, True)
+        return model_1
 
-    #Need to create new class for bool operations
+    def cut_avgvolt_unstable_df_for_b1_b2(self, df):
+        b1 = datetime(2018, 10, 5, 0, 0, 0)
+        map = df.index <= b1
+        df_b1, df_b1_b2 = df[map], df[~map]
+        model_1 = df_b1_b2['avgvolt'] > 120000.
+        df_b1_b2 = df_b1_b2[model_1]
+        mask = df_b1_b2['resistance'] < 1465
+        df_res_1 = self.cut_avgvolt_unstable_df_for_b1(df_b1)
+        result = pd.concat([df_res_1, mask])
+        return result
+
+    def cut_avgvolt_unstable_df_for_b2(self, df):
+        b2 = datetime(2018, 10, 17, 12, 0, 0)
+        map = df.index < b2
+        df_b1_b2, df_b2 = df[map], df[~map]
+        model_1 = df_b2['avgvolt'] > 180000.
+        df_b2 = df_b2[model_1]
+        mask = df_b2['resistance'] < 1465
+        df_res_1 = self.cut_avgvolt_unstable_df_for_b1_b2(df_b1_b2)
+        result = pd.concat([df_res_1, mask])
+        return result
+
+    def cut_avgvolt_df_unstable_periods(self, df):
+        b1 = datetime(2018, 10, 5, 0, 0, 0)  # 2018-10-05 00:00:00
+        b2 = datetime(2018, 10, 17, 12, 0, 0)  # 2018-10-17 12:00:00
+        last_index = df.last_valid_index()
+        if last_index >= b2:
+            df['bool'] = self.cut_avgvolt_unstable_df_for_b2(df)
+        elif last_index > b1:
+            df['bool'] = self.cut_avgvolt_unstable_df_for_b1_b2(df)
+            print(df)
+        elif last_index <= b1:
+            df['bool'] = self.cut_avgvolt_unstable_df_for_b1(df)
+        df = df.dropna(subset=['bool'])
+        print(df)
+        df_clear_1 = df['ncurr'] != 0
+        df_clear_1[0] = True
+        df_clear_1[df_clear_1.last_valid_index()] = True
+        df = df[df_clear_1]
+        df_clear_2 = df['nvolt'] != 0
+        df_clear_2[0] = True
+        df_clear_2[df_clear_2.last_valid_index()] = True
+        df = df[df_clear_2]
+        return df
+
+
+class CutOriginal:
 
     def create_unstable_df_for_b1(self, df):
         model_1 = df['avgvolt'] < 120000.
@@ -116,11 +169,9 @@ class ErnestsWriter(Writer):
         result = pd.concat([df_res_1, model_1])
         return result
 
-    def new_df_unstable_periods(self):
+    def new_df_unstable_periods(self, df):
         b1 = datetime(2018, 10, 5, 0, 0, 0)  # 2018-10-05 00:00:00
         b2 = datetime(2018, 10, 17, 12, 0, 0)  # 2018-10-17 12:00:00
-        df = self.df_wrapper.data_frame
-        df = self.fill_na(df)
         logging.info(f'HeinzWrapper.data_frame =\n{df}')
         last_index = df.last_valid_index()
         if last_index >= b2:
@@ -129,55 +180,28 @@ class ErnestsWriter(Writer):
             df['bool'] = self.create_unstable_df_for_b1_b2(df)
         elif last_index <= b1:
             df['bool'] = self.create_unstable_df_for_b1(df)
-        #df = self.remove_nan(df)
-        logging.info(f'HeinzWrapper.data_frame =\n{df}')
         return df
 
-    def cut_avgvolt_unstable_df_for_b1(self, df):
-        model_1 = df['avgvolt'] > 120000.
-        df = df[model_1]
-        mask_1 = 1452 > df['resistance']
-        mask_2 = 1472 < df['resistance']
-        model_1 = mask_1.mask(mask_2, True)
-        return model_1
 
-    def cut_avgvolt_unstable_df_for_b1_b2(self, df):
-        b1 = datetime(2018, 10, 5, 0, 0, 0)
-        map = df.index <= b1
-        df_b1, df_b1_b2 = df[map], df[~map]
-        model_1 = df_b1_b2['avgvolt'] > 120000.
-        df_b1_b2 = df_b1_b2[model_1]
-        mask = df_b1_b2['resistance'] < 1465
-        df_res_1 = self.cut_avgvolt_unstable_df_for_b1(df_b1)
-        result = pd.concat([df_res_1, mask])
-        return result
+class ErnestsWriter(Writer, CutOriginal, CutAvgVolt):
+    def __init__(self, df_wrapper, file_name):
+        super().__init__(df_wrapper, file_name)
+        self.unstable_periods = None
 
-    def cut_avgvolt_unstable_df_for_b2(self, df):
-        b2 = datetime(2018, 10, 17, 12, 0, 0)
-        map = df.index < b2
-        df_b1_b2, df_b2 = df[map], df[~map]
-        model_1 = df_b2['avgvolt'] > 180000.
-        df_b2 = df_b2[model_1]
-        mask = df_b2['resistance'] < 1465
-        df_res_1 = self.cut_avgvolt_unstable_df_for_b1_b2(df_b1_b2)
-        result = pd.concat([df_res_1, mask])
-        return result
+    def df_original_unstable_periods(self):
+        self.unstable_periods = self.new_df_unstable_periods(self.df_wrapper.data_frame)
+        return self.unstable_periods
 
-    def cut_avgvolt_df_unstable_periods(self):
-        b1 = datetime(2018, 10, 5, 0, 0, 0)  # 2018-10-05 00:00:00
-        b2 = datetime(2018, 10, 17, 12, 0, 0)  # 2018-10-17 12:00:00
+    def df_avgvolt_cut_unstable_periods(self):
+        self.unstable_periods = self.cut_avgvolt_df_unstable_periods(self.df_wrapper.data_frame)
+        return self.unstable_periods
+
+    def fill_na(self):
+        self.df_wrapper.data_frame = self.df_wrapper.data_frame.ffill(axis=0)
+        return 0
+
+    def remove_nan(self):
         df = self.df_wrapper.data_frame
-        logging.info(f'HeinzWrapper.data_frame =\n{df}')
-        last_index = df.last_valid_index()
-        if last_index >= b2:
-            df['bool'] = self.cut_avgvolt_unstable_df_for_b2(df)
-        elif last_index > b1:
-            df['bool'] = self.cut_avgvolt_unstable_df_for_b1_b2(df)
-            print(df)
-        elif last_index <= b1:
-            df['bool'] = self.cut_avgvolt_unstable_df_for_b1(df)
-        df = df.dropna(subset=['bool'])
-        print(df)
         df_clear_1 = df['ncurr'] != 0
         df_clear_1[0] = True
         df_clear_1[df_clear_1.last_valid_index()] = True
@@ -186,25 +210,11 @@ class ErnestsWriter(Writer):
         df_clear_2[0] = True
         df_clear_2[df_clear_2.last_valid_index()] = True
         df = df[df_clear_2]
-        return df
-
-    def fill_na(self, df):
-        df = df.ffill(axis=0)
-        return df
-
-    def remove_nan(self, df):
-        df_clear_1 = df['ncurr'] != 0
-        df_clear_1[0] = True
-        df_clear_1[df_clear_1.last_valid_index()] = True
-        df = df[df_clear_1]
-        df_clear_2 = df['nvolt'] != 0
-        df_clear_2[0] = True
-        df_clear_2[df_clear_2.last_valid_index()] = True
-        df = df[df_clear_2]
-        return df
+        self.df_wrapper.data_frame = df
+        return 0
 
     def get_unstable_periods(self):
-        df = self.new_df_unstable_periods()
+        df = self.unstable_periods
         logging.info(f'get_unstable_periods =\n{df}')
         stream = True
         start = df.index[0]

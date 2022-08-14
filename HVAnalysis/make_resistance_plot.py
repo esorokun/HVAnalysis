@@ -11,7 +11,8 @@ def main(args):
     comb_wrapper = ResistanceWrapper(curr_wrapper, volt_wrapper)
 
     writer = ErnestsWriter(comb_wrapper, f'{args.outputfolder}/ernests_unstable_periods.csv')
-    periods_df = writer.new_df_unstable_periods()
+    writer.fill_na()
+    periods_df = writer.df_original_unstable_periods()
     plot_data = BuildColorPlots(periods_df)
     #plot_data.filter_df_by_beam_mom()
     plot_data.build_color_histogram_plot('avgvolt')
