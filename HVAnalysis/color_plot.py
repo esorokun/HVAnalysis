@@ -1,4 +1,6 @@
 from datetime import datetime, timedelta
+
+import numpy as np
 import pandas as pd
 import logging
 from functools import cached_property
@@ -160,6 +162,13 @@ class ColorPlots:
         plt.show()
 
     def build_color_sns_scatter_plot(self, df):
-        sns.jointplot(x='avgcurr', y='avgvolt', data=df, hue='bool', s=3, alpha=0.1)
-        #sns.scatterplot(x='avgcurr', y='avgvolt', data=df, hue='bool', s=3, alpha=0.1)
+        g = sns.jointplot(x='avgcurr', y='avgvolt', data=df, hue='bool',
+                          s=3, alpha=0.1, marginal_ticks=True, height=10, ratio=3)
+        plt.legend(labels=["unstable", "stable"])
+        df_r = df[df['bool']]
+        _ = g.ax_marg_x.hist(df_r['avgcurr'], color='r', alpha=.6, bins=20)
+        _ = g.ax_marg_y.hist(df_r['avgvolt'], color='r', alpha=.6, bins=20, orientation="horizontal")
+        df_b = df[~df['bool']]
+        _ = g.ax_marg_x.hist(df_b['avgcurr'], color='b', alpha=.6, bins=20)
+        _ = g.ax_marg_y.hist(df_b['avgvolt'], color='b', alpha=.6, bins=20, orientation="horizontal")
         plt.show()

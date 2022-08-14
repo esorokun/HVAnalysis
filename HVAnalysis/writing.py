@@ -121,6 +121,7 @@ class ErnestsWriter(Writer):
         b1 = datetime(2018, 10, 5, 0, 0, 0)  # 2018-10-05 00:00:00
         b2 = datetime(2018, 10, 17, 12, 0, 0)  # 2018-10-17 12:00:00
         df = self.df_wrapper.data_frame
+        df = self.fill_na(df)
         logging.info(f'HeinzWrapper.data_frame =\n{df}')
         last_index = df.last_valid_index()
         if last_index >= b2:
@@ -129,8 +130,8 @@ class ErnestsWriter(Writer):
             df['bool'] = self.create_unstable_df_for_b1_b2(df)
         elif last_index <= b1:
             df['bool'] = self.create_unstable_df_for_b1(df)
-        df = self.remove_nan(df)
-        df = self.add_size(df)
+        #df = self.remove_nan(df)
+        logging.info(f'HeinzWrapper.data_frame =\n{df}')
         return df
 
     def cut_avgvolt_unstable_df_for_b1(self, df):
@@ -199,10 +200,14 @@ class ErnestsWriter(Writer):
         df_copy[df.last_valid_index()] = s3+1
         df_size = pd.DataFrame({'end': df_copy, 'start': df})
         df_size['size'] = df_size['end'] - df_size['start']
+        df_size['timestamp'] = df_t.index
+        df_size = df_size.set_index('timestamp')
         df_t = df_t.assign(size=df_size['size'])
-        logging.info(f'HeinzWrapper.data_frame =\n{df_size}')
-        logging.info(f'HeinzWrapper.data_frame =\n{df_t}')
         return df_t
+
+    def fill_na(self, df):
+        df = df.ffill(axis=0)
+        return df
 
     def remove_nan(self, df):
         df_clear_1 = df['ncurr'] != 0
