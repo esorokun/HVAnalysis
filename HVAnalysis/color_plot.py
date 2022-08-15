@@ -75,28 +75,38 @@ class BeamFilter:
 class ColorDF(BeamFilter):
     def __init__(self, df_bool):
         self.df_bool = df_bool
+        self.df_color = self.bool_in_color_df()
 
-    def filter_df_by_beam_mom(self):
-        self.df_bool = self.beam_on_filter(self.df_bool)
-        return 0
+    def get_bool(self):
+        return self.df_bool
+
+    def get_color(self):
+        return self.df_color
 
     def show_data_frame(self):
         return print(self.df_bool)
 
-    ''' def date_type_of_data(self, unstable_period):
-        full_date_time = []
-        i = 0
-        while i < unstable_period.index.size:
-            time = unstable_period.at[i, 'start_time']
-            while unstable_period.at[i, 'start_time'] <= time <= unstable_period.at[i, 'end_time']:
-                full_date_time.append([datetime.fromtimestamp(time)])
-                time += 1
-            i += 1
-        full_df = pd.DataFrame(full_date_time).set_axis(['timestamp'], axis=1)
-        full_df = full_df.drop_duplicates()
-        return full_df
+    def filter_df_by_beam_mom(self):
+        self.df_bool = self.beam_on_filter(self.df_bool)
+        self.bool_in_color_df()
+        return 0
 
-    def colored_type_of_data(self, unstable_periods):
+    def cut_on_2_curr(self):
+        df = self.df_color
+        mask = df['avgcurr'] < 2
+        df = df[mask]
+        mask = df['avgcurr'] > 0
+        df = df[mask]
+        mask = df['avgvolt'] > 120000
+        df = df[mask]
+        '''mask = df['avgvolt'] > 180000
+        df = df[mask]
+        mask = df.index > datetime(2018, 10, 17, 12, 0, 0)  # 2018-10-17 12:00:00
+        df = df[mask]'''
+        self.df_color = df
+        return 0
+
+    '''def colored_type_of_data(self, unstable_periods):
         df = self.df_match
         unstable_df = self.date_type_of_data(unstable_periods)
 
@@ -114,16 +124,18 @@ class ColorDF(BeamFilter):
         mask = df['bool']
         df['color'] = 'blue'
         df.loc[mask, ['color']] = 'red'
+        self.df_color = df
         return df
 
 
 class BuildColorPlots(ColorDF):
     def __init__(self, df_bool):
         super().__init__(df_bool)
-        self.df_color = self.bool_in_color_df()
+        self.df_bool = self.get_bool()
+        self.df_color = self.get_color()
 
     def percentage_of_unstable_data(self):
-        df = self.df_bool
+        df = self.df_color
         first_time = int(round(df.index[0].timestamp()))
         last_time = int(round(df.last_valid_index().timestamp()))
         all_time = last_time - first_time
@@ -186,18 +198,20 @@ class BuildColorPlots(ColorDF):
 
     def build_color_sns_scatter_plot(self):
         df = self.df_color
+        print(df)
         mask = df['bool']
         df['color'] = 'Stable'
         df.loc[mask, ['color']] = 'Unstable'
-        g = sns.jointplot(x='avgcurr', y='avgvolt', data=df, hue='color', palette=['b', 'r'],
+        g = sns.jointplot(x='avgcurr', y='avgvolt', data=df, hue='color', palette=['r', 'b'],
                           s=3, alpha=0.1, marginal_ticks=True, height=8, ratio=4)
         un = self.percentage_of_unstable_data()
         stbl = round(100 - un, 2)
-        plt.legend(labels=[str(un) + "%", str(stbl) + "%"])
+        #plt.legend(labels=[str(un) + "%", str(stbl) + "%"])
+        plt.legend(labels=[str(stbl) + "%", str(un) + "%"])
         df_r = df[df['bool']]
         mybins = 30
-        _ = g.ax_marg_x.hist(df_r['avgcurr'], color='r', alpha=.6, bins=mybins)
-        _ = g.ax_marg_y.hist(df_r['avgvolt'], color='r', alpha=.6, bins=mybins, orientation="horizontal")
+        _ = g.ax_marg_x.hist(df_r['avgcurr'], color='r', alpha=.6, bins=mybins*2)
+        _ = g.ax_marg_y.hist(df_r['avgvolt'], color='r', alpha=.6, bins=mybins*2, orientation="horizontal")
         df_b = df[~df['bool']]
         _ = g.ax_marg_x.hist(df_b['avgcurr'], color='b', alpha=.6, bins=mybins)
         _ = g.ax_marg_y.hist(df_b['avgvolt'], color='b', alpha=.6, bins=mybins, orientation="horizontal")

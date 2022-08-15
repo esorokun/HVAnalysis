@@ -11,12 +11,10 @@ def main(args):
     volt_wrapper = HeinzWrapper(conf.volt_file_names, 'volt')
     comb_wrapper = ResistanceWrapper(curr_wrapper, volt_wrapper)
 
-    writer = ErnestsWriter(comb_wrapper, f'{args.outputfolder}/ernests_unstable_periods.csv')
-    writer.fill_nan()
-    periods_df = writer.df_avgvolt_cut_unstable_periods()
-    plot_data = BuildColorPlots(periods_df)
-    #plot_data.filter_df_by_beam_mom()
-    plot_data.build_color_histogram_plot()
+    writer = ErnestsWriter(comb_wrapper, f'{args.outputfolder}/ernests_unstable_periods_remove.csv')
+    writer.write_unstable_periods(writer.get_unstable_periods(), 2)
+    '''writer = LinosWriter(comb_wrapper, f'{args.outputfolder}/linos_unstable_periods_2.csv')
+    writer.write_unstable_periods(writer.get_unstable_periods(), 2)'''
 
 
 if __name__ == '__main__':
