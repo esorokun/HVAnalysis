@@ -51,6 +51,14 @@ class ResistanceWrapper:
         df = self._decorate_averages(df)
         return df
 
+    def add_marker_column(self, name):
+        self.data_frame['marker'] = name
+        return 0
+
+    def show(self):
+        print(self.data_frame)
+        return 0
+
     def _decorate_averages(self, df):
         df['avgcurr'] = df['sumcurr'] / df['ncurr']
         df['avgvolt'] = df['sumvolt'] / df['nvolt']

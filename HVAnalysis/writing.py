@@ -15,42 +15,61 @@ class Writer:
     def get_unstable_periods(self):
         raise NotImplemented
 
-    '''def date_type_of_data(self, unstable_period):
-        full_date_time = []
+    def compare_two_lists(self, unstable_periods_1, unstable_periods_2):
+        length_1 = int(len(unstable_periods_1))
+        length_2 = int(len(unstable_periods_2))
+        time_line_1 = []
+        time_line_2 = []
         i = 0
-        while i < unstable_period.index.size:
-            time = unstable_period.at[i, 'start_time']
-            while unstable_period.at[i, 'start_time'] <= time <= unstable_period.at[i, 'end_time']:
-                full_date_time.append([datetime.fromtimestamp(time)])
-                time += 1
+        while i < length_1:
+            j = unstable_periods_1[i][0]
+            while j <= unstable_periods_1[i][1]:
+                time_line_1.append(j)
+                j += 1
             i += 1
-        full_df = pd.DataFrame(full_date_time).set_axis(['timestamp'], axis=1)
-        full_df = full_df.drop_duplicates()
-        return full_df'''
+        i = 0
+        time_line_1 = list(set(time_line_1))
+        while i < length_2:
+            j = unstable_periods_2[i][0]
+            while j <= unstable_periods_2[i][1]:
+                time_line_2.append(j)
+                j += 1
+            i += 1
+        time_line_2 = list(set(time_line_2))
+        time_length_1 = int(len(time_line_1))
+        time_length_2 = int(len(time_line_2))
+        print(time_length_2 - time_length_1)
+        return 0
 
     def write_unstable_not_overlapping_periods(self, unstable_periods, safety_seconds=0,):
         safety_interval = timedelta(seconds=2*safety_seconds)
-        length = int(len(unstable_periods))
+        length = int(len(unstable_periods)) - 1
         unstbl_p = []
         i = 0
         while i < length:
             start_time = unstable_periods[i][0]
             while unstable_periods[i+1][0] - unstable_periods[i][1] <= safety_interval:
-                i +=1
+                i += 1
             end_time = unstable_periods[i][1]
             unstbl_p.append([start_time, end_time])
             i += 1
-
+        start_time = unstable_periods[i][0]
+        end_time = unstable_periods[i][1]
+        unstbl_p.append([start_time, end_time])
         safety_period = timedelta(seconds=safety_seconds)
+        new_list = []
         with open(self.file_name, mode='w') as f:
             writer = csv.writer(f, delimiter=',')
             for u_p in unstbl_p:
                 begin = u_p[0] - safety_period
                 end = u_p[1] + safety_period
                 row = [to_time_stamp(begin), to_time_stamp(end)]
+                new_list.append(row)
                 writer.writerow(row)
+        return new_list
 
     def write_unstable_periods(self, unstable_periods, safety_seconds=0):
+        new_list = []
         safety_interval = timedelta(seconds=safety_seconds)
         with open(self.file_name, mode='w') as f:
             writer = csv.writer(f, delimiter=',')
@@ -58,7 +77,9 @@ class Writer:
                 begin = u_p[0] - safety_interval
                 end = u_p[1] + safety_interval
                 row = [to_time_stamp(begin), to_time_stamp(end)]
+                new_list.append(row)
                 writer.writerow(row)
+        return new_list
 
 class LinosWriter(Writer):
     """I'm trying to reproduce the results in ProtoDUNEUnstableHVFilter.fcl
