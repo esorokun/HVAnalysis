@@ -9,12 +9,12 @@ from color_plot import ColorDF, BuildColorPlots
 
 def main(args):
     conf.configure_from_args(args)
-    volt_wrapper = HeinzWrapper(conf.Heinz_V_volt_file_names, 'volt')
+    curr_f_wrapper = HeinzWrapper(conf.Heinz_I_Filtered_curr_file_names, 'curr')
     curr_wrapper = HeinzWrapper(conf.Heinz_I_curr_file_names, 'curr')
     volt_r_wrapper = HeinzWrapper(conf.Heinz_V_Raw_volt_file_names, 'volt')
-    curr_f_wrapper = HeinzWrapper(conf.Heinz_I_Filtered_curr_file_names, 'curr')
+    volt_wrapper = HeinzWrapper(conf.Heinz_V_volt_file_names, 'volt')
     volt_c_wrapper = HeinzWrapper(conf.Heinz_V_Cathode_volt_file_names, 'volt')
-    comb_wrapper_1 = ResistanceWrapper(curr_wrapper, volt_wrapper)
+    '''comb_wrapper_1 = ResistanceWrapper(curr_wrapper, volt_wrapper)
     comb_wrapper_2 = ResistanceWrapper(curr_wrapper, volt_r_wrapper)
     comb_wrapper_3 = ResistanceWrapper(curr_f_wrapper, volt_r_wrapper)
     comb_wrapper_4 = ResistanceWrapper(curr_f_wrapper, volt_wrapper)
@@ -34,7 +34,7 @@ def main(args):
                         comb_wrapper_6.data_frame
                         ])
     plotter = Plotter(new_df)
-    plotter.plot_scatter('avgcurr', 'avgvolt')
+    plotter.plot_scatter('avgcurr', 'avgvolt')'''
 
     #writer = ErnestsWriter(comb_wrapper, f'{args.outputfolder}/ernests_unstable_periods_remove.csv')
     #writer.write_unstable_not_overlapping_periods(writer.get_unstable_periods(), 2)

@@ -8,6 +8,14 @@ class HeinzWrapper:
         self.file_names = file_names
         self.val_name = val_name
 
+    def add_marker_column(self, name):
+        self.data_frame['marker'] = name
+        return 0
+
+    def show(self):
+        print(self.data_frame)
+        return 0
+
     def _get_data_frame_from_file(self, fn):
         return pd.read_csv(fn, sep=' ', index_col=0, usecols=[0, 1],
                            names=['timestamp', self.val_name])
@@ -50,14 +58,6 @@ class ResistanceWrapper:
     def _get_modified_data_frame(self, df):
         df = self._decorate_averages(df)
         return df
-
-    def add_marker_column(self, name):
-        self.data_frame['marker'] = name
-        return 0
-
-    def show(self):
-        print(self.data_frame)
-        return 0
 
     def _decorate_averages(self, df):
         df['avgcurr'] = df['sumcurr'] / df['ncurr']
