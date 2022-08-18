@@ -14,27 +14,17 @@ def main(args):
     volt_r_wrapper = HeinzWrapper(conf.Heinz_V_Raw_volt_file_names, 'volt')
     volt_wrapper = HeinzWrapper(conf.Heinz_V_volt_file_names, 'volt')
     volt_c_wrapper = HeinzWrapper(conf.Heinz_V_Cathode_volt_file_names, 'volt')
-    '''comb_wrapper_1 = ResistanceWrapper(curr_wrapper, volt_wrapper)
-    comb_wrapper_2 = ResistanceWrapper(curr_wrapper, volt_r_wrapper)
-    comb_wrapper_3 = ResistanceWrapper(curr_f_wrapper, volt_r_wrapper)
-    comb_wrapper_4 = ResistanceWrapper(curr_f_wrapper, volt_wrapper)
-    comb_wrapper_5 = ResistanceWrapper(curr_wrapper, volt_c_wrapper)
-    comb_wrapper_6 = ResistanceWrapper(curr_f_wrapper, volt_c_wrapper)
-    comb_wrapper_1.add_marker_column('V(I)')
-    comb_wrapper_2.add_marker_column('V_Raw(I)')
-    comb_wrapper_3.add_marker_column('V_Raw(I_Filtered)')
-    comb_wrapper_4.add_marker_column('V(I_Filtered)')
-    comb_wrapper_5.add_marker_column('V_Cathode(I)')
-    comb_wrapper_6.add_marker_column('V_Cathode(I_Filtered)')
-    new_df = pd.concat([comb_wrapper_1.data_frame,
-                        comb_wrapper_2.data_frame,
-                        comb_wrapper_3.data_frame,
-                        comb_wrapper_4.data_frame,
-                        comb_wrapper_5.data_frame,
-                        comb_wrapper_6.data_frame
-                        ])
-    plotter = Plotter(new_df)
-    plotter.plot_scatter('avgcurr', 'avgvolt')'''
+    curr_f_wrapper.add_marker_column('I_Filtered')
+    curr_wrapper.add_marker_column('I')
+    volt_r_wrapper.add_marker_column('V_Raw')
+    volt_wrapper.add_marker_column('V')
+    volt_c_wrapper.add_marker_column('V_Cathode')
+
+    new_df_V = pd.concat([volt_c_wrapper.data_frame, volt_wrapper.data_frame, volt_r_wrapper.data_frame])
+    new_df_I = pd.concat([curr_wrapper.data_frame, curr_f_wrapper.data_frame])
+    plotter_V = Plotter(new_df_V)
+    plotter_I = Plotter(new_df_I)
+    plotter_V.plot_scatter('timestamp', 'volt')
 
     #writer = ErnestsWriter(comb_wrapper, f'{args.outputfolder}/ernests_unstable_periods_remove.csv')
     #writer.write_unstable_not_overlapping_periods(writer.get_unstable_periods(), 2)
