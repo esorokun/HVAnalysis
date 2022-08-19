@@ -1,32 +1,31 @@
 from HVAnalysis import dfwrapper, conf, writing
+from HVAnalysis import periods
+import datetime
+import tempfile
+import os
 
 
-class TestArgs:
-    datelist = ['2018-09-25']
-    loglvl = 0
-    outputfolder = 'test_output'
+def test_conf():
+    assert len(conf.curr_file_names) == 1
 
 
-conf.configure_from_args(TestArgs)
-
-curr_wrapper = dfwrapper.HeinzWrapper(conf.curr_file_names, 'curr')
-volt_r_wrapper = dfwrapper.HeinzWrapper(conf.volt_file_names, 'volt')
-comb_wrapper = dfwrapper.ResistanceWrapper(curr_wrapper, volt_r_wrapper)
-linos_writer = writing.LinosWriter(comb_wrapper, 'test_output')
-ernests_writer = writing.ErnestsWriter(comb_wrapper, 'test_output')
+def test_unstable_periods_seconds(my_periods):
+    u_s = my_periods.get_unstable_seconds()
+    assert len(u_s) == 60*60*24
 
 
-def test_true():
-    assert True
+def test_unstable_periods_writing(my_periods):
+    fd, path = tempfile.mkstemp()
+    my_periods.write_to_file(path)
+    os.close(fd)
+    os.unlink(path)
 
 
-def test_df_wrapper():
-    assert linos_writer.get_unstable_periods() == ernests_writer.get_unstable_periods()
+#def test_df_wrapper():
+#    assert linos_writer.get_unstable_periods() == ernests_writer.get_unstable_periods()
 
 
-def test_overlap_removal():
-    overlapping_periods = ernests_writer.write_unstable_periods()
-    clean_periods = ernests_writer.write_unstable_not_overlapping_periods()
-    assert overlapping_periods == clean_periods
-
-
+#def test_overlap_removal():
+#    overlapping_periods = ernests_writer.write_unstable_periods()
+#    clean_periods = ernests_writer.write_unstable_not_overlapping_periods()
+#    assert overlapping_periods == clean_periods
