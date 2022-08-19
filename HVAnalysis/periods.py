@@ -6,6 +6,10 @@ class UnstablePeriods:
     def __init__(self):
         self._periods = []
 
+    def __str__(self):
+        return f"instance of UnstablePeriods with " \
+               f"{len(self._periods)} unstable periods"
+
     def append(self, start_end_pair):
         self._periods.append(start_end_pair)
 
@@ -13,10 +17,6 @@ class UnstablePeriods:
         with open(file_name, mode='w') as f:
             writer = csv.writer(f, delimiter=',')
             for per in self._periods:
-                #begin_ts = to_time_stamp(per[0])
-                #end_ts = to_time_stamp(per[1])
-                #row = [begin_ts, end_ts]
-                #writer.writerow(row)
                 writer.writerow([to_time_stamp(dt) for dt in per])
 
     def get_unstable_seconds(self) -> set:

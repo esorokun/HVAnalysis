@@ -81,6 +81,7 @@ class Writer:
                 writer.writerow(row)
         return new_list
 
+
 class LinosWriter(Writer):
     """I'm trying to reproduce the results in ProtoDUNEUnstableHVFilter.fcl
     with this class."""

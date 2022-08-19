@@ -1,8 +1,10 @@
-from HVAnalysis import dfwrapper, conf, writing
+from HVAnalysis import conf
+from HVAnalysis.dfwrapper import ResistanceWrapper
 from HVAnalysis import periods
 import datetime
 import tempfile
 import os
+import pytest
 
 
 def test_conf():
@@ -21,8 +23,16 @@ def test_unstable_periods_writing(my_periods):
     os.unlink(path)
 
 
-#def test_df_wrapper():
-#    assert linos_writer.get_unstable_periods() == ernests_writer.get_unstable_periods()
+def test_wrong_df_wrapper(volt_wrapper, curr_wrapper):
+    with pytest.raises(Exception):
+        ResistanceWrapper(curr_wrapper, volt_wrapper)
+
+
+def test_df_wrapper(comb_wrapper):
+    periods = comb_wrapper.get_unstable_periods_original()
+    print(f'periods = {periods}')
+
+    #assert linos_writer.get_unstable_periods() == ernests_writer.get_unstable_periods()
 
 
 #def test_overlap_removal():

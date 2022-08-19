@@ -1,6 +1,8 @@
 import logging
 import pandas as pd
+from datetime import datetime
 from functools import cached_property
+from HVAnalysis.periods import UnstablePeriods
 
 
 class DataFrameWrapper:
@@ -51,11 +53,18 @@ class HeinzWrapper(DataFrameWrapper):
 
 class ResistanceWrapper(DataFrameWrapper):
     """Wrapper class for resistance data frame. made from volt and curr wrappers"""
-
     def __init__(self, volt_wrapper, curr_wrapper, resample_rate='S'):
         self.volt_wrapper = volt_wrapper
         self.curr_wrapper = curr_wrapper
         self.resample_rate = resample_rate
+        self._check_input_wrappers()
+
+    def _check_input_wrappers(self):
+        vn = self.volt_wrapper.val_name
+        cn = self.curr_wrapper.val_name
+        if not (vn == 'volt' and cn == 'curr'):
+            raise Exception("The input wrappers must have values"
+                            "'curr' and 'volt', respectively")
 
     def _get_data_frames(self):
         dfs = []
@@ -80,3 +89,60 @@ class ResistanceWrapper(DataFrameWrapper):
         df = self._get_modified_data_frame(df)
         logging.info(f'ResistanceWrapper.data_frame =\n{df}')
         return df
+
+#    def decorate_stable_original(self):
+
+
+    def get_unstable_periods_original(self) -> UnstablePeriods:
+        df = self.data_frame
+
+        # for some reason, the original periods start at 2018-09-19 02:00:16
+        first_date = datetime(2018, 9, 19, 0, 0, 0)
+        b1 = datetime(2018, 10, 5, 0, 0, 0)    #2018-10-05 00:00:00
+        b2 = datetime(2018, 10, 17, 12, 0, 0)  #2018-10-17 12:00:00
+        streamer_on = False
+        unstable_periods = UnstablePeriods()
+
+        for row in df.itertuples():
+            if row.ncurr == 0 or row.nvolt == 0:
+                continue
+
+            if row.Index < first_date:
+                continue
+
+            b = row.Index
+            r = row.resistance
+            vps = row.avgvolt
+
+            if b <= b1 and (r > 1472 or r < 1452 or vps < 120000.) and not streamer_on:
+                streamer_on = True
+                start_stream = b
+
+            if b <= b1 and (r > 1452 and r < 1472 and vps > 120000.) and streamer_on:
+                streamer_on = False
+                unstable_periods.append([start_stream, b])
+
+            if b1 < b < b2 and (r < 1465 or vps < 120000.) and not streamer_on:
+                streamer_on = True
+                start_stream = b
+
+            if b1 < b < b2 and (r > 1465 and vps > 120000.) and streamer_on:
+                streamer_on = False
+                unstable_periods.append([start_stream, b])
+
+            if b >= b2 and (r < 1465 or vps < 180000.) and not streamer_on:
+                streamer_on = True
+                start_stream = b
+
+            if b >= b2 and (r > 1465 and vps > 180000.) and streamer_on:
+                streamer_on = False
+                unstable_periods.append([start_stream, b])
+
+        # write the last unstable period
+        if streamer_on:
+            end_time = datetime(b.year, b.month, b.day+1, 1, 0, 59)
+            unstable_periods.append([start_stream, end_time])
+
+        return unstable_periods
+
+

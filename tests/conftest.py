@@ -20,11 +20,11 @@ def curr_wrapper():
 
 @pytest.fixture
 def volt_wrapper():
-    return HeinzWrapper(conf.volt_file_names, 'curr')
+    return HeinzWrapper(conf.volt_file_names, 'volt')
 
 @pytest.fixture
 def comb_wrapper(curr_wrapper, volt_wrapper):
-    return ResistanceWrapper(curr_wrapper, volt_wrapper)
+    return ResistanceWrapper(volt_wrapper, curr_wrapper)
 
 @pytest.fixture
 def my_periods():

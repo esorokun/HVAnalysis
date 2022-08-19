@@ -5,11 +5,15 @@ from dfwrapper import HeinzWrapper, ResistanceWrapper
 from plotting import Plotter
 from writing import LinosWriter, ErnestsWriter
 from color_plot import ColorDF, BuildColorPlots
+import sys
 
 
 def main(args):
     conf.configure_from_args(args)
-    curr_f_wrapper = HeinzWrapper(conf.Heinz_I_Filtered_curr_file_names, 'curr')
+    curr_f_wrapper = HeinzWrapper(conf.curr_file_names, 'curr')
+    #curr_f_wrapper = HeinzWrapper(conf.Heinz_I_Filtered_curr_file_names, 'curr')
+    print(curr_f_wrapper.data_frame)
+    sys.exit(0)
     curr_wrapper = HeinzWrapper(conf.Heinz_I_curr_file_names, 'curr')
     volt_r_wrapper = HeinzWrapper(conf.Heinz_V_Raw_volt_file_names, 'volt')
     volt_wrapper = HeinzWrapper(conf.Heinz_V_volt_file_names, 'volt')
