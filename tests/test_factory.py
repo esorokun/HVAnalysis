@@ -29,7 +29,8 @@ def test_wrong_df_wrapper(volt_wrapper, curr_wrapper):
 
 
 def test_df_wrapper(comb_wrapper):
-    periods = comb_wrapper.get_unstable_periods_original()
+#    comb_wrapper.decorate_stable_original()
+    periods = comb_wrapper.get_unstable_periods('stable_original')
     print(f'periods = {periods}')
 
     #assert linos_writer.get_unstable_periods() == ernests_writer.get_unstable_periods()
