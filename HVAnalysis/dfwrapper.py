@@ -2,7 +2,19 @@ import logging
 import pandas as pd
 from functools import cached_property
 
-class HeinzWrapper:
+
+class DataFrameWrapper:
+    def __str__(self):
+        return f"instance of {type(self).__name__} " \
+               f"wrapping around following data frame\n" \
+               f"{self.data_frame}"
+
+    @property
+    def data_frame(self):
+        raise NotImplemented
+
+
+class HeinzWrapper(DataFrameWrapper):
     """Wrapper class for pandas data frame"""
     def __init__(self, file_names=None, val_name=None):
         self.file_names = file_names
@@ -10,10 +22,6 @@ class HeinzWrapper:
 
     def add_marker_column(self, name):
         self.data_frame['marker'] = name
-        return 0
-
-    def show(self):
-        print(self.data_frame)
         return 0
 
     def _get_data_frame_from_file(self, fn):
@@ -34,15 +42,16 @@ class HeinzWrapper:
 
     def resample_value(self, resample_rate):
         res = self.data_frame.resample(resample_rate)[self.val_name].sum()
-        return pd.Series.to_frame(res).rename(columns={self.val_name: 'sum'+self.val_name})
+        return pd.Series.to_frame(res).rename(columns={self.val_name: 'sum' + self.val_name})
 
     def resample_count(self, resample_rate):
         res = self.data_frame.resample(resample_rate)[self.val_name].count()
-        return pd.Series.to_frame(res).rename(columns={self.val_name: 'n'+self.val_name})
+        return pd.Series.to_frame(res).rename(columns={self.val_name: 'n' + self.val_name})
 
 
-class ResistanceWrapper:
+class ResistanceWrapper(DataFrameWrapper):
     """Wrapper class for resistance data frame. made from volt and curr wrappers"""
+
     def __init__(self, volt_wrapper, curr_wrapper, resample_rate='S'):
         self.volt_wrapper = volt_wrapper
         self.curr_wrapper = curr_wrapper
