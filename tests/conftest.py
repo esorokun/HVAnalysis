@@ -9,7 +9,7 @@ from HVAnalysis import conf
 @pytest.fixture(autouse=True)
 def configure_from_args():
     class TestArgs:
-        datelist = ['2018-09-25']
+        datelist = None#['2018-09-25']# None
         loglvl = 0
         outputfolder = 'test_output'
     conf.configure_from_args(TestArgs)

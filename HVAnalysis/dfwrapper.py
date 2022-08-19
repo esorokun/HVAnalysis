@@ -94,9 +94,13 @@ class ResistanceWrapper(DataFrameWrapper):
 
     def _decorate_stable_original(self, df):
         start_ts, end_ts = [pd.to_datetime("2018-10-05 00:00:00"), pd.to_datetime("2018-10-17 12:00:00")]
-        b_df = df.iloc[df.index <= start_ts]
-        d_df = df.iloc[(df.index > start_ts) * (df.index < end_ts)]
-        a_df = df.iloc[(df.index >= end_ts)]
+        #df.loc[df.index <= start_ts, 'stable_original'] = (df.loc[df.index <= start_ts, 'resistance'] > 1452) * (df.loc[df.index <= start_ts, 'resistance'] < 1472) * (df.loc[df.index <= start_ts, 'avgvolt'] > 120000)
+        #df.loc[(df.index > start_ts) * (df.index < end_ts), 'stable_original'] = (df.loc[(df.index > start_ts) * (df.index < end_ts), 'resistance'] > 1465) * (df.loc[(df.index > start_ts) * (df.index < end_ts), 'avgvolt'] > 120000)
+        #df.loc[df.index >= end_ts, 'stable_original'] = (df.loc[df.index >= end_ts, 'resistance'] > 1465) * (df.loc[df.index >= end_ts, 'avgvolt'] > 180000)
+        #return df
+        b_df = df.loc[df.index <= start_ts]
+        d_df = df.loc[(df.index > start_ts) * (df.index < end_ts)]
+        a_df = df.loc[(df.index >= end_ts)]
         b_df['stable_original'] = (b_df['resistance'] > 1452) * (b_df['resistance'] < 1472) * (b_df['avgvolt'] > 120000)
         d_df['stable_original'] = (d_df['resistance'] > 1465) * (d_df['avgvolt'] > 120000)
         a_df['stable_original'] = (a_df['resistance'] > 1465) * (a_df['avgvolt'] > 180000)
