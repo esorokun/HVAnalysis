@@ -23,6 +23,7 @@ new_date_list = ['2022-06-01', '2022-06-02', '2022-06-03', '2022-06-04', '2022-0
                  '2022-06-21', '2022-06-22', '2022-06-23', '2022-06-24', '2022-06-25',
                  '2022-06-26', '2022-06-27', '2022-06-28', '2022-06-29', '2022-06-30',
                  '2022-07-01']
+
 curr_file_names = [f'{input_data_folder}/heinzCurr_{d}.csv' for d in all_date_list]
 volt_file_names = [f'{input_data_folder}/heinzVolt_{d}.csv' for d in all_date_list]
 Heinz_I_curr_file_names = [f'{input_data_folder}/NP04_DCS_01_Heinz_I._{d}.csv' for d in new_date_list]
