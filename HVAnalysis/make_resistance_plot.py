@@ -9,28 +9,10 @@ from color_plot import ColorDF, BuildColorPlots
 
 def main(args):
     conf.configure_from_args(args)
-    curr_f_wrapper = HeinzWrapper(conf.Heinz_I_Filtered_curr_file_names, 'curr')
-    curr_wrapper = HeinzWrapper(conf.Heinz_I_curr_file_names, 'curr')
-    volt_r_wrapper = HeinzWrapper(conf.Heinz_V_Raw_volt_file_names, 'volt')
-    volt_wrapper = HeinzWrapper(conf.Heinz_V_volt_file_names, 'volt')
-    volt_c_wrapper = HeinzWrapper(conf.Heinz_V_Cathode_volt_file_names, 'volt')
-    curr_f_wrapper.add_marker_column('I_Filtered')
-    curr_wrapper.add_marker_column('I')
-    volt_r_wrapper.add_marker_column('V_Raw')
-    volt_wrapper.add_marker_column('V')
-    volt_c_wrapper.add_marker_column('V_Cathode')
 
-    new_df_V = pd.concat([volt_c_wrapper.data_frame, volt_wrapper.data_frame, volt_r_wrapper.data_frame])
-    new_df_I = pd.concat([curr_wrapper.data_frame, curr_f_wrapper.data_frame])
-    plotter_V = Plotter(new_df_V)
-    plotter_I = Plotter(new_df_I)
-    plotter_V.plot_scatter('timestamp', 'volt')
-
-    #writer = ErnestsWriter(comb_wrapper, f'{args.outputfolder}/ernests_unstable_periods_remove.csv')
-    #writer.write_unstable_not_overlapping_periods(writer.get_unstable_periods(), 2)
-    #writer = LinosWriter(comb_wrapper, f'{args.outputfolder}/linos_unstable_periods_2.csv')
-    #writer.write_unstable_periods(writer.get_unstable_periods(), 2)
-
+    curr_wrapper = HeinzWrapper(conf.curr_file_names, 'curr')
+    volt_wrapper = HeinzWrapper(conf.volt_file_names, 'volt')
+    comb_wrapper = ResistanceWrapper(volt_wrapper, curr_wrapper)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
