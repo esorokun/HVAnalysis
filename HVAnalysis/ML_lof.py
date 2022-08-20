@@ -11,7 +11,7 @@ from dfwrapper import HeinzWrapper, ResistanceWrapper
 import conf
 from scipy import stats
 # Import models
-from pyod.models.abod import ABOD
+from pyod.models.sod import SOD
 from pyod.models.cblof import CBLOF
 from pyod.models.hbos import HBOS
 from pyod.models.iforest import IForest
@@ -30,20 +30,30 @@ def main(args):
     ernest_writer.fill_nan()
     df = ernest_writer.df_wrapper.data_frame
     scaler = MinMaxScaler(feature_range=(0, 1))
-    df[['avgcurr', 'avgvolt']] = scaler.fit_transform(df[['avgcurr', 'avgvolt']])
-    X = df['avgcurr'].values.reshape(-1, 1)
-    Y = df['avgvolt'].values.reshape(-1, 1)
+    df[['binavgcurr', 'binavgvolt', 'binresistance']] = scaler.fit_transform(df[['avgcurr', 'avgvolt', 'resistance']])
+    X = df['binavgcurr'].values.reshape(-1, 1)
+    Y = df['binavgvolt'].values.reshape(-1, 1)
+    R = df['binresistance'].values.reshape(-1, 1)
     XY = np.concatenate((X, Y), axis=1)
-    clf_name = 'LOF'
-    clf = LOF()
+    clf_name = 'KNN'
+    clf = KNN()
 
-    clf.fit(X)
+    clf.fit(XY)
     pred = clf.labels_
     scores = clf.decision_scores_
     print('prediction')
     print(pred)
     print('scores')
     print(scores)
+    MyFile = open('data/output/output.txt', 'w')
+    for element in pred:
+        MyFile.write(str(element))
+        MyFile.write('\n')
+    MyFile.close()
+    df['result'] = pred
+    print(df['result'])
+    sns.jointplot(x='avgcurr', y='avgvolt', data=df, alpha=1, s=5, hue='result')
+    plt.show()
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
