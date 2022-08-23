@@ -1,8 +1,9 @@
 import logging
 import pandas as pd
 from datetime import datetime
+import numpy as np
 from functools import cached_property
-from HVAnalysis.periods import UnstablePeriods
+from periods import UnstablePeriods
 
 
 class DataFrameWrapper:
@@ -78,11 +79,17 @@ class ResistanceWrapper(DataFrameWrapper):
         df = self._decorate_stable_original(df)
         return df
 
+    def _ffill_df(self, df):
+        df = df.replace(0, np.nan)
+        df = df.ffill(axis=0)
+        return df
+
     def _decorate_averages(self, df):
+        df = self._ffill_df(df)
         df['avgcurr'] = df['sumcurr'] / df['ncurr']
         df['avgvolt'] = df['sumvolt'] / df['nvolt']
         df['resistance'] = df['avgvolt'] / df['avgcurr']
-        df = df[~df['resistance'].isnull()]
+        #df = df[~df['resistance'].isnull()]
         return df
 
     @cached_property

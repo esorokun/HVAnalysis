@@ -298,7 +298,7 @@ class ErnestsWriter(Writer, CutOriginal, CutAvgVolt, BoolCurr):
 
     def fill_nan(self):
         self.df_wrapper.data_frame = self.df_wrapper.data_frame.ffill(axis=0)
-        return 0
+        return self.df_wrapper.data_frame.ffill(axis=0)
 
     def remove_nan(self):
         df = self.df_wrapper.data_frame

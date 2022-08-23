@@ -27,21 +27,21 @@ def main(args):
     volt_wrapper = HeinzWrapper(conf.volt_file_names, 'volt')
     comb_wrapper = ResistanceWrapper(volt_wrapper, curr_wrapper)
     ernest_writer = ErnestsWriter(comb_wrapper, f'{args.outputfolder}/ernests_unstable_periods_remove.csv')
-    ernest_writer.fill_nan()
-    df = ernest_writer.df_wrapper.data_frame
+    df = ernest_writer.fill_nan()
+    print(df)
     scaler = MinMaxScaler(feature_range=(0, 1))
     df[['binavgcurr', 'binavgvolt', 'binresistance']] = scaler.fit_transform(df[['avgcurr', 'avgvolt', 'resistance']])
     X = df['binavgcurr'].values.reshape(-1, 1)
     Y = df['binavgvolt'].values.reshape(-1, 1)
     R = df['binresistance'].values.reshape(-1, 1)
-    XY = np.concatenate((X, Y), axis=1)
+    XY = np.concatenate((X, Y, R), axis=1)
     clf_name = 'KNN'
-    clf = KNN()
+    clf = KNN(method='mean', n_neighbors=50, contamination=0.05)
 
     clf.fit(XY)
     pred = clf.labels_
     scores = clf.decision_scores_
-    print('prediction')
+    print('prediction : ' + str(sum(pred)) + ' / ' + str(len(pred)))
     print(pred)
     print('scores')
     print(scores)
