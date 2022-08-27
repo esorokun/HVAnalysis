@@ -43,48 +43,6 @@ def main(args):
     ml_plot = PlotBuilder(df, list_result)
     ml_plot.build_datetime_plot_ml('avgcurr')
 
-    '''df['time_to_stamp'] = (df.index.astype('uint64') / 1_000_000_000).astype(np.int64)
-    df['logcurr'] = np.log10(df['avgcurr']*df['avgvolt'])
-    df['logvolt'] = np.log10(df['avgvolt'])
-    df['logcurr'] = df['logcurr'].ffill(axis=0)
-    df['logvolt'] = df['logvolt'].ffill(axis=0)
-    scaler = MinMaxScaler(feature_range=(0, 1))
-    df[['binavgcurr', 'binavgvolt', 'binresistance', 'bintime', 'binlogcurr', 'binlogvolt']] = scaler.fit_transform(
-                    df[['avgcurr', 'avgvolt', 'resistance', 'time_to_stamp', 'logcurr', 'logvolt']])
-    X = df['binavgcurr'].values.reshape(-1, 1)
-    Y = df['binavgvolt'].values.reshape(-1, 1)
-    R = df['binresistance'].values.reshape(-1, 1)
-    T = df['bintime'].values.reshape(-1, 1)
-    LI = df['binlogcurr'].values.reshape(-1, 1)
-    #LV = df['binlogvolt'].values.reshape(-1, 1)
-    XY = np.concatenate((X, Y, R, LI), axis=1)
-    
-    clf = CBLOF()
-
-    clf.fit(XY)
-    pred = clf.labels_
-    scores = clf.decision_scores_
-    print('prediction')
-    print(pred)
-    print('scores')
-    print(scores)
-    MyFile = open('data/output/output.txt', 'w')
-    for element in pred:
-        MyFile.write(str(element))
-        MyFile.write('\n')
-    MyFile.close()
-    df['result'] = pred
-    print(df['result'])
-    g = sns.jointplot(x='avgcurr', y='avgvolt', data=df, alpha=1, s=5, hue='result')
-    mybins = 30
-    df_r = df.loc[df['result'] == 1]
-    _ = g.ax_marg_x.hist(df_r['avgcurr'], color='r', alpha=.6, bins=mybins * 2)
-    _ = g.ax_marg_y.hist(df_r['avgvolt'], color='r', alpha=.6, bins=mybins * 2, orientation="horizontal")
-    df_b = df.loc[df['result'] == 0]
-    _ = g.ax_marg_x.hist(df_b['avgcurr'], color='b', alpha=.6, bins=mybins)
-    _ = g.ax_marg_y.hist(df_b['avgvolt'], color='b', alpha=.6, bins=mybins, orientation="horizontal")
-    plt.show()'''
-
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("--datelist", nargs="+", default=None, help="dates to consider")
