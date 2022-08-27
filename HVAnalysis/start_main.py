@@ -16,6 +16,7 @@ def main(args):
     mldf = MLDataFrame(comb_wrapper.data_frame)
     mldf.transform_data()
     mldf.add_log10_params()
+    mldf.add_unix_time_from_index(mldf.log10_df)
     print(mldf.log10_df)
 
     '''test_df = df.reset_index()[['timestamp', 'resistance']].\

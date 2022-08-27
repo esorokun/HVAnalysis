@@ -32,3 +32,6 @@ class MLDataFrame:
                                  'avgcurr': df['avgcurr'], 'avgvolt': df['avgvolt'],
                                  'resistance': df['resistance']})
         self.log10_df = df_learn
+
+    def add_unix_time_from_index(self, df):
+        df['time_to_unix'] = (df.index.astype('uint64') / 1_000_000_000).astype(np.int64)
