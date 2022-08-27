@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 import logging
 import argparse
-from ML import MLDataFrame
+from ML import MLDataFrame, PlotBuilder
 from sktime.transformations.panel.summarize import PlateauFinder
 
 from writing import LinosWriter, ErnestsWriter
@@ -30,35 +30,18 @@ def main(args):
     curr_wrapper = HeinzWrapper(conf.curr_file_names, 'curr')
     volt_wrapper = HeinzWrapper(conf.volt_file_names, 'volt')
     comb_wrapper = ResistanceWrapper(volt_wrapper, curr_wrapper)
+
     mldf = MLDataFrame(comb_wrapper.data_frame)
-    mldf.transform_data()
-    currdf = mldf.curr_for_ml()
-    voltdf = mldf.volt_for_ml()
-    resdf = mldf.resistance_for_ml()
-    currdf['binavgvolt'] = voltdf['binavgvolt']
     df = mldf.data_frame
+
+    resdf = mldf.curr_for_ml()
     pyod_model = CBLOF(contamination=0.2)
     pyod_sktime_annotator_curr = PyODAnnotator(pyod_model)
     pyod_sktime_annotator_curr.fit(resdf)
-    currdf['result'] = pyod_sktime_annotator_curr.predict(resdf)
-    currdf['datetime'] = currdf.index
-    df['result'] = currdf['result']
-    #df_red = currdf.loc[currdf['result'] != 0]
-    #df_blue = currdf.loc[currdf['result'] == 0]
-    #fig, axes = plt.subplots(1, 2)
-    #fig = sns.scatterplot(x='datetime', y='binresistance', data=df_red, s=2, color='r', ax=axes[0])
-    #axes = sns.scatterplot(x='datetime', y='binresistance', s=2, data=df_blue, color='b', ax=axes[1])
-    sns.jointplot(x='avgcurr', y='avgvolt', data=df, alpha=0.2, s=5, hue='result')
-    plt.show()
-    '''g = sns.jointplot(x='avgcurr', y='avgvolt', data=df, alpha=1, s=5, hue='result', palette=['b', 'r'])
-    mybins = 30
-    df_r = df.loc[df['result'] == 1]
-    _ = g.ax_marg_x.hist(df_r['avgcurr'], color='r', alpha=.6, bins=mybins * 2)
-    _ = g.ax_marg_y.hist(df_r['avgvolt'], color='r', alpha=.6, bins=mybins * 2, orientation="horizontal")
-    df_b = df.loc[df['result'] == 0]
-    _ = g.ax_marg_x.hist(df_b['avgcurr'], color='b', alpha=.6, bins=mybins)
-    _ = g.ax_marg_y.hist(df_b['avgvolt'], color='b', alpha=.6, bins=mybins, orientation="horizontal")
-    plt.show()'''
+    list_result = pyod_sktime_annotator_curr.predict(resdf)
+
+    ml_plot = PlotBuilder(df, list_result)
+    ml_plot.build_datetime_plot_ml('avgcurr')
 
     '''df['time_to_stamp'] = (df.index.astype('uint64') / 1_000_000_000).astype(np.int64)
     df['logcurr'] = np.log10(df['avgcurr']*df['avgvolt'])

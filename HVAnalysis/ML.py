@@ -1,17 +1,19 @@
 from sklearn.preprocessing import MinMaxScaler, StandardScaler, PowerTransformer, Normalizer
 import numpy as np
 import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
 
 
 class MLDataFrame:
     def __init__(self, data_frame):
         self.data_frame = self._clear_df(data_frame)
         self.trans_df = self._normal_dist_data()
-        self.log10_df = self._log10_params()
+        #self.log10_df = self._log10_params()
 
     def __str__(self):
         df = "data for ML :   " + str(self.data_frame.first_valid_index()) \
-            + " || " + str(self.data_frame.last_valid_index()) + "\n"
+             + " || " + str(self.data_frame.last_valid_index()) + "\n"
         return df
 
     def _clear_df(self, df):
@@ -53,7 +55,7 @@ class MLDataFrame:
         self.trans_df = df_learn
         return self.trans_df
 
-    def _log10_params(self):
+    '''def _log10_params(self):
         df = self.data_frame
         df['logcurr'] = np.log10(df['avgcurr'])
         df['logvolt'] = np.log10(df['avgvolt'])
@@ -63,7 +65,7 @@ class MLDataFrame:
                                  'avgcurr': df['avgcurr'], 'avgvolt': df['avgvolt'],
                                  'resistance': df['resistance']})
         self.log10_df = df_learn
-        return self.log10_df
+        return self.log10_df'''
 
     def curr_for_ml(self):
         df = self.trans_df
@@ -89,3 +91,38 @@ class MLDataFrame:
         df_res = df_first.merge(df_second, left_index=True, right_index=True)
         return df_res
 
+
+class PlotBuilder:
+    def __init__(self, data_frame, list_result):
+        self.data_frame = data_frame
+        self.list_result = list_result
+        self.build_df = self._add_result()
+
+    def _add_result(self):
+        df = self.data_frame.copy()
+        df['result'] = self.list_result
+        df['datetime'] = df.index
+        self.build_df = df
+        return self.build_df
+
+    def build_scatter_ml(self):
+        df = self.build_df
+        df['datetime'] = df.index
+        g = sns.jointplot(x='avgcurr', y='avgvolt', data=df, alpha=1, s=5, hue='result', palette=['b', 'r'])
+        mybins = 30
+        df_r = df.loc[df['result'] == 1]
+        _ = g.ax_marg_x.hist(df_r['avgcurr'], color='r', alpha=.6, bins=mybins * 2)
+        _ = g.ax_marg_y.hist(df_r['avgvolt'], color='r', alpha=.6, bins=mybins * 2, orientation="horizontal")
+        df_b = df.loc[df['result'] == 0]
+        _ = g.ax_marg_x.hist(df_b['avgcurr'], color='b', alpha=.6, bins=mybins)
+        _ = g.ax_marg_y.hist(df_b['avgvolt'], color='b', alpha=.6, bins=mybins, orientation="horizontal")
+        plt.show()
+
+    def build_datetime_plot_ml(self, name):
+        df = self.build_df
+        df_red = df.loc[df['result'] != 0]
+        df_blue = df.loc[df['result'] == 0]
+        fig, axes = plt.subplots(1, 2)
+        fig = sns.scatterplot(x='datetime', y=name, data=df_red, s=2, color='r', ax=axes[0])
+        axes = sns.scatterplot(x='datetime', y=name, s=2, data=df_blue, color='b', ax=axes[1])
+        plt.show()

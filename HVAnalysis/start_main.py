@@ -1,5 +1,5 @@
 import numpy as np
-from ML import MLDataFrame
+from ML import MLDataFrame, MLPlotBuilder
 from dfwrapper import HeinzWrapper, ResistanceWrapper
 import argparse
 import conf
