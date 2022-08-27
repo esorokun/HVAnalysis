@@ -17,14 +17,11 @@ def main(args):
     comb_wrapper = ResistanceWrapper(volt_wrapper, curr_wrapper)
     analise = MLDataFrame(comb_wrapper.data_frame)
     print(analise.data_frame)
-    df = analise.normal_dist_data()
+    df = analise.trans_df
     print(df)
-    plt.hist(df['binresistance'], bins=100)
-    plt.show()
-    plt.hist(df['binavgvolt'], bins=100)
-    plt.show()
-    plt.hist(df['binavgcurr'], bins=100)
-    plt.show()
+    #df['timestamp'] = df.index
+    #sns.scatterplot(x='timestamp', y='binresistance', data=df, alpha=1, s=5)
+    #plt.show()
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()

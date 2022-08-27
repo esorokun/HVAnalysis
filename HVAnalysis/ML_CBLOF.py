@@ -31,12 +31,16 @@ def main(args):
     volt_wrapper = HeinzWrapper(conf.volt_file_names, 'volt')
     comb_wrapper = ResistanceWrapper(volt_wrapper, curr_wrapper)
     mldf = MLDataFrame(comb_wrapper.data_frame)
-    currdf = mldf.resistance_for_ml()
+    mldf.transform_data()
+    currdf = mldf.curr_for_ml()
+    voltdf = mldf.volt_for_ml()
+    resdf = mldf.resistance_for_ml()
+    currdf['binavgvolt'] = voltdf['binavgvolt']
     df = mldf.data_frame
-    pyod_model = CBLOF(contamination=0.05)
+    pyod_model = CBLOF(contamination=0.2)
     pyod_sktime_annotator_curr = PyODAnnotator(pyod_model)
-    pyod_sktime_annotator_curr.fit(currdf)
-    currdf['result'] = pyod_sktime_annotator_curr.predict(currdf)
+    pyod_sktime_annotator_curr.fit(resdf)
+    currdf['result'] = pyod_sktime_annotator_curr.predict(resdf)
     currdf['datetime'] = currdf.index
     df['result'] = currdf['result']
     #df_red = currdf.loc[currdf['result'] != 0]

@@ -1,4 +1,4 @@
-from sklearn.preprocessing import MinMaxScaler, StandardScaler, PowerTransformer
+from sklearn.preprocessing import MinMaxScaler, StandardScaler, PowerTransformer, Normalizer
 import numpy as np
 import pandas as pd
 
@@ -23,7 +23,7 @@ class MLDataFrame:
         self.data_frame = df
         return self.data_frame
 
-    def _transform_data(self):
+    def transform_data(self):
         df = self.data_frame
         scaler = MinMaxScaler(feature_range=(0, 1))
         df[['binavgcurr', 'binavgvolt', 'binresistance']] = scaler.fit_transform(
@@ -38,12 +38,16 @@ class MLDataFrame:
 
     def _normal_dist_data(self):
         df = self.data_frame
-        scaler = PowerTransformer()
-        df[['binavgcurr', 'binavgvolt', 'binresistance']] = scaler.fit_transform(
+        scaler = PowerTransformer(copy=False)
+        df.loc[df['avgcurr'] < 0, 'avgcurr'] = 0
+        df.loc[df['avgcurr'] > 300, 'avgcurr'] = 300
+        df.loc[df['avgvolt'] < 0, 'avgvolt'] = 0
+        df.loc[df['avgvolt'] > 500_000, 'avgvolt'] = 500_000
+        df.loc[df['resistance'] < 0, 'resistance'] = 0
+        df.loc[df['resistance'] > 10_000, 'resistance'] = 10_000
+        scaler.fit(df[['avgcurr', 'avgvolt', 'resistance']])
+        df[['binavgcurr', 'binavgvolt', 'binresistance']] = scaler.transform(
             df[['avgcurr', 'avgvolt', 'resistance']])
-        df['binavgcurr'] = df['binavgcurr'].values.reshape(-1, 1)
-        df['binavgvolt'] = df['binavgvolt'].values.reshape(-1, 1)
-        df['binresistance'] = df['binresistance'].values.reshape(-1, 1)
         df_learn = pd.DataFrame({'binavgcurr': df['binavgcurr'], 'binavgvolt': df['binavgvolt'],
                                  'binresistance': df['binresistance']})
         self.trans_df = df_learn
@@ -63,21 +67,18 @@ class MLDataFrame:
 
     def curr_for_ml(self):
         df = self.trans_df
-        del df['binavgvolt']
-        del df['binresistance']
-        return df
+        df_l = pd.DataFrame({'binavgcurr': df['binavgcurr']})
+        return df_l
 
     def volt_for_ml(self):
         df = self.trans_df
-        del df['binavgcurr']
-        del df['binresistance']
-        return df
+        df_l = pd.DataFrame({'binavgvolt': df['binavgvolt']})
+        return df_l
 
     def resistance_for_ml(self):
-        df = self.trans_df
-        del df['binavgcurr']
-        del df['binavgvolt']
-        return df
+        df = self.trans_df.copy()
+        df_l = pd.DataFrame({'binresistance': df['binresistance']})
+        return df_l
 
     def add_unix_time_from_index(self, df):
         df['time_to_unix'] = (df.index.astype('uint64') / 1_000_000_000).astype(np.int64)
