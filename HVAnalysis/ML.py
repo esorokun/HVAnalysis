@@ -5,24 +5,25 @@ import pandas as pd
 
 class MLDataFrame:
     def __init__(self, data_frame):
-        self.data_frame = self.clear_df(data_frame)
-        self.trans_df = NotImplemented
-        self.log10_df = NotImplemented
+        self.data_frame = self._clear_df(data_frame)
+        self.trans_df = self._normal_dist_data()
+        self.log10_df = self._log10_params()
 
     def __str__(self):
         df = "data for ML :   " + str(self.data_frame.first_valid_index()) \
             + " || " + str(self.data_frame.last_valid_index()) + "\n"
         return df
 
-    def clear_df(self, df):
+    def _clear_df(self, df):
         del df['ncurr']
         del df['nvolt']
         del df['sumvolt']
         del df['sumcurr']
         del df['stable_original']
-        return df
+        self.data_frame = df
+        return self.data_frame
 
-    def transform_data(self):
+    def _transform_data(self):
         df = self.data_frame
         scaler = MinMaxScaler(feature_range=(0, 1))
         df[['binavgcurr', 'binavgvolt', 'binresistance']] = scaler.fit_transform(
@@ -35,7 +36,7 @@ class MLDataFrame:
         self.trans_df = df_learn
         return self.trans_df
 
-    def normal_dist_data(self):
+    def _normal_dist_data(self):
         df = self.data_frame
         scaler = PowerTransformer()
         df[['binavgcurr', 'binavgvolt', 'binresistance']] = scaler.fit_transform(
@@ -48,7 +49,7 @@ class MLDataFrame:
         self.trans_df = df_learn
         return self.trans_df
 
-    def add_log10_params(self):
+    def _log10_params(self):
         df = self.data_frame
         df['logcurr'] = np.log10(df['avgcurr'])
         df['logvolt'] = np.log10(df['avgvolt'])
@@ -59,6 +60,24 @@ class MLDataFrame:
                                  'resistance': df['resistance']})
         self.log10_df = df_learn
         return self.log10_df
+
+    def curr_for_ml(self):
+        df = self.trans_df
+        del df['binavgvolt']
+        del df['binresistance']
+        return df
+
+    def volt_for_ml(self):
+        df = self.trans_df
+        del df['binavgcurr']
+        del df['binresistance']
+        return df
+
+    def resistance_for_ml(self):
+        df = self.trans_df
+        del df['binavgcurr']
+        del df['binavgvolt']
+        return df
 
     def add_unix_time_from_index(self, df):
         df['time_to_unix'] = (df.index.astype('uint64') / 1_000_000_000).astype(np.int64)
