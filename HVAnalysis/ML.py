@@ -1,14 +1,21 @@
-from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import MinMaxScaler, StandardScaler
 import numpy as np
 import pandas as pd
 
 
 class MLDataFrame:
     def __init__(self, data_frame):
-        self.data_frame = data_frame
+        self.data_frame = self.clear_df(data_frame)
         self.trans_df = NotImplemented
         self.log10_df = NotImplemented
 
+    def clear_df(self, df):
+        del df['ncurr']
+        del df['nvolt']
+        del df['sumvolt']
+        del df['sumcurr']
+        del df['stable_original']
+        return df
 
     def transform_data(self):
         df = self.data_frame
@@ -21,6 +28,20 @@ class MLDataFrame:
         df_learn = pd.DataFrame({'binavgcurr': df['binavgcurr'], 'binavgvolt': df['binavgvolt'],
                                  'binresistance': df['binresistance']})
         self.trans_df = df_learn
+        return self.trans_df
+
+    def normal_dist_data(self):
+        df = self.data_frame
+        scaler = StandardScaler()
+        df[['binavgcurr', 'binavgvolt', 'binresistance']] = scaler.fit_transform(
+            df[['avgcurr', 'avgvolt', 'resistance']])
+        df['binavgcurr'] = df['binavgcurr'].values.reshape(-1, 1)
+        df['binavgvolt'] = df['binavgvolt'].values.reshape(-1, 1)
+        df['binresistance'] = df['binresistance'].values.reshape(-1, 1)
+        df_learn = pd.DataFrame({'binavgcurr': df['binavgcurr'], 'binavgvolt': df['binavgvolt'],
+                                 'binresistance': df['binresistance']})
+        self.trans_df = df_learn
+        return self.trans_df
 
     def add_log10_params(self):
         df = self.data_frame
@@ -32,6 +53,7 @@ class MLDataFrame:
                                  'avgcurr': df['avgcurr'], 'avgvolt': df['avgvolt'],
                                  'resistance': df['resistance']})
         self.log10_df = df_learn
+        return self.log10_df
 
     def add_unix_time_from_index(self, df):
         df['time_to_unix'] = (df.index.astype('uint64') / 1_000_000_000).astype(np.int64)
