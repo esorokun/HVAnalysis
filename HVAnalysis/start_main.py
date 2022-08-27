@@ -1,5 +1,5 @@
 import numpy as np
-
+from ML import MLDataFrame
 from dfwrapper import HeinzWrapper, ResistanceWrapper
 import argparse
 import conf
@@ -13,7 +13,11 @@ def main(args):
     curr_wrapper = HeinzWrapper(conf.curr_file_names, 'curr')
     volt_wrapper = HeinzWrapper(conf.volt_file_names, 'volt')
     comb_wrapper = ResistanceWrapper(volt_wrapper, curr_wrapper)
-    df = comb_wrapper.data_frame
+    mldf = MLDataFrame(comb_wrapper.data_frame)
+    mldf.transform_data()
+    mldf.add_log10_params()
+    print(mldf.log10_df)
+
     '''test_df = df.reset_index()[['timestamp', 'resistance']].\
                         rename({'timestamp': 'ds', 'resistance': 'y'}, axis='columns')
     m = Prophet(changepoint_range=0.8)

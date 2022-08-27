@@ -2,11 +2,12 @@ from sklearn.preprocessing import MinMaxScaler
 import numpy as np
 import pandas as pd
 
+
 class MLDataFrame:
     def __init__(self, data_frame):
         self.data_frame = data_frame
-        self.curr_volt_res_df = NotImplemented
-        self.log10_volt_curr_df = NotImplemented
+        self.trans_df = NotImplemented
+        self.log10_df = NotImplemented
 
 
     def transform_data(self):
@@ -19,7 +20,7 @@ class MLDataFrame:
         df['binresistance'] = df['binresistance'].values.reshape(-1, 1)
         df_learn = pd.DataFrame({'binavgcurr': df['binavgcurr'], 'binavgvolt': df['binavgvolt'],
                                  'binresistance': df['binresistance']})
-        self.curr_volt_res_df = df_learn
+        self.trans_df = df_learn
 
     def add_log10_params(self):
         df = self.data_frame
@@ -30,4 +31,4 @@ class MLDataFrame:
         df_learn = pd.DataFrame({'logcurr': df['logcurr'], 'logvolt': df['logvolt'],
                                  'avgcurr': df['avgcurr'], 'avgvolt': df['avgvolt'],
                                  'resistance': df['resistance']})
-        self.log10_volt_curr_df = df_learn
+        self.log10_df = df_learn
