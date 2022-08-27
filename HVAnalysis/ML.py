@@ -9,6 +9,11 @@ class MLDataFrame:
         self.trans_df = NotImplemented
         self.log10_df = NotImplemented
 
+    def __str__(self):
+        df = "data for ML :   " + str(self.data_frame.first_valid_index()) \
+            + " || " + str(self.data_frame.last_valid_index()) + "\n"
+        return df
+
     def clear_df(self, df):
         del df['ncurr']
         del df['nvolt']

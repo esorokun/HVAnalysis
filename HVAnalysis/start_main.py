@@ -24,15 +24,6 @@ def main(args):
     sns.histplot(df['binresistance'], bins=100)
     plt.show()
 
-
-    '''test_df = df.reset_index()[['timestamp', 'resistance']].\
-                        rename({'timestamp': 'ds', 'resistance': 'y'}, axis='columns')
-    m = Prophet(changepoint_range=0.8)
-    m.fit(df)'''
-    #plotting = Plotter(comb_wrapper.data_frame)
-    #plotting.plot_separate('avgcurr')
-
-
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("--datelist", nargs="+", default=None, help="dates to consider")
