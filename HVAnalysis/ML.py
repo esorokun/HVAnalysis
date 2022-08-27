@@ -1,4 +1,4 @@
-from sklearn.preprocessing import MinMaxScaler, StandardScaler
+from sklearn.preprocessing import MinMaxScaler, StandardScaler, PowerTransformer
 import numpy as np
 import pandas as pd
 
@@ -37,7 +37,7 @@ class MLDataFrame:
 
     def normal_dist_data(self):
         df = self.data_frame
-        scaler = StandardScaler()
+        scaler = PowerTransformer()
         df[['binavgcurr', 'binavgvolt', 'binresistance']] = scaler.fit_transform(
             df[['avgcurr', 'avgvolt', 'resistance']])
         df['binavgcurr'] = df['binavgcurr'].values.reshape(-1, 1)

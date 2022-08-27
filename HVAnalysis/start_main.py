@@ -19,9 +19,11 @@ def main(args):
     print(analise.data_frame)
     df = analise.normal_dist_data()
     print(df)
-    df_new = analise.transform_data()
-    print(df_new)
-    sns.histplot(df['binresistance'], bins=100)
+    plt.hist(df['binresistance'], bins=100)
+    plt.show()
+    plt.hist(df['binavgvolt'], bins=100)
+    plt.show()
+    plt.hist(df['binavgcurr'], bins=100)
     plt.show()
 
 if __name__ == '__main__':
