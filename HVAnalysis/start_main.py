@@ -17,7 +17,8 @@ def main(args):
     mldf.transform_data()
     mldf.add_log10_params()
     mldf.add_unix_time_from_index(mldf.log10_df)
-    print(mldf.log10_df)
+    df = mldf.connect_two_df(mldf.log10_df, mldf.trans_df)
+    print(df)
 
     '''test_df = df.reset_index()[['timestamp', 'resistance']].\
                         rename({'timestamp': 'ds', 'resistance': 'y'}, axis='columns')

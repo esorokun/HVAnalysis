@@ -35,3 +35,10 @@ class MLDataFrame:
 
     def add_unix_time_from_index(self, df):
         df['time_to_unix'] = (df.index.astype('uint64') / 1_000_000_000).astype(np.int64)
+
+    def connect_two_df(self, df1, df2):
+        df_first = df1
+        df_second = df2
+        df_res = df_first.merge(df_second, left_index=True, right_index=True)
+        return df_res
+
