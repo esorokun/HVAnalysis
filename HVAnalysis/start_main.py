@@ -1,5 +1,5 @@
 import numpy as np
-from ML import MLDataFrame, MLPlotBuilder
+from ML import MLDataFrame, PlotBuilder
 from dfwrapper import HeinzWrapper, ResistanceWrapper
 import argparse
 import conf
@@ -8,6 +8,8 @@ import seaborn as sns
 from plotting import Plotter
 import datetime
 #from pycaret.anomaly
+from pyod.models.cblof import CBLOF
+from sktime.annotation.adapters import PyODAnnotator
 
 def main(args):
     conf.configure_from_args(args)
@@ -15,13 +17,18 @@ def main(args):
     curr_wrapper = HeinzWrapper(conf.curr_file_names, 'curr')
     volt_wrapper = HeinzWrapper(conf.volt_file_names, 'volt')
     comb_wrapper = ResistanceWrapper(volt_wrapper, curr_wrapper)
-    analise = MLDataFrame(comb_wrapper.data_frame)
-    print(analise.data_frame)
-    df = analise.trans_df
-    print(df)
-    #df['timestamp'] = df.index
-    #sns.scatterplot(x='timestamp', y='binresistance', data=df, alpha=1, s=5)
-    #plt.show()
+
+    mldf = MLDataFrame(comb_wrapper.data_frame)
+    df = mldf.data_frame
+
+    resdf = mldf.curr_for_ml()
+    pyod_model = CBLOF(contamination=0.2)
+    pyod_sktime_annotator_curr = PyODAnnotator(pyod_model)
+    pyod_sktime_annotator_curr.fit(resdf)
+    list_result = pyod_sktime_annotator_curr.predict(resdf)
+
+    ml_plot = PlotBuilder(df, list_result)
+    ml_plot.build_datetime_plot_ml('avgcurr')
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
