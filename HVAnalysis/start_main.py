@@ -1,5 +1,5 @@
 import numpy as np
-from ML import MLDataFrame, PlotBuilder
+from ML import MLDataFrame, PlotBuilder, MLTrainSet
 from dfwrapper import HeinzWrapper, ResistanceWrapper
 import argparse
 import conf
@@ -14,21 +14,26 @@ from sktime.annotation.adapters import PyODAnnotator
 def main(args):
     conf.configure_from_args(args)
 
-    curr_wrapper = HeinzWrapper(conf.curr_file_names, 'curr')
+    mldf = MLTrainSet()
+    df = mldf.data_frame
+    list_result = mldf.create_train_list()
+    '''curr_wrapper = HeinzWrapper(conf.curr_file_names, 'curr')
     volt_wrapper = HeinzWrapper(conf.volt_file_names, 'volt')
     comb_wrapper = ResistanceWrapper(volt_wrapper, curr_wrapper)
 
     mldf = MLDataFrame(comb_wrapper.data_frame)
+    mldf.normal_dist_data()
     df = mldf.data_frame
 
-    resdf = mldf.curr_for_ml()
-    pyod_model = CBLOF(contamination=0.2)
+    alldf = mldf.curr_volt_for_ml()
+    print(alldf)
+    pyod_model = CBLOF(contamination=0.0095)
     pyod_sktime_annotator_curr = PyODAnnotator(pyod_model)
-    pyod_sktime_annotator_curr.fit(resdf)
-    list_result = pyod_sktime_annotator_curr.predict(resdf)
+    pyod_sktime_annotator_curr.fit(alldf)
+    list_result = pyod_sktime_annotator_curr.predict(alldf)'''
 
     ml_plot = PlotBuilder(df, list_result)
-    ml_plot.build_datetime_plot_ml('avgcurr')
+    ml_plot.build_scatter_plot()
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()

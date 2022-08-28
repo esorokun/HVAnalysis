@@ -24,6 +24,10 @@ new_date_list = ['2022-06-01', '2022-06-02', '2022-06-03', '2022-06-04', '2022-0
                  '2022-06-26', '2022-06-27', '2022-06-28', '2022-06-29', '2022-06-30',
                  '2022-07-01']
 
+train_list = ['2018-09-19', '2018-09-20', '2018-09-28', '2018-09-30']
+
+curr_train = [f'{input_data_folder}/heinzCurr_{d}.csv' for d in train_list]
+volt_train = [f'{input_data_folder}/heinzVolt_{d}.csv' for d in train_list]
 curr_file_names = [f'{input_data_folder}/heinzCurr_{d}.csv' for d in all_date_list]
 volt_file_names = [f'{input_data_folder}/heinzVolt_{d}.csv' for d in all_date_list]
 Heinz_I_curr_file_names = [f'{input_data_folder}/NP04_DCS_01_Heinz_I._{d}.csv' for d in new_date_list]
