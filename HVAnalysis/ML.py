@@ -29,10 +29,15 @@ class MLDataFrame:
         self.data_frame = df
         return self.data_frame
 
+    def for_train(self):
+        df = self.data_frame
+        df_l = pd.DataFrame({'avgcurr': df['avgcurr'], 'avgvolt': df['avgvolt']})
+        return df_l
+
     def remove_low_val(self):
         df = self.data_frame
-        df = df.loc[df['avgvolt'] > 10_000]
-        df = df.loc[df['avgcurr'] > 10]
+        df = df.loc[df['avgvolt'] > 50_000]
+        df = df.loc[df['avgcurr'] > 40]
         self.data_frame = df
 
     def transform_data(self):
@@ -62,6 +67,7 @@ class MLDataFrame:
         df_learn = pd.DataFrame({'binavgcurr': df['binavgcurr'], 'binavgvolt': df['binavgvolt'],
                                  'binresistance': df['binresistance']})
         self.trans_df = df_learn
+        return self.trans_df
 
     '''def _log10_params(self):
         df = self.data_frame
@@ -133,8 +139,9 @@ class MLTrainSet(MLDataFrame):
         df.loc[df['avgvolt'] < 50_000, 'result'] = 1
         df.loc[df['avgcurr'] < 40, 'result'] = 1
         list_res = df['result']
-        alldf['result'] = list_res
-        self.train_df = alldf
+        df_l = pd.DataFrame({'avgcurr': df['avgcurr'], 'avgvolt': df['avgvolt']})
+        #df_l['result'] = list_res
+        self.train_df = df_l
         return list_res
 
 

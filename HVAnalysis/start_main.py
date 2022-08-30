@@ -1,5 +1,8 @@
 import numpy as np
+from sktime.clustering.k_means import TimeSeriesKMeans
+
 from ML import MLDataFrame, PlotBuilder, MLTrainSet
+import sktime.clustering
 from dfwrapper import HeinzWrapper, ResistanceWrapper
 import argparse
 import conf
@@ -14,26 +17,20 @@ from sktime.annotation.adapters import PyODAnnotator
 def main(args):
     conf.configure_from_args(args)
 
-    mldf = MLTrainSet()
-    df = mldf.data_frame
-    list_result = mldf.create_train_list()
-    '''curr_wrapper = HeinzWrapper(conf.curr_file_names, 'curr')
+    curr_wrapper = HeinzWrapper(conf.curr_file_names, 'curr')
     volt_wrapper = HeinzWrapper(conf.volt_file_names, 'volt')
     comb_wrapper = ResistanceWrapper(volt_wrapper, curr_wrapper)
 
     mldf = MLDataFrame(comb_wrapper.data_frame)
     mldf.normal_dist_data()
-    df = mldf.data_frame
+    df = mldf.curr_for_ml()
+    #tl = df['binavgcurr'].values
+    print(type(df))
+    new_claster = TimeSeriesKMeans()
+    new_claster.fit(df)
 
-    alldf = mldf.curr_volt_for_ml()
-    print(alldf)
-    pyod_model = CBLOF(contamination=0.0095)
-    pyod_sktime_annotator_curr = PyODAnnotator(pyod_model)
-    pyod_sktime_annotator_curr.fit(alldf)
-    list_result = pyod_sktime_annotator_curr.predict(alldf)'''
-
-    ml_plot = PlotBuilder(df, list_result)
-    ml_plot.build_scatter_plot()
+    #ml_plot = PlotBuilder(fit_df, list_result)
+    #ml_plot.build_scatter_plot()
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
