@@ -31,10 +31,17 @@ def main(args):
     mldf = MLDataFrame(comb_wrapper.data_frame)
     mldf.normal_dist_data()
     df = mldf.data_frame
-    df['checker'] = np.abs((df['avgcurr']-df['avgcurr'].shift(2))/2)
+    #df['checker'] = np.abs((df['avgcurr'].shift(-30) - df['avgcurr'].shift(30)) / 120)
+    #df['checker_10sec'] = np.abs((df['avgcurr'].shift(-5) - df['avgcurr'].shift(5)) / 20)
+    df['checker_30sec'] = np.abs((df['avgcurr'].shift(-15) - df['avgcurr'].shift(15)) / 60)
+    df['checker_60sec'] = np.abs((df['avgcurr'].shift(-30) - df['avgcurr'].shift(30))/120)
+    df['checker_120sec'] = np.abs((df['avgcurr'].shift(-60) - df['avgcurr'].shift(60)) / 240)
+    df['checker_240sec'] = np.abs((df['avgcurr'].shift(-120) - df['avgcurr'].shift(120)) / 480)
+    df['checker'] = (df['checker_30sec'] + df['checker_60sec']
+                     + df['checker_120sec'] + df['checker_240sec'])/4
     #df.loc[df['checker'] > 100, 'checker'] = 100
     #df.loc[df['checker'] < 0.001, 'checker'] = 0.001
-    df.loc[df['checker'] < 0.01, 'result'] = 0
+    df.loc[df['checker'] < 0.005, 'result'] = 0
     #df.loc[(1.006 > df['checker'])*(df['checker'] > 0.994), 'result'] = 0
     df.loc[df['result'] != 0, 'result'] = 1
     df['datetime'] = df.index
