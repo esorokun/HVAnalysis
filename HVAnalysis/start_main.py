@@ -31,12 +31,15 @@ def main(args):
     mldf = MLDataFrame(comb_wrapper.data_frame)
     mldf.normal_dist_data()
     df = mldf.data_frame
-    df['checker'] = df['avgcurr']/df['avgcurr'].shift(1)
+    df['checker'] = np.abs((df['avgcurr']-df['avgcurr'].shift(2))/2)
     #df.loc[df['checker'] > 100, 'checker'] = 100
     #df.loc[df['checker'] < 0.001, 'checker'] = 0.001
+    df.loc[df['checker'] < 0.01, 'result'] = 0
+    #df.loc[(1.006 > df['checker'])*(df['checker'] > 0.994), 'result'] = 0
+    df.loc[df['result'] != 0, 'result'] = 1
     df['datetime'] = df.index
     print(df)
-    sns.scatterplot(x='datetime', y='checker', data=df, alpha=1, s=5)
+    sns.scatterplot(x='datetime', y='avgcurr', data=df, alpha=1, s=5, hue='result')
     plt.show()
     #ml_plot = PlotBuilder(df, res)
     #ml_plot.build_scatter_plot()
