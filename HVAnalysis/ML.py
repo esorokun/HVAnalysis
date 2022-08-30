@@ -41,7 +41,7 @@ class MLDataFrame:
         self.data_frame = df
 
     def transform_data(self):
-        df = self.data_frame
+        df = self.data_frame.copy()
         scaler = MinMaxScaler(feature_range=(0, 1))
         df[['binavgcurr', 'binavgvolt', 'binresistance']] = scaler.fit_transform(
             df[['avgcurr', 'avgvolt', 'resistance']])
@@ -53,7 +53,7 @@ class MLDataFrame:
         self.trans_df = df_learn
 
     def normal_dist_data(self):
-        df = self.data_frame
+        df = self.data_frame.copy()
         scaler = PowerTransformer(copy=False)
         df.loc[df['avgcurr'] < 0, 'avgcurr'] = 0
         df.loc[df['avgcurr'] > 300, 'avgcurr'] = 300

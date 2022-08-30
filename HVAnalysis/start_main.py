@@ -1,5 +1,11 @@
 import numpy as np
+import pandas as pd
 from sktime.clustering.k_means import TimeSeriesKMeans
+from sktime.clustering.k_medoids import TimeSeriesKMedoids
+from sktime.clustering.k_shapes import TimeSeriesKShapes
+from sktime.clustering.kernel_k_means import TimeSeriesKernelKMeans
+from sktime.clustering.partitioning import TimeSeriesLloyds
+from sktime.transformations.panel.summarize import PlateauFinder
 
 from ML import MLDataFrame, PlotBuilder, MLTrainSet
 import sktime.clustering
@@ -15,6 +21,7 @@ from pyod.models.cblof import CBLOF
 from sktime.annotation.adapters import PyODAnnotator
 
 def main(args):
+
     conf.configure_from_args(args)
 
     curr_wrapper = HeinzWrapper(conf.curr_file_names, 'curr')
@@ -23,13 +30,15 @@ def main(args):
 
     mldf = MLDataFrame(comb_wrapper.data_frame)
     mldf.normal_dist_data()
-    df = mldf.curr_for_ml()
-    #tl = df['binavgcurr'].values
-    print(type(df))
-    new_claster = TimeSeriesKMeans()
-    new_claster.fit(df)
-
-    #ml_plot = PlotBuilder(fit_df, list_result)
+    df = mldf.data_frame
+    df['checker'] = df['avgcurr']/df['avgcurr'].shift(1)
+    #df.loc[df['checker'] > 100, 'checker'] = 100
+    #df.loc[df['checker'] < 0.001, 'checker'] = 0.001
+    df['datetime'] = df.index
+    print(df)
+    sns.scatterplot(x='datetime', y='checker', data=df, alpha=1, s=5)
+    plt.show()
+    #ml_plot = PlotBuilder(df, res)
     #ml_plot.build_scatter_plot()
 
 if __name__ == '__main__':
