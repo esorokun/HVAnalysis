@@ -37,8 +37,8 @@ def main(args):
     df['checker_60sec'] = np.abs((df['avgcurr'].shift(-30) - df['avgcurr'].shift(30))/120)
     df['checker_120sec'] = np.abs((df['avgcurr'].shift(-60) - df['avgcurr'].shift(60)) / 240)
     df['checker_240sec'] = np.abs((df['avgcurr'].shift(-120) - df['avgcurr'].shift(120)) / 480)
-    df['checker'] = np.sqrt((df['checker_30sec']**2 + df['checker_60sec']**2
-                     + df['checker_120sec']**2 + df['checker_240sec']**2)/4)
+    df['checker'] = np.sqrt((df['checker_30sec']**2*2 + df['checker_60sec']**2*4
+                     + df['checker_120sec']**2*8 + df['checker_240sec']**2*16)/30)
     #df.loc[df['checker'] > 100, 'checker'] = 100
     #df.loc[df['checker'] < 0.001, 'checker'] = 0.001
     df.loc[df['checker'] < 0.005, 'result'] = 0
