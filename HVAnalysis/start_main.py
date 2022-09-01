@@ -44,7 +44,7 @@ def main(args):
     df.loc[df['checker'] < 0.005, 'result'] = 0
     #df.loc[(1.006 > df['checker'])*(df['checker'] > 0.994), 'result'] = 0
     df.loc[df['result'] != 0, 'result'] = 1
-    df.loc[np.abs(df['avgcurr']) > np.abs(df['avgcurr'].shift(-1)*2), 'result'] = 1
+    df.loc[np.abs(df['avgcurr']) > np.abs(df['avgcurr'].shift(-1)*1.006), 'result'] = 1
     df['datetime'] = df.index
     print(df)
     sns.scatterplot(x='datetime', y='avgcurr', data=df, alpha=1, s=5, hue='result')
