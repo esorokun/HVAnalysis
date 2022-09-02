@@ -31,26 +31,60 @@ def main(args):
     mldf = MLDataFrame(comb_wrapper.data_frame)
     mldf.normal_dist_data()
     df = mldf.data_frame
-    #df['checker'] = np.abs((df['avgcurr'].shift(-30) - df['avgcurr'].shift(30)) / 120)
-    #df['checker_10sec'] = np.abs((df['avgcurr'].shift(-5) - df['avgcurr'].shift(5)) / 20)
+    '''
     df['checker_30sec'] = np.abs((df['avgcurr'].shift(-15) - df['avgcurr'].shift(15)) / 60)
     df['checker_60sec'] = np.abs((df['avgcurr'].shift(-30) - df['avgcurr'].shift(30))/120)
     df['checker_120sec'] = np.abs((df['avgcurr'].shift(-60) - df['avgcurr'].shift(60)) / 240)
     df['checker_240sec'] = np.abs((df['avgcurr'].shift(-120) - df['avgcurr'].shift(120)) / 480)
     df['checker'] = np.sqrt((df['checker_30sec']**2*2 + df['checker_60sec']**2*4
                      + df['checker_120sec']**2*8 + df['checker_240sec']**2*16)/30)
-    #df.loc[df['checker'] > 100, 'checker'] = 100
-    #df.loc[df['checker'] < 0.001, 'checker'] = 0.001
-    df.loc[df['checker'] < 0.005, 'result'] = 0
-    #df.loc[(1.006 > df['checker'])*(df['checker'] > 0.994), 'result'] = 0
-    df.loc[df['result'] != 0, 'result'] = 1
-    df.loc[np.abs(df['avgcurr']) > np.abs(df['avgcurr'].shift(-1)*1.006), 'result'] = 1
-    df['datetime'] = df.index
+    '''
+
+    #df['checker_long'] = np.abs((df['avgcurr'].shift(-600) - df['avgcurr'].shift(600)) / 2400)
+
+    new_df = df.copy()
+    new_df['datetime'] = new_df.index
+    new_df = new_df.reset_index()
+    new_df['num'] = new_df.index
+    new_df = new_df.loc[new_df['num'] % 120 == 0]
+    new_df['checker'] = np.abs((new_df['avgcurr'].shift(-1) - new_df['avgcurr'].shift(1)) / 240)
+    new_df = new_df.set_index('datetime')
+    df = df.join(new_df[['checker']])
+    df = df.ffill(axis=0)
+    df = df.bfill(axis=0)
     print(df)
-    sns.scatterplot(x='datetime', y='avgcurr', data=df, alpha=1, s=5, hue='result')
+    df.loc[np.abs(df['checker']) < 0.001, 'result_curr'] = 0
+    df.loc[df['result_curr'] != 0, 'result_curr'] = 1
+    df.loc[np.abs(df['avgcurr']) > np.abs(df['avgcurr'].shift(-1) * 1.01), 'result_curr'] = 1
+    df.loc[np.abs(df['avgcurr']) > np.abs(df['avgcurr'].shift(1) * 1.01), 'result_curr'] = 1
+    print(df['result_curr'].sum())
+    print(df['result_curr'])
+
+    '''
+    #df['checker_30sec'] = np.abs((df['avgvolt'].shift(-15) - df['avgvolt'].shift(15)) / 60)
+    df['checker_60sec'] = np.abs((df['avgvolt'].shift(-30) - df['avgvolt'].shift(30)) / 120)
+    df['checker_120sec'] = np.abs((df['avgvolt'].shift(-60) - df['avgvolt'].shift(60)) / 240)
+    df['checker_240sec'] = np.abs((df['avgvolt'].shift(-120) - df['avgvolt'].shift(120)) / 480)
+    df['checker_480sec'] = np.abs((df['avgvolt'].shift(-240) - df['avgvolt'].shift(240)) / 960)
+    df['checker'] = np.sqrt((df['checker_60sec'] ** 2 * 2 + df['checker_120sec'] ** 2 * 4
+                             + df['checker_240sec'] ** 2 * 8 + df['checker_480sec'] ** 2 * 16) / 30)
+    df.loc[df['checker'] < 0.25, 'result_volt'] = 0
+    df.loc[df['result_volt'] != 0, 'result_volt'] = 1
+    df.loc[np.abs(df['avgvolt']) > np.abs(df['avgvolt'].shift(-1) * 1.05), 'result_volt'] = 1
+    df.loc[np.abs(df['avgvolt']) > np.abs(df['avgvolt'].shift(1) * 1.05), 'result_volt'] = 1
+    '''
+
+    #df['result'] = df['result_volt']
+    df.loc[df['result_curr'] == 1, 'result'] = 1
+    df['datetime'] = df.index
+    length = int(len(df))
+    unstable = int(df['result_curr'].sum())
+    perc = np.round(unstable/length, 2)
+    print(str(perc) + "%\n" + str(100 - perc) + "%")
+    sns.jointplot(x='datetime', y='avgcurr', data=df, alpha=1, s=5, hue='result_curr')
     plt.show()
-    #ml_plot = PlotBuilder(df, res)
-    #ml_plot.build_scatter_plot()
+    #ml_plot = PlotBuilder(df, df['result'])
+    #ml_plot.build_scatter_plot()'''
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
