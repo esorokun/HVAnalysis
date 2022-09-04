@@ -50,10 +50,9 @@ def second(df):
     new_df = new_df.reset_index()
     new_df['num'] = new_df.index
 
-    new_df = new_df.loc[new_df['num'] % 180 == 0]
+    new_df = new_df.loc[new_df['num'] % 240 == 0]
     new_df = new_df.drop([0])
     datelist = new_df['datetime']
-    print(new_df)
 
     new_df = new_df.set_index('datetime')
     df = df.join(new_df[['num']])
@@ -61,24 +60,35 @@ def second(df):
     df = df.bfill(axis=0)
 
     df['datetime'] = df.index
+    df = df.loc[np.abs(df['avgcurr']) < np.abs(df['avgcurr'].shift(-1) * 1.05)]
+    df = df.loc[np.abs(df['avgcurr']) < np.abs(df['avgcurr'].shift(1) * 1.05)]
+    df = df.loc[np.abs(df['avgcurr']) < np.abs(df['avgcurr'].shift(-10) * 1.05)]
+    df = df.loc[np.abs(df['avgcurr']) < np.abs(df['avgcurr'].shift(10) * 1.05)]
+    df = df.loc[np.abs(df['avgcurr']) < np.abs(df['avgcurr'].shift(-20) * 1.05)]
+    df = df.loc[np.abs(df['avgcurr']) < np.abs(df['avgcurr'].shift(20) * 1.05)]
+    df = df.loc[np.abs(df['avgcurr']) < np.abs(df['avgcurr'].shift(-30) * 1.05)]
+    df = df.loc[np.abs(df['avgcurr']) < np.abs(df['avgcurr'].shift(30) * 1.05)]
     new_df = df.groupby(['num']).mean()
     new_df = new_df.join(datelist)
 
-    new_df['checker'] = np.abs((new_df['avgcurr'].shift(-1) - new_df['avgcurr'].shift(1)) / 360)
+    new_df['checker'] = np.abs((new_df['avgcurr'].shift(-1) - new_df['avgcurr'].shift(1)) / 560)
     new_df = new_df.set_index('datetime')
     df = df_res
     df = df.join(new_df[['checker']])
     df = df.ffill(axis=0)
     df = df.bfill(axis=0)
     print(df)
-    df.loc[np.abs(df['checker']) < 0.001, 'result_curr'] = 0
+    df.loc[np.abs(df['checker']) < 0.01, 'result_curr'] = 0
     df.loc[df['result_curr'] != 0, 'result_curr'] = 1
-
     df.loc[np.abs(df['avgcurr']) > np.abs(df['avgcurr'].shift(-1) * 1.05), 'result_curr'] = 1
     df.loc[np.abs(df['avgcurr']) > np.abs(df['avgcurr'].shift(1) * 1.05), 'result_curr'] = 1
+    df.loc[np.abs(df['avgcurr']) > np.abs(df['avgcurr'].shift(-10) * 1.05), 'result_curr'] = 1
+    df.loc[np.abs(df['avgcurr']) > np.abs(df['avgcurr'].shift(10) * 1.05), 'result_curr'] = 1
+    df.loc[np.abs(df['avgcurr']) > np.abs(df['avgcurr'].shift(-20) * 1.05), 'result_curr'] = 1
+    df.loc[np.abs(df['avgcurr']) > np.abs(df['avgcurr'].shift(20) * 1.05), 'result_curr'] = 1
+    df.loc[np.abs(df['avgcurr']) > np.abs(df['avgcurr'].shift(-30) * 1.05), 'result_curr'] = 1
+    df.loc[np.abs(df['avgcurr']) > np.abs(df['avgcurr'].shift(30) * 1.05), 'result_curr'] = 1
 
-    print(df['result_curr'].sum())
-    print(df['result_curr'])
 
     # df['result'] = df['result_volt']
     df.loc[df['result_curr'] == 1, 'result'] = 1
