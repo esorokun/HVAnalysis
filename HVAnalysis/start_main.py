@@ -14,11 +14,69 @@ import argparse
 import conf
 import matplotlib.pyplot as plt
 import seaborn as sns
+from num_diff import NumDiff, CurrNumDiff, VoltNumDiff
 from plotting import Plotter
 import datetime
 #from pycaret.anomaly
 from pyod.models.cblof import CBLOF
 from sktime.annotation.adapters import PyODAnnotator
+
+
+def second(df):
+
+    df_res = df.copy()
+    new_df = df.copy()
+    new_df['datetime'] = new_df.index
+    new_df = new_df.reset_index()
+    new_df['num'] = new_df.index
+
+    new_df = new_df.loc[new_df['num'] % 60 == 0]
+    new_df = new_df.drop([0])
+    datelist = new_df['datetime']
+
+    new_df = new_df.set_index('datetime')
+    df = df.join(new_df[['num']])
+    df = df.ffill(axis=0)
+    df = df.bfill(axis=0)
+    df['datetime'] = df.index
+
+    df = df.loc[np.abs(df['avgcurr']) < np.abs(df['avgcurr'].shift(1) * 1.05)]
+    df = df.loc[np.abs(df['avgcurr']) > np.abs(df['avgcurr'].shift(1) * 0.95)]
+    df = df.loc[np.abs(df['avgcurr']) < np.abs(df['avgcurr'].shift(-1) * 1.05)]
+    df = df.loc[np.abs(df['avgcurr']) > np.abs(df['avgcurr'].shift(-1) * 0.95)]
+    df = df.loc[np.abs(df['avgcurr']) < np.abs(df['avgcurr'].shift(120) * 1.05)]
+    df = df.loc[np.abs(df['avgcurr']) > np.abs(df['avgcurr'].shift(120) * 0.95)]
+    df = df.loc[np.abs(df['avgcurr']) < np.abs(df['avgcurr'].shift(-120) * 1.05)]
+    df = df.loc[np.abs(df['avgcurr']) > np.abs(df['avgcurr'].shift(-120) * 0.95)]
+    new_df = df.groupby(['num']).mean()
+    new_df = new_df.join(datelist)
+
+    new_df['checker_left'] = np.abs((new_df['avgcurr'].shift(-1) - new_df['avgcurr']) / 60)
+    new_df['checker_right'] = np.abs((new_df['avgcurr'].shift(1) - new_df['avgcurr']) / 60)
+    new_df['checker'] = (np.abs(new_df['checker_left']) + np.abs(new_df['checker_right']))/2
+    new_df = new_df.set_index('datetime')
+    df = df_res
+    df = df.join(new_df[['checker']])
+    new_df = new_df.rename(columns={"avgcurr": "meancurr"})
+    df = df.join(new_df[['meancurr']])
+    df = df.ffill(axis=0)
+    df = df.bfill(axis=0)
+    df.loc[np.abs(df['checker']) < 0.01, 'result_curr'] = 0
+    df.loc[df['result_curr'] != 0, 'result_curr'] = 1
+    df.loc[np.abs(df['avgcurr']) > np.abs(df['meancurr'] * 1.025), 'result_curr'] = 1
+    df.loc[np.abs(df['avgcurr']) < np.abs(df['meancurr'] * 0.975), 'result_curr'] = 1
+
+    df.loc[df['result_curr'] == 1, 'result'] = 1
+    df.loc[df['result'] != 1, 'result'] = 0
+    df['datetime'] = df.index
+    length = int(len(df))
+    unstable = int(df['result_curr'].sum())
+    perc = np.round(unstable / length, 2)
+    print(str(perc) + "%\n" + str(100 - perc) + "%")
+
+    df['datetime'] = df.index
+    sns.scatterplot(x='datetime', y='avgcurr', data=df, alpha=1, s=5, hue='result')
+    plt.show()
 
 def main(args):
 
@@ -31,68 +89,16 @@ def main(args):
     mldf = MLDataFrame(comb_wrapper.data_frame)
     mldf.normal_dist_data()
     df = mldf.data_frame
+    volt = VoltNumDiff(df)
+    volt.show_plot()
+    #volt_res = volt.get_result_list()
+    #curr = CurrNumDiff(df)
+    #curr_res = curr.get_result_list()
+    #df['result'] = volt_res
+    #df.loc[curr_res['result'] == 1, 'result'] = 1
+    #k = PlotBuilder(df, df['result'].values)
+    #k.build_scatter_plot()
 
-
-    '''
-    df['checker_30sec'] = np.abs((df['avgcurr'].shift(-15) - df['avgcurr'].shift(15)) / 60)
-    df['checker_60sec'] = np.abs((df['avgcurr'].shift(-30) - df['avgcurr'].shift(30))/120)
-    df['checker_120sec'] = np.abs((df['avgcurr'].shift(-60) - df['avgcurr'].shift(60)) / 240)
-    df['checker_240sec'] = np.abs((df['avgcurr'].shift(-120) - df['avgcurr'].shift(120)) / 480)
-    df['checker'] = np.sqrt((df['checker_30sec']**2*2 + df['checker_60sec']**2*4
-                     + df['checker_120sec']**2*8 + df['checker_240sec']**2*16)/30)
-    '''
-
-    #df['checker_long'] = np.abs((df['avgcurr'].shift(-600) - df['avgcurr'].shift(600)) / 2400)
-
-    new_df = df.copy()
-    new_df['datetime'] = new_df.index
-    new_df = new_df.reset_index()
-    new_df['num'] = new_df.index
-    new_df = new_df.loc[new_df['num'] % 600 == 0]
-    new_df['checker'] = np.abs((new_df['avgcurr'].shift(-1) - new_df['avgcurr'].shift(1)) / 1200)
-    new_df = new_df.set_index('datetime')
-    df = df.join(new_df[['checker']])
-    df = df.ffill(axis=0)
-    df = df.bfill(axis=0)
-    print(df)
-    df.loc[np.abs(df['checker']) < 0.001, 'result_curr'] = 0
-    df.loc[df['result_curr'] != 0, 'result_curr'] = 1
-
-    df.loc[np.abs(df['avgcurr']) > np.abs(df['avgcurr'].shift(-1) * 1.007), 'result_curr'] = 1
-    df.loc[np.abs(df['avgcurr']) > np.abs(df['avgcurr'].shift(1) * 1.007), 'result_curr'] = 1
-
-    print(df['result_curr'].sum())
-    print(df['result_curr'])
-
-    '''
-    #df['checker_30sec'] = np.abs((df['avgvolt'].shift(-15) - df['avgvolt'].shift(15)) / 60)
-    df['checker_60sec'] = np.abs((df['avgvolt'].shift(-30) - df['avgvolt'].shift(30)) / 120)
-    df['checker_120sec'] = np.abs((df['avgvolt'].shift(-60) - df['avgvolt'].shift(60)) / 240)
-    df['checker_240sec'] = np.abs((df['avgvolt'].shift(-120) - df['avgvolt'].shift(120)) / 480)
-    df['checker_480sec'] = np.abs((df['avgvolt'].shift(-240) - df['avgvolt'].shift(240)) / 960)
-    df['checker'] = np.sqrt((df['checker_60sec'] ** 2 * 2 + df['checker_120sec'] ** 2 * 4
-                             + df['checker_240sec'] ** 2 * 8 + df['checker_480sec'] ** 2 * 16) / 30)
-    df.loc[df['checker'] < 0.25, 'result_volt'] = 0
-    df.loc[df['result_volt'] != 0, 'result_volt'] = 1
-    df.loc[np.abs(df['avgvolt']) > np.abs(df['avgvolt'].shift(-1) * 1.05), 'result_volt'] = 1
-    df.loc[np.abs(df['avgvolt']) > np.abs(df['avgvolt'].shift(1) * 1.05), 'result_volt'] = 1
-    '''
-
-    #df['result'] = df['result_volt']
-    df.loc[df['result_curr'] == 1, 'result'] = 1
-    df.loc[df['result'] != 1, 'result'] = 0
-    df['datetime'] = df.index
-    length = int(len(df))
-    unstable = int(df['result_curr'].sum())
-    perc = np.round(unstable/length, 2)
-    print(str(perc) + "%\n" + str(100 - perc) + "%")
-
-
-    df['datetime'] = df.index
-    sns.scatterplot(x='datetime', y='avgcurr', data=df, alpha=1, s=5, hue='result')
-    plt.show()
-    #ml_plot = PlotBuilder(df, df['result'])
-    #ml_plot.build_scatter_plot()'''
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()

@@ -9,203 +9,117 @@ from dfwrapper import HeinzWrapper, ResistanceWrapper
 from ML import MLDataFrame
 
 
-def first(df):
-    new_df = df.copy()
-    new_df['datetime'] = new_df.index
-    new_df = new_df.reset_index()
-    new_df['num'] = new_df.index
-    new_df = new_df.loc[new_df['num'] % 600 == 0]
-    new_df['checker'] = np.abs((new_df['avgcurr'].shift(-1) - new_df['avgcurr'].shift(1)) / 1200)
-    new_df = new_df.set_index('datetime')
-    df = df.join(new_df[['checker']])
-    df = df.ffill(axis=0)
-    df = df.bfill(axis=0)
-    print(df)
-    df.loc[np.abs(df['checker']) < 0.001, 'result_curr'] = 0
-    df.loc[df['result_curr'] != 0, 'result_curr'] = 1
+class NumDiff():
+    def __init__(self, data_frame, name='avgcurr', seconds=60, angle=0.01, rate=0.05):
+        self.data_frame = data_frame
+        self.seconds = seconds
+        self.name = name
+        self.angle = angle
+        self.rate = rate
 
-    df.loc[np.abs(df['avgcurr']) > np.abs(df['avgcurr'].shift(-1) * 1.007), 'result_curr'] = 1
-    df.loc[np.abs(df['avgcurr']) > np.abs(df['avgcurr'].shift(1) * 1.007), 'result_curr'] = 1
+    def get_result_list(self):
+        df = self._result_df()
+        res_df = pd.DataFrame({'result': df['result']})
+        return res_df
 
-    print(df['result_curr'].sum())
-    print(df['result_curr'])
+    def _create_work_df(self):
+        new_df = self.data_frame.copy()
+        df = self.data_frame.copy()
 
-    # df['result'] = df['result_volt']
-    df.loc[df['result_curr'] == 1, 'result'] = 1
-    df.loc[df['result'] != 1, 'result'] = 0
-    df['datetime'] = df.index
-    length = int(len(df))
-    unstable = int(df['result_curr'].sum())
-    perc = np.round(unstable / length, 2)
-    print(str(perc) + "%\n" + str(100 - perc) + "%")
+        new_df['datetime'] = new_df.index
+        new_df = new_df.reset_index()
+        new_df['num'] = new_df.index
+        seconds = self.seconds
+        new_df = new_df.loc[new_df['num'] % seconds == 0]
+        new_df = new_df.drop([0])
+        datelist = new_df['datetime']
+        new_df = new_df.set_index('datetime')
+        df = df.join(new_df[['num']])
+        df = df.ffill(axis=0)
+        df = df.bfill(axis=0)
+        df['datetime'] = df.index
+        self.work_df = df
+        return datelist
 
-    df['datetime'] = df.index
-    sns.scatterplot(x='datetime', y='avgcurr', data=df, alpha=1, s=5, hue='result')
-    plt.show()
+    def _mean_filtering(self):
+        name = self.name
+        datelist = self._create_work_df()
+        df = self.work_df
+        seconds = self.seconds
+        rate = self.rate
 
-def second(df):
-    df_res = df.copy()
-    new_df = df.copy()
-    new_df['datetime'] = new_df.index
-    new_df = new_df.reset_index()
-    new_df['num'] = new_df.index
+        df = df.loc[np.abs(df[name]) < np.abs(df[name].shift(1) * (1 + rate))]
+        df = df.loc[np.abs(df[name]) > np.abs(df[name].shift(1) * (1 - rate))]
+        df = df.loc[np.abs(df[name]) < np.abs(df[name].shift(-1) * (1 + rate))]
+        df = df.loc[np.abs(df[name]) > np.abs(df[name].shift(-1) * (1 - rate))]
+        df = df.loc[np.abs(df[name]) < np.abs(df[name].shift(2*seconds) * (1 + rate))]
+        df = df.loc[np.abs(df[name]) > np.abs(df[name].shift(2*seconds) * (1 - rate))]
+        df = df.loc[np.abs(df[name]) < np.abs(df[name].shift(-2*seconds) * (1 + rate))]
+        df = df.loc[np.abs(df[name]) > np.abs(df[name].shift(-2*seconds) * (1 - rate))]
+        new_df = df.groupby(['num']).mean()
+        new_df = new_df.join(datelist)
+        return new_df
 
-    new_df = new_df.loc[new_df['num'] % 60 == 0]
-    new_df = new_df.drop([0])
-    datelist = new_df['datetime']
+    def _checker(self):
+        new_df = self._mean_filtering()
+        name = self.name
+        seconds = self.seconds
 
-    new_df = new_df.set_index('datetime')
-    df = df.join(new_df[['num']])
-    df = df.ffill(axis=0)
-    df = df.bfill(axis=0)
+        new_df['checker_left'] = np.abs((new_df[name].shift(-1) - new_df[name]) / seconds)
+        new_df['checker_right'] = np.abs((new_df[name].shift(1) - new_df[name]) / seconds)
+        new_df['checker'] = (np.abs(new_df['checker_left']) + np.abs(new_df['checker_right'])) / 2
+        new_df = new_df.set_index('datetime')
+        return new_df
 
-    df['datetime'] = df.index
-    '''
-    df = df.loc[np.abs(df['avgcurr']) < np.abs(df['avgcurr'].shift(-1) * 1.05)]
-    df = df.loc[np.abs(df['avgcurr']) > np.abs(df['avgcurr'].shift(-1) * 0.95)]
-    df = df.loc[np.abs(df['avgcurr']) < np.abs(df['avgcurr'].shift(1) * 1.05)]
-    df = df.loc[np.abs(df['avgcurr']) > np.abs(df['avgcurr'].shift(1) * 0.95)]
-    df = df.loc[np.abs(df['avgcurr']) < np.abs(df['avgcurr'].shift(-10) * 1.05)]
-    df = df.loc[np.abs(df['avgcurr']) > np.abs(df['avgcurr'].shift(-10) * 0.95)]
-    df = df.loc[np.abs(df['avgcurr']) < np.abs(df['avgcurr'].shift(10) * 1.05)]
-    df = df.loc[np.abs(df['avgcurr']) > np.abs(df['avgcurr'].shift(10) * 0.95)]
-    df = df.loc[np.abs(df['avgcurr']) < np.abs(df['avgcurr'].shift(-20) * 1.05)]
-    df = df.loc[np.abs(df['avgcurr']) > np.abs(df['avgcurr'].shift(-20) * 0.95)]
-    df = df.loc[np.abs(df['avgcurr']) < np.abs(df['avgcurr'].shift(20) * 1.05)]
-    df = df.loc[np.abs(df['avgcurr']) > np.abs(df['avgcurr'].shift(20) * 0.95)]
-    df = df.loc[np.abs(df['avgcurr']) < np.abs(df['avgcurr'].shift(-30) * 1.05)]
-    df = df.loc[np.abs(df['avgcurr']) > np.abs(df['avgcurr'].shift(-30) * 0.95)]
-    df = df.loc[np.abs(df['avgcurr']) < np.abs(df['avgcurr'].shift(30) * 1.05)]
-    df = df.loc[np.abs(df['avgcurr']) > np.abs(df['avgcurr'].shift(30) * 0.95)]
-    '''
-    df = df.loc[np.abs(df['avgcurr']) < np.abs(df['avgcurr'].shift(1) * 1.05)]
-    df = df.loc[np.abs(df['avgcurr']) > np.abs(df['avgcurr'].shift(1) * 0.95)]
-    df = df.loc[np.abs(df['avgcurr']) < np.abs(df['avgcurr'].shift(-1) * 1.05)]
-    df = df.loc[np.abs(df['avgcurr']) > np.abs(df['avgcurr'].shift(-1) * 0.95)]
-    df = df.loc[np.abs(df['avgcurr']) < np.abs(df['avgcurr'].shift(120) * 1.05)]
-    df = df.loc[np.abs(df['avgcurr']) > np.abs(df['avgcurr'].shift(120) * 0.95)]
-    df = df.loc[np.abs(df['avgcurr']) < np.abs(df['avgcurr'].shift(-120) * 1.05)]
-    df = df.loc[np.abs(df['avgcurr']) > np.abs(df['avgcurr'].shift(-120) * 0.95)]
-    new_df = df.groupby(['num']).mean()
-    new_df = new_df.join(datelist)
+    def _result_value(self):
+        df = self.data_frame.copy()
+        new_df = self._checker()
+        name = self.name
+        angle = self.angle
+        rate = self.rate
 
-    new_df['checker_left'] = np.abs((new_df['avgcurr'].shift(-1) - new_df['avgcurr']) / 60)
-    new_df['checker_right'] = np.abs((new_df['avgcurr'].shift(1) - new_df['avgcurr']) / 60)
-    new_df['checker_sides'] = np.abs((new_df['avgcurr'].shift(-1) - new_df['avgcurr'].shift(1)) / 120)
-    new_df['checker'] = \
-        (np.abs(new_df['checker_left']) + np.abs(new_df['checker_right']))/2
-    new_df = new_df.set_index('datetime')
-    df = df_res
-    df = df.join(new_df[['checker']])
-    new_df = new_df.rename(columns={"avgcurr": "meancurr"})
-    df = df.join(new_df[['meancurr']])
-    df = df.ffill(axis=0)
-    df = df.bfill(axis=0)
-    print(df)
-    df.loc[np.abs(df['checker']) < 0.01, 'result_curr'] = 0
-    df.loc[df['result_curr'] != 0, 'result_curr'] = 1
-    df.loc[np.abs(df['avgcurr']) > np.abs(df['meancurr'] * 1.025), 'result_curr'] = 1
-    df.loc[np.abs(df['avgcurr']) < np.abs(df['meancurr'] * 0.975), 'result_curr'] = 1
-    '''
-    df.loc[np.abs(df['avgcurr']) > np.abs(df['avgcurr'].shift(-1) * 1.05), 'result_curr'] = 1
-    df.loc[np.abs(df['avgcurr']) > np.abs(df['avgcurr'].shift(1) * 1.05), 'result_curr'] = 1
-    df.loc[np.abs(df['avgcurr']) > np.abs(df['avgcurr'].shift(-10) * 1.05), 'result_curr'] = 1
-    df.loc[np.abs(df['avgcurr']) > np.abs(df['avgcurr'].shift(10) * 1.05), 'result_curr'] = 1
-    df.loc[np.abs(df['avgcurr']) > np.abs(df['avgcurr'].shift(-20) * 1.05), 'result_curr'] = 1
-    df.loc[np.abs(df['avgcurr']) > np.abs(df['avgcurr'].shift(20) * 1.05), 'result_curr'] = 1
-    df.loc[np.abs(df['avgcurr']) > np.abs(df['avgcurr'].shift(-30) * 1.05), 'result_curr'] = 1
-    df.loc[np.abs(df['avgcurr']) > np.abs(df['avgcurr'].shift(30) * 1.05), 'result_curr'] = 1
-    '''
+        df = df.join(new_df[['checker']])
+        new_df = new_df.rename(columns={name: "meanvalue"})
+        df = df.join(new_df[['meanvalue']])
+        df = df.ffill(axis=0)
+        df = df.bfill(axis=0)
+        df.loc[np.abs(df['checker']) < angle, 'result_value'] = 0
+        df.loc[df['result_value'] != 0, 'result_value'] = 1
+        df.loc[np.abs(df[name]) > np.abs(df['meanvalue'] * (1 + rate/2)), 'result_value'] = 1
+        df.loc[np.abs(df[name]) < np.abs(df['meanvalue'] * (1 - rate/2)), 'result_value'] = 1
+        return df
 
-    # df['result'] = df['result_volt']
-    df.loc[df['result_curr'] == 1, 'result'] = 1
-    df.loc[df['result'] != 1, 'result'] = 0
-    df['datetime'] = df.index
-    length = int(len(df))
-    unstable = int(df['result_curr'].sum())
-    perc = np.round(unstable / length, 2)
-    print(str(perc) + "%\n" + str(100 - perc) + "%")
+    def _result_df(self):
+        df = self._result_value()
+        df.loc[df['result_value'] == 1, 'result'] = 1
+        df.loc[df['result'] != 1, 'result'] = 0
+        df['datetime'] = df.index
+        return df
 
-    df['datetime'] = df.index
-    sns.scatterplot(x='datetime', y='avgcurr', data=df, alpha=1, s=5, hue='result')
-    plt.show()
+    def show_plot(self):
+        name = self.name
+        df = self._result_df()
+
+        length = int(len(df))
+        unstable = int(df['result_value'].sum())
+        perc = np.round(unstable / length, 2)
+        print("unstable: " + str(perc) + "%\n" + "stable:   " + str(100 - perc) + "%")
+        df['datetime'] = df.index
+        sns.scatterplot(x='datetime', y=name, data=df, alpha=1, s=5, hue='result')
+        plt.show()
 
 
-def third(df):
-    df_res = df.copy()
-    new_df = df.copy()
-    new_df['datetime'] = new_df.index
-    new_df = new_df.reset_index()
-    new_df['num'] = new_df.index
-
-    new_df = new_df.loc[new_df['num'] % 600 == 0]
-    new_df = new_df.drop([0])
-    datelist = new_df['datetime']
-
-    new_df = new_df.set_index('datetime')
-    df = df.join(new_df[['num']])
-    df = df.ffill(axis=0)
-    df = df.bfill(axis=0)
-
-    df['datetime'] = df.index
-
-    df = df.loc[np.abs(df['avgcurr']) < np.abs(df['avgcurr'].shift(1) * 1.2)]
-    df = df.loc[np.abs(df['avgcurr']) > np.abs(df['avgcurr'].shift(1) * 0.8)]
-    df = df.loc[np.abs(df['avgcurr']) < np.abs(df['avgcurr'].shift(-1) * 1.2)]
-    df = df.loc[np.abs(df['avgcurr']) > np.abs(df['avgcurr'].shift(-1) * 0.8)]
-    df = df.loc[np.abs(df['avgcurr']) < np.abs(df['avgcurr'].shift(60) * 1.2)]
-    df = df.loc[np.abs(df['avgcurr']) > np.abs(df['avgcurr'].shift(60) * 0.8)]
-    df = df.loc[np.abs(df['avgcurr']) < np.abs(df['avgcurr'].shift(-60) * 1.2)]
-    df = df.loc[np.abs(df['avgcurr']) > np.abs(df['avgcurr'].shift(-60) * 0.8)]
-    new_df = df.groupby(['num']).mean()
-    new_df = new_df.join(datelist)
-
-    new_df['checker'] = np.abs((new_df['avgcurr'].shift(-1) - new_df['avgcurr'].shift(1)) / 1200)
-    new_df = new_df.set_index('datetime')
-    df = df_res
-    df = df.join(new_df[['checker']])
-    new_df = new_df.rename(columns={"avgcurr": "meancurr"})
-    df = df.join(new_df[['meancurr']])
-    df = df.ffill(axis=0)
-    df = df.bfill(axis=0)
-    print(df)
-    df.loc[np.abs(df['checker']) < 0.01, 'result_curr'] = 0
-    df.loc[df['result_curr'] != 0, 'result_curr'] = 1
-    df.loc[np.abs(df['avgcurr']) > np.abs(df['meancurr'] * 1.025), 'result_curr'] = 1
-    df.loc[np.abs(df['avgcurr']) < np.abs(df['meancurr'] * 0.975), 'result_curr'] = 1
-
-    df.loc[df['result_curr'] == 1, 'result'] = 1
-    df.loc[df['result'] != 1, 'result'] = 0
-    df['datetime'] = df.index
-    length = int(len(df))
-    unstable = int(df['result_curr'].sum())
-    perc = np.round(unstable / length, 2)
-    print(str(perc) + "%\n" + str(100 - perc) + "%")
-
-    df['datetime'] = df.index
-    sns.scatterplot(x='datetime', y='avgcurr', data=df, alpha=1, s=5, hue='result')
-    plt.show()
+class CurrNumDiff(NumDiff):
+    def __init__(self, data_frame):
+        super().__init__(data_frame, name='avgcurr', seconds=60, angle=0.01, rate=0.05)
 
 
-def main(args):
-    conf.configure_from_args(args)
+class VoltNumDiff(NumDiff):
+    def __init__(self, data_frame):
+        super().__init__(data_frame, name='avgvolt', seconds=120, angle=1, rate=0.05)
 
-    curr_wrapper = HeinzWrapper(conf.curr_file_names, 'curr')
-    volt_wrapper = HeinzWrapper(conf.volt_file_names, 'volt')
-    comb_wrapper = ResistanceWrapper(volt_wrapper, curr_wrapper)
 
-    mldf = MLDataFrame(comb_wrapper.data_frame)
-    mldf.normal_dist_data()
-    df = mldf.data_frame
-    second(df)
-
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--datelist", nargs="+", default=None, help="dates to consider")
-    parser.add_argument("--loglvl", type=int, default=0, help="0: warning, 1: info, 2: debug")
-    parser.add_argument("--outputfolder", type=str, default="data/output/",
-                        help="name of output file")
-    args = parser.parse_args()
-    main(args)
-
+class ResNumDiff(NumDiff):
+    def __init__(self, data_frame):
+        super().__init__(data_frame, name='resistance', seconds=60, angle=0.1, rate=0.05)
 
