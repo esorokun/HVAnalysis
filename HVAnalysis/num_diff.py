@@ -9,17 +9,7 @@ from dfwrapper import HeinzWrapper, ResistanceWrapper
 from ML import MLDataFrame
 
 
-def first():
-    conf.configure_from_args(args)
-
-    curr_wrapper = HeinzWrapper(conf.curr_file_names, 'curr')
-    volt_wrapper = HeinzWrapper(conf.volt_file_names, 'volt')
-    comb_wrapper = ResistanceWrapper(volt_wrapper, curr_wrapper)
-
-    mldf = MLDataFrame(comb_wrapper.data_frame)
-    mldf.normal_dist_data()
-    df = mldf.data_frame
-
+def first(df):
     new_df = df.copy()
     new_df['datetime'] = new_df.index
     new_df = new_df.reset_index()
@@ -53,11 +43,26 @@ def first():
     sns.scatterplot(x='datetime', y='avgcurr', data=df, alpha=1, s=5, hue='result')
     plt.show()
 
-def second():
+def second(df):
+    new_df = df.copy()
+    new_df['datetime'] = new_df.index
+    new_df = new_df.reset_index()
+    new_df['num'] = new_df.index
+    new_df = new_df.loc[new_df['num'] % 180 == 0]
+    new_df = new_df.drop([0])
+    print(new_df)
 
 def main(args):
-    first()
+    conf.configure_from_args(args)
 
+    curr_wrapper = HeinzWrapper(conf.curr_file_names, 'curr')
+    volt_wrapper = HeinzWrapper(conf.volt_file_names, 'volt')
+    comb_wrapper = ResistanceWrapper(volt_wrapper, curr_wrapper)
+
+    mldf = MLDataFrame(comb_wrapper.data_frame)
+    mldf.normal_dist_data()
+    df = mldf.data_frame
+    second(df)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
