@@ -50,7 +50,7 @@ def second(df):
     new_df = new_df.reset_index()
     new_df['num'] = new_df.index
 
-    new_df = new_df.loc[new_df['num'] % 300 == 0]
+    new_df = new_df.loc[new_df['num'] % 100 == 0]
     new_df = new_df.drop([0])
     datelist = new_df['datetime']
 
@@ -71,7 +71,7 @@ def second(df):
     new_df = df.groupby(['num']).mean()
     new_df = new_df.join(datelist)
 
-    new_df['checker'] = np.abs((new_df['avgcurr'].shift(-1) - new_df['avgcurr'].shift(1)) / 600)
+    new_df['checker'] = np.abs((new_df['avgcurr'].shift(-1) - new_df['avgcurr'].shift(1)) / 200)
     new_df = new_df.set_index('datetime')
     df = df_res
     df = df.join(new_df[['checker']])
@@ -82,8 +82,8 @@ def second(df):
     print(df)
     df.loc[np.abs(df['checker']) < 0.01, 'result_curr'] = 0
     df.loc[df['result_curr'] != 0, 'result_curr'] = 1
-    df.loc[np.abs(df['avgcurr']) > np.abs(df['meancurr'] * 1.05), 'result_curr'] = 1
-    df.loc[np.abs(df['avgcurr']) < np.abs(df['meancurr'] * 0.95), 'result_curr'] = 1
+    df.loc[np.abs(df['avgcurr']) > np.abs(df['meancurr'] * 1.025), 'result_curr'] = 1
+    df.loc[np.abs(df['avgcurr']) < np.abs(df['meancurr'] * 0.975), 'result_curr'] = 1
     '''
     df.loc[np.abs(df['avgcurr']) > np.abs(df['avgcurr'].shift(-1) * 1.05), 'result_curr'] = 1
     df.loc[np.abs(df['avgcurr']) > np.abs(df['avgcurr'].shift(1) * 1.05), 'result_curr'] = 1
