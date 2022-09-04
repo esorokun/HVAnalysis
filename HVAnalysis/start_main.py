@@ -31,6 +31,8 @@ def main(args):
     mldf = MLDataFrame(comb_wrapper.data_frame)
     mldf.normal_dist_data()
     df = mldf.data_frame
+
+
     '''
     df['checker_30sec'] = np.abs((df['avgcurr'].shift(-15) - df['avgcurr'].shift(15)) / 60)
     df['checker_60sec'] = np.abs((df['avgcurr'].shift(-30) - df['avgcurr'].shift(30))/120)
@@ -46,8 +48,8 @@ def main(args):
     new_df['datetime'] = new_df.index
     new_df = new_df.reset_index()
     new_df['num'] = new_df.index
-    new_df = new_df.loc[new_df['num'] % 120 == 0]
-    new_df['checker'] = np.abs((new_df['avgcurr'].shift(-1) - new_df['avgcurr'].shift(1)) / 240)
+    new_df = new_df.loc[new_df['num'] % 600 == 0]
+    new_df['checker'] = np.abs((new_df['avgcurr'].shift(-1) - new_df['avgcurr'].shift(1)) / 1200)
     new_df = new_df.set_index('datetime')
     df = df.join(new_df[['checker']])
     df = df.ffill(axis=0)
@@ -55,8 +57,10 @@ def main(args):
     print(df)
     df.loc[np.abs(df['checker']) < 0.001, 'result_curr'] = 0
     df.loc[df['result_curr'] != 0, 'result_curr'] = 1
-    df.loc[np.abs(df['avgcurr']) > np.abs(df['avgcurr'].shift(-1) * 1.01), 'result_curr'] = 1
-    df.loc[np.abs(df['avgcurr']) > np.abs(df['avgcurr'].shift(1) * 1.01), 'result_curr'] = 1
+
+    df.loc[np.abs(df['avgcurr']) > np.abs(df['avgcurr'].shift(-1) * 1.007), 'result_curr'] = 1
+    df.loc[np.abs(df['avgcurr']) > np.abs(df['avgcurr'].shift(1) * 1.007), 'result_curr'] = 1
+
     print(df['result_curr'].sum())
     print(df['result_curr'])
 
@@ -76,12 +80,16 @@ def main(args):
 
     #df['result'] = df['result_volt']
     df.loc[df['result_curr'] == 1, 'result'] = 1
+    df.loc[df['result'] != 1, 'result'] = 0
     df['datetime'] = df.index
     length = int(len(df))
     unstable = int(df['result_curr'].sum())
     perc = np.round(unstable/length, 2)
     print(str(perc) + "%\n" + str(100 - perc) + "%")
-    sns.jointplot(x='datetime', y='avgcurr', data=df, alpha=1, s=5, hue='result_curr')
+
+
+    df['datetime'] = df.index
+    sns.scatterplot(x='datetime', y='avgcurr', data=df, alpha=1, s=5, hue='result')
     plt.show()
     #ml_plot = PlotBuilder(df, df['result'])
     #ml_plot.build_scatter_plot()'''
