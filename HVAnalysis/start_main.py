@@ -14,7 +14,7 @@ import argparse
 import conf
 import matplotlib.pyplot as plt
 import seaborn as sns
-from num_diff import NumDiff, CurrNumDiff, VoltNumDiff
+from num_diff import NumDiff, CurrNumDiff, VoltNumDiff, ResNumDiff
 from plotting import Plotter
 import datetime
 #from pycaret.anomaly
@@ -85,20 +85,24 @@ def main(args):
     curr_wrapper = HeinzWrapper(conf.curr_file_names, 'curr')
     volt_wrapper = HeinzWrapper(conf.volt_file_names, 'volt')
     comb_wrapper = ResistanceWrapper(volt_wrapper, curr_wrapper)
+    '''
+    df = comb_wrapper.data_frame
+    length = int(len(df))
+    df.loc[df['stable_original'], 'result'] = 0
+    df.loc[df['result'] != 0, 'result'] = 1
+    unstable = int(df['result'].sum())
+    perc = np.round(unstable / length, 2)
+    print("unstable: " + str(perc) + "%\n" + "stable:   " + str(100 - perc) + "%")
+    df['datetime'] = df.index
+    sns.scatterplot(x='datetime', y='avgvolt', data=df, alpha=1, s=5, hue='result')
+    plt.show()'''
+
 
     mldf = MLDataFrame(comb_wrapper.data_frame)
     mldf.normal_dist_data()
     df = mldf.data_frame
-    volt = VoltNumDiff(df)
-    volt.show_plot()
-    #volt_res = volt.get_result_list()
-    #curr = CurrNumDiff(df)
-    #curr_res = curr.get_result_list()
-    #df['result'] = volt_res
-    #df.loc[curr_res['result'] == 1, 'result'] = 1
-    #k = PlotBuilder(df, df['result'].values)
-    #k.build_scatter_plot()
-
+    curr = CurrNumDiff(df)
+    curr.show_plot()
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()

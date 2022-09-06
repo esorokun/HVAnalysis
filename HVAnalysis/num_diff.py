@@ -10,7 +10,7 @@ from ML import MLDataFrame
 
 
 class NumDiff():
-    def __init__(self, data_frame, name='avgcurr', seconds=60, angle=0.01, rate=0.05):
+    def __init__(self, data_frame, name, seconds, angle, rate):
         self.data_frame = data_frame
         self.seconds = seconds
         self.name = name
@@ -77,16 +77,33 @@ class NumDiff():
         name = self.name
         angle = self.angle
         rate = self.rate
+        seconds = self.seconds
 
         df = df.join(new_df[['checker']])
         new_df = new_df.rename(columns={name: "meanvalue"})
         df = df.join(new_df[['meanvalue']])
         df = df.ffill(axis=0)
         df = df.bfill(axis=0)
+        print(df)
         df.loc[np.abs(df['checker']) < angle, 'result_value'] = 0
         df.loc[df['result_value'] != 0, 'result_value'] = 1
-        df.loc[np.abs(df[name]) > np.abs(df['meanvalue'] * (1 + rate/2)), 'result_value'] = 1
-        df.loc[np.abs(df[name]) < np.abs(df['meanvalue'] * (1 - rate/2)), 'result_value'] = 1
+        df.loc[np.abs(df[name]) > np.abs(df['meanvalue'] * (1 + rate / 2)), 'result_value'] = 1
+        df.loc[np.abs(df[name]) < np.abs(df['meanvalue'] * (1 - rate / 2)), 'result_value'] = 1
+        #'''
+        interval = seconds-1
+        df.loc[
+            (df['result_value'].shift(interval) == 0)*
+            (df['result_value'] == 1)*
+            np.abs(df[name]/df['meanvalue'].shift(interval) < (1 + rate/3))*
+            np.abs(df[name]/df['meanvalue'].shift(interval) > (1 - rate/3))
+            , 'result_value'] = 0
+        df.loc[
+            (df['result_value'].shift(-interval) == 0) *
+            (df['result_value'] == 1) *
+            np.abs(df[name] / df['meanvalue'].shift(-interval) < (1 + rate/3)) *
+            np.abs(df[name] / df['meanvalue'].shift(-interval) > (1 - rate/3))
+            , 'result_value'] = 0
+        #'''
         return df
 
     def _result_df(self):
@@ -111,8 +128,8 @@ class NumDiff():
 
 class CurrNumDiff(NumDiff):
     def __init__(self, data_frame):
-        super().__init__(data_frame, name='avgcurr', seconds=60, angle=0.01, rate=0.05)
-
+        super().__init__(data_frame, name='avgcurr', seconds=3600, angle=0.00009, rate=0.04)
+        #super().__init__(data_frame, name='avgcurr', seconds=180, angle=0.1, rate=0.04)
 
 class VoltNumDiff(NumDiff):
     def __init__(self, data_frame):
@@ -121,5 +138,24 @@ class VoltNumDiff(NumDiff):
 
 class ResNumDiff(NumDiff):
     def __init__(self, data_frame):
-        super().__init__(data_frame, name='resistance', seconds=60, angle=0.1, rate=0.05)
+        super().__init__(data_frame, name='binresistance', seconds=120, angle=0.0001, rate=0.05)
 
+    def _result_df(self):
+        df = self._result_value()
+        df.loc[df['binresistance'] < -1, 'result'] = 1
+        df.loc[df['result_value'] == 1, 'result'] = 1
+        df.loc[df['result'] != 1, 'result'] = 0
+        df['datetime'] = df.index
+        return df
+
+    def show_plot(self):
+        name = self.name
+        df = self._result_df()
+
+        length = int(len(df))
+        unstable = int(df['result_value'].sum())
+        perc = np.round(unstable / length, 2)
+        print("unstable: " + str(perc) + "%\n" + "stable:   " + str(100 - perc) + "%")
+        df['datetime'] = df.index
+        sns.jointplot(x='datetime', y=name, data=df, alpha=1, s=5, hue='result')
+        plt.show()
