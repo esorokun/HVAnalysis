@@ -89,21 +89,20 @@ class NumDiff():
         df.loc[df['result_value'] != 0, 'result_value'] = 1
         df.loc[np.abs(df[name]) > np.abs(df['meanvalue'] * (1 + rate / 2)), 'result_value'] = 1
         df.loc[np.abs(df[name]) < np.abs(df['meanvalue'] * (1 - rate / 2)), 'result_value'] = 1
-        #'''
-        interval = seconds-1
+        interval = seconds
         df.loc[
-            (df['result_value'].shift(interval) == 0)*
-            (df['result_value'] == 1)*
-            np.abs(df[name]/df['meanvalue'].shift(interval) < (1 + rate/3))*
-            np.abs(df[name]/df['meanvalue'].shift(interval) > (1 - rate/3))
+            (df['result_value'].shift(interval) == 0) &
+            (df['result_value'] == 1) &
+            np.abs(df[name]/df['meanvalue'].shift(interval) < (1 + rate/2)) &
+            np.abs(df[name]/df['meanvalue'].shift(interval) > (1 - rate/2))
             , 'result_value'] = 0
         df.loc[
-            (df['result_value'].shift(-interval) == 0) *
-            (df['result_value'] == 1) *
-            np.abs(df[name] / df['meanvalue'].shift(-interval) < (1 + rate/3)) *
-            np.abs(df[name] / df['meanvalue'].shift(-interval) > (1 - rate/3))
+            (df['result_value'].shift(-interval) == 0) &
+            (df['result_value'] == 1) &
+            np.abs(df[name] / df['meanvalue'].shift(-interval) < (1 + rate/2)) &
+            np.abs(df[name] / df['meanvalue'].shift(-interval) > (1 - rate/2))
             , 'result_value'] = 0
-        #'''
+        df.loc[np.abs(df[name].shift(-5)-df[name].shift(5)) > df[name]*0.1, 'result_value'] = 1
         return df
 
     def _result_df(self):
@@ -128,7 +127,7 @@ class NumDiff():
 
 class CurrNumDiff(NumDiff):
     def __init__(self, data_frame):
-        super().__init__(data_frame, name='avgcurr', seconds=3600, angle=0.00009, rate=0.04)
+        super().__init__(data_frame, name='avgcurr', seconds=3600, angle=0.0001, rate=0.04)
         #super().__init__(data_frame, name='avgcurr', seconds=180, angle=0.1, rate=0.04)
 
 class VoltNumDiff(NumDiff):
