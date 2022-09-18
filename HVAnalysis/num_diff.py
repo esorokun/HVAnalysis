@@ -93,14 +93,14 @@ class NumDiff():
         df.loc[
             (df['result_value'].shift(interval) == 0) &
             (df['result_value'] == 1) &
-            np.abs(df[name]/df['meanvalue'].shift(interval) < (1 + rate/2)) &
-            np.abs(df[name]/df['meanvalue'].shift(interval) > (1 - rate/2))
+            np.abs(df[name]/df['meanvalue'].shift(interval) < (1 + rate/3)) &
+            np.abs(df[name]/df['meanvalue'].shift(interval) > (1 - rate/3))
             , 'result_value'] = 0
         df.loc[
             (df['result_value'].shift(-interval) == 0) &
             (df['result_value'] == 1) &
-            np.abs(df[name] / df['meanvalue'].shift(-interval) < (1 + rate/2)) &
-            np.abs(df[name] / df['meanvalue'].shift(-interval) > (1 - rate/2))
+            np.abs(df[name] / df['meanvalue'].shift(-interval) < (1 + rate/3)) &
+            np.abs(df[name] / df['meanvalue'].shift(-interval) > (1 - rate/3))
             , 'result_value'] = 0
         df.loc[np.abs(df[name].shift(-5)-df[name].shift(5)) > df[name]*0.1, 'result_value'] = 1
         return df
@@ -127,13 +127,29 @@ class NumDiff():
 
 class CurrNumDiff(NumDiff):
     def __init__(self, data_frame):
-        super().__init__(data_frame, name='avgcurr', seconds=3600, angle=0.0001, rate=0.04)
-        #super().__init__(data_frame, name='avgcurr', seconds=180, angle=0.1, rate=0.04)
+        super().__init__(data_frame, name='avgcurr', seconds=3600, angle=0.0001, rate=0.03)
+
+    def _result_df(self):
+        df = self._result_value()
+        name = self.name
+        df.loc[df['result_value'] == 1, 'result'] = 1
+        df.loc[df['result'] != 1, 'result'] = 0
+        df.loc[df[name] < 10, 'result'] = 1
+        df['datetime'] = df.index
+        return df
 
 class VoltNumDiff(NumDiff):
     def __init__(self, data_frame):
         super().__init__(data_frame, name='avgvolt', seconds=120, angle=1, rate=0.05)
 
+    def _result_df(self):
+        df = self._result_value()
+        name = self.name
+        df.loc[df['result_value'] == 1, 'result'] = 1
+        df.loc[df['result'] != 1, 'result'] = 0
+        df.loc[df[name] < 1000, 'result'] = 1
+        df['datetime'] = df.index
+        return df
 
 class ResNumDiff(NumDiff):
     def __init__(self, data_frame):

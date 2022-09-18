@@ -85,24 +85,57 @@ def main(args):
     curr_wrapper = HeinzWrapper(conf.curr_file_names, 'curr')
     volt_wrapper = HeinzWrapper(conf.volt_file_names, 'volt')
     comb_wrapper = ResistanceWrapper(volt_wrapper, curr_wrapper)
-    '''
+
     df = comb_wrapper.data_frame
-    length = int(len(df))
+    #df['datetime'] = df.index
     df.loc[df['stable_original'], 'result'] = 0
-    df.loc[df['result'] != 0, 'result'] = 1
+    df.loc[~df['stable_original'], 'result'] = 1
+    df = df.loc[df['stable_original']]
+    #df = comb_wrapper.data_frame
+    #length = int(len(df))
+    #df.loc[df['stable_original'], 'result'] = 0
+    #df.loc[df['result'] != 0, 'result'] = 1
+    #unstable = int(df['result'].sum())
+    #perc = np.round(unstable / length, 2)
+    #print("unstable: " + str(perc) + "%\n" + "stable:   " + str(100 - perc) + "%")
+    #df['datetime'] = df.index
+    #sns.scatterplot(x='datetime', y='avgvolt', data=df, alpha=1, s=5, hue='result')
+    #plt.show()
+
+    #mldf = MLDataFrame(comb_wrapper.data_frame)
+    #mldf.normal_dist_data()
+    #df = mldf.data_frame
+    #volt = VoltNumDiff(df)
+    #volt.show_plot()
+    '''
+    curr = CurrNumDiff(df)
+    curr_l = curr.get_result_list()
+    volt = VoltNumDiff(df)
+    volt_l = volt.get_result_list()
+
+    df['result'] = curr_l
+    df.loc[volt_l['result'] == 1, 'result'] = 1
+    length = len(df)
     unstable = int(df['result'].sum())
     perc = np.round(unstable / length, 2)
     print("unstable: " + str(perc) + "%\n" + "stable:   " + str(100 - perc) + "%")
-    df['datetime'] = df.index
-    sns.scatterplot(x='datetime', y='avgvolt', data=df, alpha=1, s=5, hue='result')
-    plt.show()'''
-
-
-    mldf = MLDataFrame(comb_wrapper.data_frame)
-    mldf.normal_dist_data()
-    df = mldf.data_frame
-    curr = CurrNumDiff(df)
-    curr.show_plot()
+    print(df)
+    df = df.loc[df['result'] == 0]
+    sns.scatterplot(x='avgcurr', y='avgvolt', data=df, alpha=0.8, s=5, hue='result')
+    '''
+    '''
+    g = sns.scatterplot(x='avgcurr', y='avgvolt', data=df, alpha=0.8, s=5, hue='stable_original')
+    
+    mybins = 30
+    df_r = df[df['stable_original']]
+    df_b = df[~df['stable_original']]
+    _ = g.ax_marg_x.hist(df_r['avgcurr'], color='r', alpha=.6, bins=mybins * 2)
+    _ = g.ax_marg_y.hist(df_r['avgvolt'], color='r', alpha=.6, bins=mybins * 2, orientation="horizontal")
+    _ = g.ax_marg_x.hist(df_b['avgcurr'], color='b', alpha=.6, bins=mybins)
+    _ = g.ax_marg_y.hist(df_b['avgvolt'], color='b', alpha=.6, bins=mybins, orientation="horizontal")
+    '''
+    g = sns.scatterplot(x='avgcurr', y='avgvolt', data=df, alpha=0.8, s=5, hue='result')
+    plt.show()
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
