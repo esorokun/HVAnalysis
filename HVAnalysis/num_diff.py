@@ -25,14 +25,17 @@ class NumDiff():
     def _create_work_df(self):
         new_df = self.data_frame.copy()
         df = self.data_frame.copy()
+        seconds = self.seconds
 
         new_df['datetime'] = new_df.index
         new_df = new_df.reset_index()
         new_df['num'] = new_df.index
-        seconds = self.seconds
+
         new_df = new_df.loc[new_df['num'] % seconds == 0]
         new_df = new_df.drop([0])
+
         datelist = new_df['datetime']
+
         new_df = new_df.set_index('datetime')
         df = df.join(new_df[['num']])
         df = df.ffill(axis=0)
