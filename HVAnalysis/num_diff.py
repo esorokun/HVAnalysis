@@ -126,8 +126,8 @@ class NumDiff():
 
 
 class CurrNumDiff(NumDiff):
-    def __init__(self, data_frame):
-        super().__init__(data_frame, name='avgcurr', seconds=3600, angle=0.0001, rate=0.03)
+    def __init__(self, data_frame, name='avgcurr', seconds=3600, angle=0.0001, rate=0.03):
+        super().__init__(data_frame, name, seconds, angle, rate)
 
     def _result_df(self):
         df = self._result_value()
@@ -139,8 +139,8 @@ class CurrNumDiff(NumDiff):
         return df
 
 class VoltNumDiff(NumDiff):
-    def __init__(self, data_frame):
-        super().__init__(data_frame, name='avgvolt', seconds=120, angle=1, rate=0.05)
+    def __init__(self, data_frame, name='avgvolt'):
+        super().__init__(data_frame, name, seconds=2400, angle=0.05, rate=0.05)
 
     def _result_df(self):
         df = self._result_value()

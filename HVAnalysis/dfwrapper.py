@@ -80,7 +80,7 @@ class ResistanceWrapper(DataFrameWrapper):
         return df
 
     def _decorate_averages(self, df):
-        df = df.replace(0, np.nan)
+        #df = df.replace(0, np.nan)
         df = df.ffill(axis=0)
         df['avgcurr'] = df['sumcurr'] / df['ncurr']
         df['avgvolt'] = df['sumvolt'] / df['nvolt']
