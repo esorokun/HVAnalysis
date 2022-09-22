@@ -26,24 +26,41 @@ def main(args):
     conf.configure_from_args(args)
 
     curr_wrapper = HeinzWrapper(conf.curr_file_names, 'curr')
-    volt_wrapper = HeinzWrapper(conf.volt_file_names, 'volt')
-    comb_wrapper = ResistanceWrapper(volt_wrapper, curr_wrapper)
+    #volt_wrapper = HeinzWrapper(conf.volt_file_names, 'volt')
+    #comb_wrapper = ResistanceWrapper(volt_wrapper, curr_wrapper)
 
-    df = curr_wrapper.data_frame
-    df['timeset'] = (df.index.astype('uint64') / 1_000_000_000).astype(np.int64)
+    seconds = 200
+    df_c = curr_wrapper.data_frame.copy()
+    df_c['datetime'] = df_c.index
+    df = curr_wrapper.data_frame.copy()
     df['datetime'] = df.index
-    n = 100000
-    df = df.head(n)
-    x = df['curr'].values
-    y = df['timeset'].values
-    corr = np.abs((np.corrcoef(x=x, y=y))[0][1])
-    var = np.sqrt(np.var(x))
-    mean = np.mean(x)
-    print(f'corr = {corr.round(4)}')
-    print(f'var = {var.round(4)}')
-    df.loc[(df['curr'] > (mean - var*3)) & (df['curr'] < (mean + var*3)), 'result'] = 1
-    df.loc[df['result'] != 1, 'result'] = 0
-    sns.scatterplot(data=df, x='datetime', y='curr', alpha=1, s=5, hue='result')
+    df = df.reset_index()
+    df['num'] = df.index
+
+    df = df.loc[df['num'] % seconds == 0]
+    df = df.drop([0])
+    datelist = df['datetime']
+    df = df.set_index('datetime')
+    df = curr_wrapper.data_frame.copy().join(df[['num']])
+    df = df.ffill(axis=0)
+    df = df.bfill(axis=0)
+    new_df = np.sqrt(df.groupby(['num']).var())
+    new_df['mean'] = df.groupby(['num']).mean()
+    new_df['const'] = new_df['mean']/new_df['curr']
+    new_df['result'] = new_df['curr'] < 0.35
+    new_df['datetime'] = datelist
+    new_df.rename(columns={'var': 'curr'})
+    new_df = new_df.set_index('datetime')
+    #n = 100000
+    #df = df.head(n)
+    #x = df['curr'].values
+    #var = np.sqrt(np.var(x))
+    #mean = np.mean(x)
+    #print(f'var = {var.round(4)}')
+    #df.loc[(df['curr'] > (mean - var*3)) & (df['curr'] < (mean + var*3)), 'result'] = 1
+    #df.loc[df['result'] != 1, 'result'] = 0
+    sns.scatterplot(data=new_df, x='datetime', y='mean', alpha=1, s=5, hue='result')
+    #sns.scatterplot(data=df_c, x='datetime', y='curr', alpha=1, s=5)
     plt.show()
 
 
