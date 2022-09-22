@@ -22,6 +22,10 @@ class NumDiff():
         res_df = pd.DataFrame({'result': df['result']})
         return res_df
 
+    def get_filter_df(self):
+        df = self._mean_filtering()
+        return df
+
     def _create_work_df(self):
         new_df = self.data_frame.copy()
         df = self.data_frame.copy()
@@ -60,6 +64,7 @@ class NumDiff():
         df = df.loc[np.abs(df[name]) < np.abs(df[name].shift(-2*seconds) * (1 + rate))]
         df = df.loc[np.abs(df[name]) > np.abs(df[name].shift(-2*seconds) * (1 - rate))]
         new_df = df.groupby(['num']).mean()
+        new_df['var'] = df.groupby(['num']).var()
         new_df = new_df.join(datelist)
         return new_df
 

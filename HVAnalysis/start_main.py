@@ -29,39 +29,16 @@ def main(args):
     #volt_wrapper = HeinzWrapper(conf.volt_file_names, 'volt')
     #comb_wrapper = ResistanceWrapper(volt_wrapper, curr_wrapper)
 
-    seconds = 200
-    df_c = curr_wrapper.data_frame.copy()
-    df_c['datetime'] = df_c.index
-    df = curr_wrapper.data_frame.copy()
-    df['datetime'] = df.index
-    df = df.reset_index()
-    df['num'] = df.index
+    nd = CurrNumDiff(curr_wrapper.data_frame, name='curr', angle=0.00050232, rate=0.90417)
+    nd.show_plot()
+    #df = nd.get_filter_df()
+    #print(df)
+    #list_v = np.sqrt(df['var']).mean()
 
-    df = df.loc[df['num'] % seconds == 0]
-    df = df.drop([0])
-    datelist = df['datetime']
-    df = df.set_index('datetime')
-    df = curr_wrapper.data_frame.copy().join(df[['num']])
-    df = df.ffill(axis=0)
-    df = df.bfill(axis=0)
-    new_df = np.sqrt(df.groupby(['num']).var())
-    new_df['mean'] = df.groupby(['num']).mean()
-    new_df['const'] = new_df['mean']/new_df['curr']
-    new_df['result'] = new_df['curr'] < 0.35
-    new_df['datetime'] = datelist
-    new_df.rename(columns={'var': 'curr'})
-    new_df = new_df.set_index('datetime')
-    #n = 100000
-    #df = df.head(n)
-    #x = df['curr'].values
-    #var = np.sqrt(np.var(x))
-    #mean = np.mean(x)
-    #print(f'var = {var.round(4)}')
-    #df.loc[(df['curr'] > (mean - var*3)) & (df['curr'] < (mean + var*3)), 'result'] = 1
-    #df.loc[df['result'] != 1, 'result'] = 0
-    sns.scatterplot(data=new_df, x='datetime', y='mean', alpha=1, s=5, hue='result')
-    #sns.scatterplot(data=df_c, x='datetime', y='curr', alpha=1, s=5)
-    plt.show()
+    #mean = np.mean(list_v)
+    #print(list_v)
+    #sns.scatterplot(data=df, x='datetime', y='var', alpha=1, s=5)
+    #plt.show()
 
 
 if __name__ == '__main__':
