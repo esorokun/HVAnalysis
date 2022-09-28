@@ -25,20 +25,18 @@ def main(args):
 
     conf.configure_from_args(args)
 
-    curr_wrapper = HeinzWrapper(conf.curr_file_names, 'curr')
-    #volt_wrapper = HeinzWrapper(conf.volt_file_names, 'volt')
+    #curr_wrapper = HeinzWrapper(conf.curr_file_names, 'curr')
+    volt_wrapper = HeinzWrapper(conf.volt_file_names, 'volt')
     #comb_wrapper = ResistanceWrapper(volt_wrapper, curr_wrapper)
 
-    nd = CurrNumDiff(curr_wrapper.data_frame, name='curr', angle=0.00050232, rate=0.90417)
-    nd.show_plot()
-    #df = nd.get_filter_df()
-    #print(df)
-    #list_v = np.sqrt(df['var']).mean()
-
-    #mean = np.mean(list_v)
-    #print(list_v)
-    #sns.scatterplot(data=df, x='datetime', y='var', alpha=1, s=5)
-    #plt.show()
+    nd = CurrNumDiff(volt_wrapper.data_frame, name='volt', seconds=3600)
+    df = nd.get_filter_df()
+    df['var'] = np.sqrt(df['var'])
+    print(df)
+    list_v = np.sqrt(df['var']).mean()
+    print(list_v)
+    sns.scatterplot(data=df, x='datetime', y='var', alpha=1, s=5)
+    plt.show()
 
 
 if __name__ == '__main__':

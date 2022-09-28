@@ -28,13 +28,34 @@ train_list = ['2018-09-19', '2018-09-20', '2018-09-28', '2018-09-30']
 
 curr_train = [f'{input_data_folder}/heinzCurr_{d}.csv' for d in train_list]
 volt_train = [f'{input_data_folder}/heinzVolt_{d}.csv' for d in train_list]
+
 curr_file_names = [f'{input_data_folder}/heinzCurr_{d}.csv' for d in all_date_list]
 volt_file_names = [f'{input_data_folder}/heinzVolt_{d}.csv' for d in all_date_list]
+
 Heinz_I_curr_file_names = [f'{input_data_folder}/NP04_DCS_01_Heinz_I._{d}.csv' for d in new_date_list]
 Heinz_I_Filtered_curr_file_names = [f'{input_data_folder}/NP04_DCS_01_Heinz_I_Filtered._{d}.csv' for d in new_date_list]
 Heinz_V_volt_file_names = [f'{input_data_folder}/NP04_DCS_01_Heinz_V._{d}.csv' for d in new_date_list]
 Heinz_V_Cathode_volt_file_names = [f'{input_data_folder}/NP04_DCS_01_Heinz_V_Cathode._{d}.csv' for d in new_date_list]
 Heinz_V_Raw_volt_file_names = [f'{input_data_folder}/NP04_DCS_01_Heinz_V_Raw._{d}.csv' for d in new_date_list]
+
+BeamPlug_Current = [f'{input_data_folder}/NP04_DCS_01_BeamPlug_Current._{d}.csv' for d in all_date_list]
+GroundPlanes_Ch01 = [f'{input_data_folder}/NP04_DCS_01_GroundPlanes_Ch01._{d}.csv' for d in all_date_list]
+GroundPlanes_Ch02 = [f'{input_data_folder}/NP04_DCS_01_GroundPlanes_Ch02._{d}.csv' for d in all_date_list]
+GroundPlanes_Ch03 = [f'{input_data_folder}/NP04_DCS_01_GroundPlanes_Ch03._{d}.csv' for d in all_date_list]
+GroundPlanes_Ch04 = [f'{input_data_folder}/NP04_DCS_01_GroundPlanes_Ch04._{d}.csv' for d in all_date_list]
+GroundPlanes_Ch05 = [f'{input_data_folder}/NP04_DCS_01_GroundPlanes_Ch05._{d}.csv' for d in all_date_list]
+GroundPlanes_Ch06 = [f'{input_data_folder}/NP04_DCS_01_GroundPlanes_Ch06._{d}.csv' for d in all_date_list]
+GroundPlanes_Ch07 = [f'{input_data_folder}/NP04_DCS_01_GroundPlanes_Ch07._{d}.csv' for d in all_date_list]
+GroundPlanes_Ch08 = [f'{input_data_folder}/NP04_DCS_01_GroundPlanes_Ch08._{d}.csv' for d in all_date_list]
+GroundPlanes_Ch09 = [f'{input_data_folder}/NP04_DCS_01_GroundPlanes_Ch09._{d}.csv' for d in all_date_list]
+GroundPlanes_Ch10 = [f'{input_data_folder}/NP04_DCS_01_GroundPlanes_Ch10._{d}.csv' for d in all_date_list]
+GroundPlanes_Ch11 = [f'{input_data_folder}/NP04_DCS_01_GroundPlanes_Ch11._{d}.csv' for d in all_date_list]
+GroundPlanes_Ch12 = [f'{input_data_folder}/NP04_DCS_01_GroundPlanes_Ch12._{d}.csv' for d in all_date_list]
+GroundPlanes_Ch13 = [f'{input_data_folder}/NP04_DCS_01_GroundPlanes_Ch13._{d}.csv' for d in all_date_list]
+GroundPlanes_Ch14 = [f'{input_data_folder}/NP04_DCS_01_GroundPlanes_Ch14._{d}.csv' for d in all_date_list]
+GroundPlanes_Ch15 = [f'{input_data_folder}/NP04_DCS_01_GroundPlanes_Ch15._{d}.csv' for d in all_date_list]
+GroundPlanes_Ch16 = [f'{input_data_folder}/NP04_DCS_01_GroundPlanes_Ch16._{d}.csv' for d in all_date_list]
+
 output_folder = 'data/output'
 
 

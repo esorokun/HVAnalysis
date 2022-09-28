@@ -7,20 +7,20 @@ import argparse
 import conf
 from dfwrapper import HeinzWrapper, ResistanceWrapper
 from ML import MLDataFrame
-
+sigma_v = 14.14158
+sigma_c = 1.16687
 
 class NumDiff():
-    def __init__(self, data_frame, name, seconds, angle, rate):
+    def __init__(self, data_frame, name, seconds, sigma, rate):
         self.data_frame = data_frame
         self.seconds = seconds
         self.name = name
-        self.angle = angle
+        self.angle = float(sigma/seconds)
         self.rate = rate
 
     def get_result_list(self):
         df = self._result_df()
-        res_df = pd.DataFrame({'result': df['result']})
-        return res_df
+        return df
 
     def get_filter_df(self):
         df = self._mean_filtering()
@@ -54,7 +54,6 @@ class NumDiff():
         df = self.work_df
         seconds = self.seconds
         rate = self.rate
-
         df = df.loc[np.abs(df[name]) < np.abs(df[name].shift(1) * (1 + rate))]
         df = df.loc[np.abs(df[name]) > np.abs(df[name].shift(1) * (1 - rate))]
         df = df.loc[np.abs(df[name]) < np.abs(df[name].shift(-1) * (1 + rate))]
@@ -134,8 +133,8 @@ class NumDiff():
 
 
 class CurrNumDiff(NumDiff):
-    def __init__(self, data_frame, name='avgcurr', seconds=3600, angle=0.0001, rate=0.03):
-        super().__init__(data_frame, name, seconds, angle, rate)
+    def __init__(self, data_frame, name='avgcurr', seconds=3600, sigma=1.16687, rate=0.04):
+        super().__init__(data_frame, name, seconds, sigma, rate)
 
     def _result_df(self):
         df = self._result_value()
@@ -148,7 +147,7 @@ class CurrNumDiff(NumDiff):
 
 class VoltNumDiff(NumDiff):
     def __init__(self, data_frame, name='avgvolt'):
-        super().__init__(data_frame, name, seconds=2400, angle=0.05, rate=0.05)
+        super().__init__(data_frame, name, seconds=2400, sigma=14.14158, rate=0.05)
 
     def _result_df(self):
         df = self._result_value()
@@ -161,7 +160,7 @@ class VoltNumDiff(NumDiff):
 
 class ResNumDiff(NumDiff):
     def __init__(self, data_frame):
-        super().__init__(data_frame, name='binresistance', seconds=120, angle=0.0001, rate=0.05)
+        super().__init__(data_frame, name='binresistance', seconds=120, sigma=0.012, rate=0.05)
 
     def _result_df(self):
         df = self._result_value()
