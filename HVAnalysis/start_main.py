@@ -28,7 +28,7 @@ def main(args):
 
     wrapper_curr = HeinzWrapper(conf.curr_file_names, 'curr')
     df = wrapper_curr.data_frame
-    mel = VarCorr(df, 'curr', 120)
+    mel = VarCorr(df, 'curr', 300)
     df_n = mel.mean_filtering()
     df_n = df_n.reset_index()
     df_n['avgsec'] = df_n.index
@@ -39,7 +39,7 @@ def main(args):
     while lvi >= i:
         x = df_n.loc[(df_n.index <= i)*(df_n.index >= k), 'curr'].values
         y = df_n.loc[(df_n.index <= i)*(df_n.index >= k), 'avgsec'].values
-        if np.abs((np.corrcoef(x=x, y=y))[0][1]) < 0.8:
+        if np.abs((np.corrcoef(x=x, y=y))[0][1]) < 0.1:
             df_n.loc[(df_n.index <= i) * (df_n.index >= k), 'skrat'] = num
             if num == 0:
                 num = 1
