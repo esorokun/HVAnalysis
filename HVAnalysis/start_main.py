@@ -14,6 +14,7 @@ import argparse
 import conf
 import matplotlib.pyplot as plt
 import seaborn as sns
+from var_corr import VarCorr
 from num_diff import NumDiff, CurrNumDiff, VoltNumDiff, ResNumDiff
 from plotting import Plotter
 import datetime
@@ -25,19 +26,33 @@ def main(args):
 
     conf.configure_from_args(args)
 
-    #curr_wrapper = HeinzWrapper(conf.curr_file_names, 'curr')
-    volt_wrapper = HeinzWrapper(conf.volt_file_names, 'volt')
-    #comb_wrapper = ResistanceWrapper(volt_wrapper, curr_wrapper)
-
-    nd = CurrNumDiff(volt_wrapper.data_frame, name='volt', seconds=3600)
-    df = nd.get_filter_df()
-    df['var'] = np.sqrt(df['var'])
-    print(df)
-    list_v = np.sqrt(df['var']).mean()
-    print(list_v)
-    sns.scatterplot(data=df, x='datetime', y='var', alpha=1, s=5)
+    wrapper_curr = HeinzWrapper(conf.curr_file_names, 'curr')
+    df = wrapper_curr.data_frame
+    mel = VarCorr(df, 'curr', 120)
+    df_n = mel.mean_filtering()
+    df_n = df_n.reset_index()
+    df_n['avgsec'] = df_n.index
+    i = 5
+    k = 0
+    num = 0
+    lvi = df_n.last_valid_index()
+    while lvi >= i:
+        x = df_n.loc[(df_n.index <= i)*(df_n.index >= k), 'curr'].values
+        y = df_n.loc[(df_n.index <= i)*(df_n.index >= k), 'avgsec'].values
+        if np.abs((np.corrcoef(x=x, y=y))[0][1]) < 0.8:
+            df_n.loc[(df_n.index <= i) * (df_n.index >= k), 'skrat'] = num
+            if num == 0:
+                num = 1
+            else:
+                num = 0
+            if np.sqrt(np.var(x)) <= 1.56687:
+                df_n.loc[(df_n.index <= i)*(df_n.index >= k), 'result'] = 'blue'
+            else:
+                df_n.loc[(df_n.index <= i) * (df_n.index >= k), 'result'] = 'red'
+            k = i
+        i += 1
+    sns.scatterplot(data=df_n, x='datetime', y='curr', alpha=1, s=5, hue='skrat')
     plt.show()
-
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
