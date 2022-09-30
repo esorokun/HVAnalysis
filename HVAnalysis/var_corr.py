@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import pandas as pd
 import seaborn as sns
 
 class VarCorr():
@@ -113,3 +114,55 @@ class VarCorr():
     #     df['datetime'] = df.index
     #     sns.scatterplot(x='datetime', y=name, data=df, alpha=1, s=5, hue='result')
     #     plt.show()
+
+class Poly1d():
+    def __init__(self, data_frame, name, points):
+        self.data_frame = data_frame
+        self.name = name
+        self.points = points
+
+    def _create_df(self):
+        new_df = self.data_frame.copy()
+        df = self.data_frame.copy()
+        points = self.points
+        df['timeset'] = (df.index.astype('uint64') / 1_000_000_000).astype(np.int64)
+
+        new_df['datetime'] = new_df.index
+        new_df = new_df.reset_index()
+        new_df['num'] = new_df.index
+
+        new_df = new_df.loc[new_df['num'] % points == 0]
+        new_df = new_df.drop([0])
+
+        self.datelist = new_df['datetime']
+
+        new_df = new_df.set_index('datetime')
+        df = df.join(new_df[['num']])
+        df = df.ffill(axis=0)
+        df = df.bfill(axis=0)
+        df['datetime'] = df.index
+        return df
+
+    def mean_filtering(self):
+        df = self._create_df()
+        name = self.name
+        #rate = 0.05
+        res = df.groupby('num').apply(lambda x: pd.Series(np.polyfit(x.curr, x.timeset, 1), index=['slope', 'intercept']))
+        print(res.head(20))
+        res = res.join(self.datelist)
+        #mean = df.groupby('num').mean()
+        #mean = mean.join(self.datelist)
+        res = res.set_index('datetime')
+        #print(mean)
+        df = df.join(res[['slope']])
+        #df = df.join(mean[['curr']])
+        df = df.ffill(axis=0)
+        df = df.bfill(axis=0)
+        df.loc[np.abs(df['slope']) < 10, 'result'] = 0
+        df.loc[df['result'] != 0, 'result'] = 1
+        #df.loc[np.abs(df[name]) > np.abs(df['meanvalue'] * (1 + rate / 2)), 'result_value'] = 1
+        #df.loc[np.abs(df[name]) < np.abs(df['meanvalue'] * (1 - rate / 2)), 'result_value'] = 1
+        print(df)
+        sns.scatterplot(data=df, x='datetime', y='curr', alpha=1, s=5, hue='result')
+        plt.show()
+        return df
