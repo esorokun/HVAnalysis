@@ -15,7 +15,7 @@ import conf
 import matplotlib.pyplot as plt
 import seaborn as sns
 from var_corr import VarCorr, Poly1d
-from num_diff import NumDiff, CurrNumDiff, VoltNumDiff, ResNumDiff
+from num_diff import NumDiff, CurrNumDiff, VoltNumDiff, ResNumDiff, Timedelta
 from plotting import Plotter
 import datetime
 #from pycaret.anomaly
@@ -29,13 +29,12 @@ def main(args):
     volt_wrapper = HeinzWrapper(conf.volt_file_names, 'volt')
     wrapper = ResistanceWrapper(volt_wrapper, curr_wrapper)
     df = wrapper.data_frame
-    df = df.loc[(df['nvolt'] != 0) & (df['ncurr'] != 0)]
-    df['datetime'] = (df.index.astype('uint64') / 1_000_000_000).astype(np.int64)
-    df['datetime_next'] = df['datetime'].shift(+1)
-    df = df.bfill(axis=0)
-    df['timedelta'] = df['datetime'] - df['datetime_next']
-    print(df)
-    #sns.scatterplot(data=df_o, x='datetime_original', y='avgcurr_original', alpha=1, s=5, hue='result')
+    recup = Timedelta(df)
+    df = recup.transformed_df
+    df = df.head(20)
+    recreate = Poly1d(df, 'avgcurr', 5)
+    recreate.mean_filtering()
+    #sns.scatterplot(data=df, x='datetime', y='avgcurr', alpha=1, s=5)
     #plt.show()
 
 if __name__ == '__main__':

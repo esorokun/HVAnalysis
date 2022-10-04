@@ -146,23 +146,19 @@ class Poly1d():
     def mean_filtering(self):
         df = self._create_df()
         name = self.name
-        #rate = 0.05
-        res = df.groupby('num').apply(lambda x: pd.Series(np.polyfit(x.curr, x.timeset, 1), index=['slope', 'intercept']))
-        print(res.head(20))
+        res = df.groupby('num').apply(lambda x: pd.Series(np.polyfit(x.timeset, x.avgcurr, 1), index=['slope', 'intercept']))
+        timedelta = df.groupby('num').sum('timedelta')
         res = res.join(self.datelist)
-        #mean = df.groupby('num').mean()
-        #mean = mean.join(self.datelist)
+        res = res.join(timedelta)
+        res = res.rename(columns={'timedelta': 'timedelta_sum'})
         res = res.set_index('datetime')
-        #print(mean)
-        df = df.join(res[['slope']])
-        #df = df.join(mean[['curr']])
+        print(res)
+        df = df.join(res[['slope', 'timedelta_sum']])
         df = df.ffill(axis=0)
         df = df.bfill(axis=0)
-        df.loc[np.abs(df['slope']) < 10, 'result'] = 0
+        df.loc[np.abs(df['slope']) < ((5*1.16687)/df['timedelta_sum']), 'result'] = 0
         df.loc[df['result'] != 0, 'result'] = 1
-        #df.loc[np.abs(df[name]) > np.abs(df['meanvalue'] * (1 + rate / 2)), 'result_value'] = 1
-        #df.loc[np.abs(df[name]) < np.abs(df['meanvalue'] * (1 - rate / 2)), 'result_value'] = 1
         print(df)
-        sns.scatterplot(data=df, x='datetime', y='curr', alpha=1, s=5, hue='result')
+        sns.scatterplot(data=df, x='datetime', y=name, alpha=1, hue='result')
         plt.show()
         return df

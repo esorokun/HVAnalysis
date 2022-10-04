@@ -5,6 +5,22 @@ import seaborn as sns
 sigma_v = 14.14158
 sigma_c = 1.16687
 
+class Timedelta():
+    def __init__(self, data_frame):
+        self.data_frame = data_frame
+        self.transformed_df = self._restructure_df()
+
+    def _restructure_df(self):
+        df = self.data_frame.copy()
+        df = df.loc[(df['nvolt'] != 0) & (df['ncurr'] != 0)]
+        df_c =df.copy()
+        df['unixtime'] = (df.index.astype('uint64') / 1_000_000_000).astype(np.int64)
+        df['unixtime_next'] = df['unixtime'].shift(+1)
+        df = df.bfill(axis=0)
+        df_c['timedelta'] = df['unixtime'] - df['unixtime_next']
+        self.transformed_df = df_c
+        return df_c
+
 class NumDiff():
     def __init__(self, data_frame, name, seconds, sigma, rate):
         self.data_frame = data_frame
@@ -37,8 +53,9 @@ class NumDiff():
 
         new_df = new_df.set_index('datetime')
         df = df.join(new_df[['num']])
-        df = df.ffill(axis=0)
-        df = df.bfill(axis=0)
+        print(df)
+        #df = df.ffill(axis=0)
+        #df = df.bfill(axis=0)
         df['datetime'] = df.index
         self.work_df = df
         return datelist
