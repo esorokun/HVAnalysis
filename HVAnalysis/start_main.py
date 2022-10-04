@@ -25,14 +25,29 @@ from sktime.annotation.adapters import PyODAnnotator
 def main(args):
 
     conf.configure_from_args(args)
-
-    wrapper_curr = HeinzWrapper(conf.curr_file_names, 'curr')
-    df = wrapper_curr.data_frame
-    mel = Poly1d(df, 'curr', 3600)
-    mel.mean_filtering()
-
-    #sns.scatterplot(data=df_n, x='datetime', y='curr', alpha=1, s=5, hue='skrat')
-    #plt.show()
+    curr_wrapper = HeinzWrapper(conf.curr_file_names, 'curr')
+    volt_wrapper = HeinzWrapper(conf.volt_file_names, 'volt')
+    res_wrapper = ResistanceWrapper(volt_wrapper, curr_wrapper)
+    df_curr = res_wrapper.data_frame
+    df_curr = df_curr.loc[df_curr['ncurr'] != 0]
+    df_curr['datetime'] = df_curr.index
+    wrapper = HeinzWrapper(conf.GroundPlanes_Ch06, 'curr')
+    c = wrapper.resample_count('S')
+    df = wrapper.resample_value('S')
+    df = df.join(c)
+    df['avgcurr'] = df['sumcurr']/df['ncurr']
+    df = df.loc[df['ncurr'] != 0]
+    df = df.loc[np.abs(df['avgcurr']) > 0.001]
+    df['datetime'] = df.index
+    print(df)
+    print(df_curr)
+    df1 = df_curr.copy()
+    print(df_curr.merge(df, how='inner', on='datetime'))
+    print(df_curr[''])
+    # df_curr.loc[df_curr['datetime'] == df['datetime'], 'result'] = 'unstable'
+    # df_curr.loc[df_curr['result'] != 'unstable', 'result'] = 'stable'
+    # sns.scatterplot(data=df_curr, x='datetime', y='avgcurr', alpha=1, s=5, hue='result')
+    # plt.show()
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
