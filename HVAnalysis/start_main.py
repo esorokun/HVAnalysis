@@ -25,16 +25,16 @@ from sktime.annotation.adapters import PyODAnnotator
 def main(args):
 
     conf.configure_from_args(args)
+
     curr_wrapper = HeinzWrapper(conf.curr_file_names, 'curr')
     volt_wrapper = HeinzWrapper(conf.volt_file_names, 'volt')
     wrapper = ResistanceWrapper(volt_wrapper, curr_wrapper)
     df = wrapper.data_frame
-    recup = Timedelta(df)
-    df = recup.transformed_df
-    df = df.head(20)
-    recreate = Poly1d(df, 'avgcurr', 5)
-    recreate.mean_filtering()
-    #sns.scatterplot(data=df, x='datetime', y='avgcurr', alpha=1, s=5)
+    new = Timedelta(df)
+    df = new.transformed_df
+    poly = Poly1d(df, 'avgcurr', 400)
+    poly.mean_filtering()
+    #sns.scatterplot(data=df, x='datetime', y='avgvolt', alpha=.25, s=5, hue='stable_original', palette=['r', 'b'])
     #plt.show()
 
 if __name__ == '__main__':

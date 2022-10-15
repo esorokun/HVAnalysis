@@ -25,7 +25,7 @@ $ pip install -r requirements.txt
 Use the following commands to make a plot of the resistance:
 ```
 (one day)
-$ python HVAnalysis/start_main.py --datelist 2018-09-19 --loglvl 1
+$ python HVAnalysis/start_main.py --loglvl 1 --datelist 2018-09-19
 
 (period 2018-09-19 | 2018-10-04) 
 $ python HVAnalysis/start_main.py --datelist 2018-09-19 2018-09-20 2018-09-21 2018-09-22 2018-09-23 2018-09-24 2018-09-25 2018-09-26 2018-09-27 2018-09-28 2018-09-29 2018-09-30 2018-10-01 2018-10-02 2018-10-03 2018-10-04  --loglvl 1

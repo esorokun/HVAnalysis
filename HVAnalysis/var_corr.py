@@ -146,19 +146,28 @@ class Poly1d():
     def mean_filtering(self):
         df = self._create_df()
         name = self.name
+        points = self.points
+        df_l = pd.DataFrame({'num': df['num'], 'meanvalue': df[name]})
+        df_l = df_l.groupby('num').mean()
+        print(df_l)
         res = df.groupby('num').apply(lambda x: pd.Series(np.polyfit(x.timeset, x.avgcurr, 1), index=['slope', 'intercept']))
         timedelta = df.groupby('num').sum('timedelta')
         res = res.join(self.datelist)
         res = res.join(timedelta)
+        res = res.join(df_l)
         res = res.rename(columns={'timedelta': 'timedelta_sum'})
         res = res.set_index('datetime')
-        print(res)
-        df = df.join(res[['slope', 'timedelta_sum']])
+        df = df.join(res[['slope', 'timedelta_sum', 'meanvalue']])
         df = df.ffill(axis=0)
         df = df.bfill(axis=0)
-        df.loc[np.abs(df['slope']) < ((5*1.16687)/df['timedelta_sum']), 'result'] = 0
+        df.loc[np.abs(df['slope']) < (1.16687/df['timedelta_sum']), 'result'] = 0
         df.loc[df['result'] != 0, 'result'] = 1
         print(df)
-        sns.scatterplot(data=df, x='datetime', y=name, alpha=1, hue='result')
+        df.loc[(df['result'].shift(points) == 0) & (df['result'] == 1) &
+               (np.abs(df[name] - df['meanvalue'].shift(points) < 2*1.16687)), 'result'] = 0
+        df.loc[(df['result'].shift(-points) == 0) & (df['result'] == 1) &
+               (np.abs(df[name] - df['meanvalue'].shift(-points)) < 2*1.16687), 'result'] = 0
+        df.loc[(df['result'] == 0) & (np.abs(df[name] - df['meanvalue']) > 2 * 1.16687), 'result'] = 1
+        sns.scatterplot(data=df, x='datetime', y=name, alpha=1, s=5, hue='result')
         plt.show()
         return df
