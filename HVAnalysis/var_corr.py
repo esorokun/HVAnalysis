@@ -116,31 +116,41 @@ class VarCorr():
     #     plt.show()
 
 class Poly1d():
-    def __init__(self, data_frame, name, points):
+    def __init__(self, data_frame, name, points, height):
         self.data_frame = data_frame
         self.name = name
         self.points = points
+        self.height = height
+
+    def _clear_df(self, df):
+        del df['ncurr']
+        del df['nvolt']
+        del df['sumvolt']
+        del df['sumcurr']
+        del df['stable_original']
+        self.data_frame = df
+        return self.data_frame
 
     def _create_df(self):
-        new_df = self.data_frame.copy()
         df = self.data_frame.copy()
         points = self.points
         df['timeset'] = (df.index.astype('uint64') / 1_000_000_000).astype(np.int64)
+        df1 = df.copy()
 
-        new_df['datetime'] = new_df.index
-        new_df = new_df.reset_index()
-        new_df['num'] = new_df.index
+        df1['datetime'] = df1.index
+        df1 = df1.reset_index()
+        df1['num'] = df1.index
+        df1 = df1.loc[df1['num'] % points == 0]
+        df1 = df1.drop([0])
+        self.date1 = df1['datetime']
+        df1 = df1.set_index('datetime')
 
-        new_df = new_df.loc[new_df['num'] % points == 0]
-        new_df = new_df.drop([0])
-
-        self.datelist = new_df['datetime']
-
-        new_df = new_df.set_index('datetime')
-        df = df.join(new_df[['num']])
+        df['datetime'] = df.index
+        df = df.join(df1[['num']])
         df = df.ffill(axis=0)
         df = df.bfill(axis=0)
         df['datetime'] = df.index
+        print(df)
         return df
 
     def mean_filtering(self):
@@ -152,22 +162,27 @@ class Poly1d():
         print(df_l)
         res = df.groupby('num').apply(lambda x: pd.Series(np.polyfit(x.timeset, x.avgcurr, 1), index=['slope', 'intercept']))
         timedelta = df.groupby('num').sum('timedelta')
-        res = res.join(self.datelist)
+        res = res.join(self.date1)
         res = res.join(timedelta)
         res = res.join(df_l)
         res = res.rename(columns={'timedelta': 'timedelta_sum'})
         res = res.set_index('datetime')
-        df = df.join(res[['slope', 'timedelta_sum', 'meanvalue']])
+        res['height'] = np.abs(res['slope']*res['timedelta_sum'])
+        df = df.join(res[['height', 'meanvalue']])
         df = df.ffill(axis=0)
         df = df.bfill(axis=0)
-        df.loc[np.abs(df['slope']) < (1.16687/df['timedelta_sum']), 'result'] = 0
-        df.loc[df['result'] != 0, 'result'] = 1
         print(df)
-        df.loc[(df['result'].shift(points) == 0) & (df['result'] == 1) &
-               (np.abs(df[name] - df['meanvalue'].shift(points) < 2*1.16687)), 'result'] = 0
-        df.loc[(df['result'].shift(-points) == 0) & (df['result'] == 1) &
-               (np.abs(df[name] - df['meanvalue'].shift(-points)) < 2*1.16687), 'result'] = 0
-        df.loc[(df['result'] == 0) & (np.abs(df[name] - df['meanvalue']) > 2 * 1.16687), 'result'] = 1
+        df.loc[df['height'] < self.height, 'result'] = 0
+        df.loc[df['result'] != 0, 'result'] = 1
+        # df.loc[(df['result'].shift(points) == 0) & (df['result'] == 1) &
+        #        (np.abs(df[name] - df['meanvalue'].shift(points) < 2*1.16687)), 'result'] = 0
+        # df.loc[(df['result'].shift(-points) == 0) & (df['result'] == 1) &
+        #        (np.abs(df[name] - df['meanvalue'].shift(-points)) < 2*1.16687), 'result'] = 0
+        # df.loc[(df['result'] == 0) & (np.abs(df[name] - df['meanvalue']) > 2 * 1.16687), 'result'] = 1
+        return df
+
+    def show_result(self):
+        df = self.mean_filtering()
+        name = self.name
         sns.scatterplot(data=df, x='datetime', y=name, alpha=1, s=5, hue='result')
         plt.show()
-        return df

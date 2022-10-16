@@ -21,6 +21,7 @@ class MLDataFrame:
         return df
 
     def _clear_df(self, df):
+        df = df.loc[(df['nvolt'] != 0) & (df['ncurr'] != 0)]
         del df['ncurr']
         del df['nvolt']
         del df['sumvolt']

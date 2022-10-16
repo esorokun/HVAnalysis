@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-sigma_v = 14.14158
+sigma_v = 141.4158
 sigma_c = 1.16687
 
 class Timedelta():
