@@ -3,117 +3,23 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
 
-class VarCorr():
-    def __init__(self, data_frame, name, seconds):
+
+class Timedelta():
+    def __init__(self, data_frame):
         self.data_frame = data_frame
-        self.seconds = seconds
-        self.name = name
-        self.rate = 0.05
+        self.transformed_df = self._restructure_df()
 
-    def _create_work_df(self):
-        new_df = self.data_frame.copy()
+    def _restructure_df(self):
         df = self.data_frame.copy()
-        seconds = self.seconds
-
-        new_df['datetime'] = new_df.index
-        new_df = new_df.reset_index()
-        new_df['num'] = new_df.index
-
-        new_df = new_df.loc[new_df['num'] % seconds == 0]
-        new_df = new_df.drop([0])
-
-        datelist = new_df['datetime']
-
-        new_df = new_df.set_index('datetime')
-        df = df.join(new_df[['num']])
-        df = df.ffill(axis=0)
+        df = df.loc[(df['nvolt'] != 0) & (df['ncurr'] != 0)]
+        df_c =df.copy()
+        df['unixtime'] = (df.index.astype('uint64') / 1_000_000_000).astype(np.int64)
+        df['unixtime_next'] = df['unixtime'].shift(+1)
         df = df.bfill(axis=0)
-        df['datetime'] = df.index
-        self.work_df = df
-        return datelist
+        df_c['timedelta'] = df['unixtime'] - df['unixtime_next']
+        self.transformed_df = df_c
+        return df_c
 
-    def mean_filtering(self):
-        name = self.name
-        datelist = self._create_work_df()
-        df = self.work_df
-        seconds = self.seconds
-        rate = self.rate
-        # df = df.loc[np.abs(df[name]) < np.abs(df[name].shift(1) * (1 + rate))]
-        # df = df.loc[np.abs(df[name]) > np.abs(df[name].shift(1) * (1 - rate))]
-        # df = df.loc[np.abs(df[name]) < np.abs(df[name].shift(-1) * (1 + rate))]
-        # df = df.loc[np.abs(df[name]) > np.abs(df[name].shift(-1) * (1 - rate))]
-        # df = df.loc[np.abs(df[name]) < np.abs(df[name].shift(2*seconds) * (1 + rate))]
-        # df = df.loc[np.abs(df[name]) > np.abs(df[name].shift(2*seconds) * (1 - rate))]
-        # df = df.loc[np.abs(df[name]) < np.abs(df[name].shift(-2*seconds) * (1 + rate))]
-        # df = df.loc[np.abs(df[name]) > np.abs(df[name].shift(-2*seconds) * (1 - rate))]
-        new_df = df.groupby(['num']).mean()
-        new_df['var'] = df.groupby(['num']).var()
-        new_df = new_df.join(datelist)
-        return new_df
-    #
-    # def _checker(self):
-    #     new_df = self._mean_filtering()
-    #     name = self.name
-    #     seconds = self.seconds
-    #
-    #     new_df['checker_left'] = np.abs((new_df[name].shift(-1) - new_df[name]) / seconds)
-    #     new_df['checker_right'] = np.abs((new_df[name].shift(1) - new_df[name]) / seconds)
-    #     new_df['checker'] = (np.abs(new_df['checker_left']) + np.abs(new_df['checker_right'])) / 2
-    #     new_df = new_df.set_index('datetime')
-    #     return new_df
-    #
-    # def _result_value(self):
-    #     df = self.data_frame.copy()
-    #     new_df = self._checker()
-    #     name = self.name
-    #     angle = self.angle
-    #     rate = self.rate
-    #     seconds = self.seconds
-    #
-    #     df = df.join(new_df[['checker']])
-    #     new_df = new_df.rename(columns={name: "meanvalue"})
-    #     df = df.join(new_df[['meanvalue']])
-    #     df = df.ffill(axis=0)
-    #     df = df.bfill(axis=0)
-    #     print(df)
-    #     df.loc[np.abs(df['checker']) < angle, 'result_value'] = 0
-    #     df.loc[df['result_value'] != 0, 'result_value'] = 1
-    #     df.loc[np.abs(df[name]) > np.abs(df['meanvalue'] * (1 + rate / 2)), 'result_value'] = 1
-    #     df.loc[np.abs(df[name]) < np.abs(df['meanvalue'] * (1 - rate / 2)), 'result_value'] = 1
-    #     interval = seconds
-    #     df.loc[
-    #         (df['result_value'].shift(interval) == 0) &
-    #         (df['result_value'] == 1) &
-    #         np.abs(df[name]/df['meanvalue'].shift(interval) < (1 + rate/3)) &
-    #         np.abs(df[name]/df['meanvalue'].shift(interval) > (1 - rate/3))
-    #         , 'result_value'] = 0
-    #     df.loc[
-    #         (df['result_value'].shift(-interval) == 0) &
-    #         (df['result_value'] == 1) &
-    #         np.abs(df[name] / df['meanvalue'].shift(-interval) < (1 + rate/3)) &
-    #         np.abs(df[name] / df['meanvalue'].shift(-interval) > (1 - rate/3))
-    #         , 'result_value'] = 0
-    #     df.loc[np.abs(df[name].shift(-5)-df[name].shift(5)) > df[name]*0.1, 'result_value'] = 1
-    #     return df
-    #
-    # def _result_df(self):
-    #     df = self._result_value()
-    #     df.loc[df['result_value'] == 1, 'result'] = 1
-    #     df.loc[df['result'] != 1, 'result'] = 0
-    #     df['datetime'] = df.index
-    #     return df
-    #
-    # def show_plot(self):
-    #     name = self.name
-    #     df = self._result_df()
-    #
-    #     length = int(len(df))
-    #     unstable = int(df['result_value'].sum())
-    #     perc = np.round(unstable / length, 2)
-    #     print("unstable: " + str(perc) + "%\n" + "stable:   " + str(100 - perc) + "%")
-    #     df['datetime'] = df.index
-    #     sns.scatterplot(x='datetime', y=name, data=df, alpha=1, s=5, hue='result')
-    #     plt.show()
 
 class Poly1d():
     def __init__(self, data_frame, name, points, height):
@@ -174,11 +80,6 @@ class Poly1d():
         print(df)
         df.loc[df['height'] < self.height, 'result'] = 0
         df.loc[df['result'] != 0, 'result'] = 1
-        # df.loc[(df['result'].shift(points) == 0) & (df['result'] == 1) &
-        #        (np.abs(df[name] - df['meanvalue'].shift(points) < 2*1.16687)), 'result'] = 0
-        # df.loc[(df['result'].shift(-points) == 0) & (df['result'] == 1) &
-        #        (np.abs(df[name] - df['meanvalue'].shift(-points)) < 2*1.16687), 'result'] = 0
-        # df.loc[(df['result'] == 0) & (np.abs(df[name] - df['meanvalue']) > 2 * 1.16687), 'result'] = 1
         return df
 
     def show_result(self):
@@ -186,3 +87,51 @@ class Poly1d():
         name = self.name
         sns.scatterplot(data=df, x='datetime', y=name, alpha=1, s=5, hue='result')
         plt.show()
+
+
+class Volt_Filter():
+    def __init__(self, data_frame, points):
+        self.data_frame = data_frame
+        self.points = points
+        self.unstable_periods = None
+
+    def make_init(self):
+        numbers = self.points
+        num_1 = round(numbers / 4)
+        num_2 = round(numbers / 2)
+        num_3 = round(numbers)
+        num_4 = round(numbers * 2)
+        poly1 = Poly1d(self.data_frame, 'avgvolt', num_1, 141.4158)
+        poly2 = Poly1d(self.data_frame, 'avgvolt', num_2, 141.4158)
+        poly3 = Poly1d(self.data_frame, 'avgvolt', num_3, 141.4158)
+        poly4 = Poly1d(self.data_frame, 'avgvolt', num_4, 141.4158)
+
+        df1 = poly1.mean_filtering()
+        df2 = poly2.mean_filtering()
+        df3 = poly3.mean_filtering()
+        df4 = poly4.mean_filtering()
+
+        df_values = pd.DataFrame({'var_1': df1['height'], 'var_2': df2['height'],
+                               'var_3': df3['height'], 'var_4': df4['height'],
+                               'mean_1': df1['meanvalue'], 'mean_2': df2['meanvalue'],
+                               'mean_3': df3['meanvalue'], 'mean_4': df4['meanvalue']})
+        return df_values
+
+    def meaning(self):
+        df_values = self.make_init()
+        df = self.data_frame
+        df_values['mean_value'] = np.sqrt((df_values['mean_1'] ** 2 + df_values['mean_2'] ** 2 +
+                                          df_values['mean_3'] ** 2 + df_values['mean_4'] ** 2) / 4)
+        df_values['mean_variance'] = np.sqrt((df_values['var_1'] ** 2 + df_values['var_2'] ** 2 +
+                                             df_values['var_3'] ** 2 + df_values['var_4'] ** 2) / 4)
+
+        df_values.loc[df_values['mean_variance'] < 141.4158, 'result'] = 0
+        df_values.loc[df_values['result'] != 0, 'result'] = 1
+        df = df.join(df_values['result'])
+        df = df.join(df_values['mean_value'])
+        df = df.join(df_values['mean_1'])
+
+        poly_cut = Poly1d(self.data_frame, 'avgvolt', 20, 141.4158)
+        dff = poly_cut.mean_filtering()
+
+        df = df.join(dff['height'])

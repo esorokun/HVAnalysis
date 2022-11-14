@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 import time as pytime
 import logging
 
-import numpy as np
+
 import pandas as pd
 
 
@@ -333,23 +333,8 @@ class ErnestsWriter(Writer, CutOriginal, CutAvgVolt, BoolCurr):
                 unstable_periods.append([start, b])
         return unstable_periods
 
+
 def to_time_stamp(dt):
     if dt < datetime(2018, 10, 28):
         return int(datetime.timestamp(dt + timedelta(hours=3)))
     return int(datetime.timestamp(dt + timedelta(hours=2)))
-
-'''def add_size(self, df):
-        df_t = df.copy()
-        df = df.reset_index()
-        df = (df['timestamp'] - pd.Timestamp("1970-01-01")) // pd.Timedelta("1s")
-        df_copy = df.copy()
-        df_copy.pop(0)
-        df_copy = df_copy.reset_index(drop=True)
-        s3 = df_copy.loc[df_copy.last_valid_index()]
-        df_copy[df.last_valid_index()] = s3+1
-        df_size = pd.DataFrame({'end': df_copy, 'start': df})
-        df_size['size'] = df_size['end'] - df_size['start']
-        df_size['timestamp'] = df_t.index
-        df_size = df_size.set_index('timestamp')
-        df_t = df_t.assign(size=df_size['size'])
-        return df_t'''

@@ -80,12 +80,10 @@ class ResistanceWrapper(DataFrameWrapper):
         return df
 
     def _decorate_averages(self, df):
-        #df = df.replace(0, np.nan)
         df = df.ffill(axis=0)
         df['avgcurr'] = df['sumcurr'] / df['ncurr']
         df['avgvolt'] = df['sumvolt'] / df['nvolt']
         df['resistance'] = df['avgvolt'] / df['avgcurr']
-        #df = df[~df['resistance'].isnull()]
         return df
 
     @cached_property
@@ -97,10 +95,6 @@ class ResistanceWrapper(DataFrameWrapper):
 
     def _decorate_stable_original(self, df):
         start_ts, end_ts = [pd.to_datetime("2018-10-05 00:00:00"), pd.to_datetime("2018-10-17 12:00:00")]
-        #df.loc[df.index <= start_ts, 'stable_original'] = (df.loc[df.index <= start_ts, 'resistance'] > 1452) * (df.loc[df.index <= start_ts, 'resistance'] < 1472) * (df.loc[df.index <= start_ts, 'avgvolt'] > 120000)
-        #df.loc[(df.index > start_ts) * (df.index < end_ts), 'stable_original'] = (df.loc[(df.index > start_ts) * (df.index < end_ts), 'resistance'] > 1465) * (df.loc[(df.index > start_ts) * (df.index < end_ts), 'avgvolt'] > 120000)
-        #df.loc[df.index >= end_ts, 'stable_original'] = (df.loc[df.index >= end_ts, 'resistance'] > 1465) * (df.loc[df.index >= end_ts, 'avgvolt'] > 180000)
-        #return df
         b_df = df.loc[df.index <= start_ts]
         d_df = df.loc[(df.index > start_ts) * (df.index < end_ts)]
         a_df = df.loc[(df.index >= end_ts)]
